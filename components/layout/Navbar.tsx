@@ -51,7 +51,7 @@ export function Navbar() {
                         </Link>
 
                         {/* Desktop Links */}
-                        <div className="hidden md:flex items-center gap-8">
+                        <div className="hidden lg:flex items-center gap-4 xl:gap-6">
                             {NAV_LINKS.map((link) => (
                                 <ScrollLink
                                     key={link.href}
@@ -60,7 +60,7 @@ export function Navbar() {
                                     smooth={true}
                                     offset={-100}
                                     duration={500}
-                                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors uppercase tracking-wide"
+                                    className="text-xs xl:text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors uppercase tracking-wide whitespace-nowrap"
                                 >
                                     {link.label}
                                 </ScrollLink>
@@ -68,7 +68,7 @@ export function Navbar() {
                         </div>
 
                         {/* Actions */}
-                        <div className="hidden md:flex items-center gap-4">
+                        <div className="hidden lg:flex items-center gap-4">
                             <button
                                 onClick={toggleTheme}
                                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -83,13 +83,13 @@ export function Navbar() {
 
                             <Button variant="outline" size="sm" className="gap-2 border-gray-200 dark:border-gray-800">
                                 <FileText className="w-4 h-4" />
-                                <span className="hidden lg:inline">CV</span>
+                                <span className="hidden xl:inline">CV</span>
                             </Button>
                         </div>
 
                         {/* Mobile Toggle */}
                         <button
-                            className="md:hidden p-2 text-gray-900 dark:text-white"
+                            className="lg:hidden p-2 text-gray-900 dark:text-white"
                             onClick={() => setMobileMenuOpen(true)}
                         >
                             <Menu className="w-6 h-6" />

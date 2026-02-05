@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ExternalLink, BookOpen, Users, Calendar } from "lucide-react";
 import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
 import { PUBLICATIONS } from "@/lib/constants";
+import { cn } from "@/lib/utils/cn";
 
 export default function PublicationsSection() {
   const content = PUBLICATIONS.map((pub) => ({
@@ -123,8 +124,4 @@ export default function PublicationsSection() {
       <ParallaxScrollCards content={content} />
     </section>
   );
-}
-
-function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
 }

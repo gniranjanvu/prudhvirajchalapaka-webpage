@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 
@@ -78,6 +78,30 @@ export const ParallaxScrollCards = ({
   const cardHeight = 100; // vh
   const totalHeight = content.length * cardHeight;
 
+  // Memoize the progress transforms for each card to avoid recreating on every render
+  const cardTransforms = useMemo(() => {
+    return content.map((_, index) => ({
+      opacity: useTransform(
+        scrollYProgress,
+        [
+          (index - 0.5) / content.length,
+          index / content.length,
+          (index + 0.5) / content.length,
+        ],
+        [0, 1, 0]
+      ),
+      y: useTransform(
+        scrollYProgress,
+        [
+          (index - 0.5) / content.length,
+          index / content.length,
+          (index + 0.5) / content.length,
+        ],
+        [50, 0, -50]
+      ),
+    }));
+  }, [scrollYProgress, content.length]);
+
   return (
     <div
       ref={containerRef}
@@ -91,22 +115,14 @@ export const ParallaxScrollCards = ({
             {/* Left side - Text content with parallax effect */}
             <div className="relative">
               {content.map((item, index) => {
-                const progress = useTransform(
-                  scrollYProgress,
-                  [
-                    (index - 0.5) / content.length,
-                    index / content.length,
-                    (index + 0.5) / content.length,
-                  ],
-                  [0, 1, 0]
-                );
+                const { opacity, y } = cardTransforms[index];
 
                 return (
                   <motion.div
                     key={`text-${index}`}
                     style={{
-                      opacity: progress,
-                      y: useTransform(progress, [0, 1, 0], [50, 0, -50]),
+                      opacity,
+                      y,
                     }}
                     className="absolute inset-0 flex flex-col justify-center"
                   >

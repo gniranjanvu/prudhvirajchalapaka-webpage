@@ -6,6 +6,9 @@ import Link from "next/link";
 import { ArrowRight, Calendar, MapPin, Briefcase } from "lucide-react";
 import { EXPERIENCES } from "@/lib/constants";
 
+// Maximum number of technologies to display on the card
+const MAX_DISPLAYED_TECHNOLOGIES = 4;
+
 export default function ExperienceSection() {
   const content = EXPERIENCES.map((exp, index) => ({
     title: `${exp.role}${exp.isCurrent ? ' (Current)' : ''}`,
@@ -38,7 +41,7 @@ export default function ExperienceSection() {
           </div>
 
           <div className="flex flex-wrap gap-2 justify-center">
-            {exp.technologies.slice(0, 4).map((tech) => (
+            {exp.technologies.slice(0, MAX_DISPLAYED_TECHNOLOGIES).map((tech) => (
               <span
                 key={tech}
                 className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium"

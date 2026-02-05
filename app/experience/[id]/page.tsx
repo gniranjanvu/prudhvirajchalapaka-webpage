@@ -1,9 +1,9 @@
 "use client";
 
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Briefcase, MapPin, Calendar, ExternalLink, Building2 } from "lucide-react";
+import { ArrowLeft, Briefcase, MapPin, Calendar, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Footer } from "@/components/layout/Footer";
 import { EXPERIENCES } from "@/lib/constants";
@@ -20,8 +20,9 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
   // Find the experience by ID
   const experience = EXPERIENCES.find((exp) => exp.id === experienceId);
 
+  // Redirect to experience section if experience not found
   if (!experience) {
-    notFound();
+    redirect("/#experience");
   }
 
   return (

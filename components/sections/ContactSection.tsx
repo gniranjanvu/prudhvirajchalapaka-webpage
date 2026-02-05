@@ -66,7 +66,7 @@ export function ContactSection() {
 
           {/* Bottom Marquee */}
           <div className="absolute bottom-0 left-0 right-0 h-12 flex items-center overflow-hidden bg-accent">
-            <div className="flex whitespace-nowrap animate-marquee-fast" style={{ animationDirection: 'reverse' }}>
+            <div className="flex whitespace-nowrap animate-marquee-reverse">
               {[...Array(4)].map((_, i) => (
                 <span key={i} className="text-white font-bold px-8">
                   LET'S BUILD SOMETHING AMAZING 🚀

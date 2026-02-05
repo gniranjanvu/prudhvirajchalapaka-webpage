@@ -44,10 +44,6 @@ const experiences = [
 
 export function ExperienceSection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  })
 
   return (
     <section id="experience" className="py-20 bg-white dark:bg-black" ref={containerRef}>
@@ -73,9 +69,6 @@ export function ExperienceSection() {
 
         <div className="space-y-8 relative">
           {experiences.map((exp, index) => {
-            const targetScale = 1 - (experiences.length - index) * 0.05
-            const targetOpacity = 1 - (experiences.length - index) * 0.1
-
             return (
               <motion.div
                 key={exp.id}

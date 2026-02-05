@@ -17,7 +17,6 @@ const skillsData = {
     { name: 'ROS2', rating: 5 },
     { name: 'YOLO', rating: 4 },
     { name: 'TensorFlow', rating: 3 },
-    { name: 'Arduino', rating: 5 },
     { name: 'Isaac Sim', rating: 3 },
   ],
   Hardware: [

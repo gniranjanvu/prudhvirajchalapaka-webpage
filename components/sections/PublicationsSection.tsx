@@ -31,8 +31,7 @@ export function PublicationsSection() {
   const copyCitation = (pub: typeof publicationsData[0]) => {
     const citation = `${pub.authors.join(', ')}. "${pub.title}". ${pub.venue}, ${pub.date}.`
     navigator.clipboard.writeText(citation)
-    // TODO: Show toast notification
-    alert('Citation copied to clipboard!')
+    // Successfully copied - in production, implement toast notification
   }
 
   return (

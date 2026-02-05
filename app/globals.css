@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
+/* Brand color variables - available for inline styles and custom components */
 :root {
-  --nothing-red: #D71921;
-  --material-primary: #6750A4;
+  --nothing-red: #D71921;     /* Primary brand color matching Nothing Phone aesthetic */
+  --material-primary: #6750A4; /* Material Design primary for future theming */
 }
 
 @layer base {

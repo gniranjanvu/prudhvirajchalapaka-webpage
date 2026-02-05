@@ -22,11 +22,16 @@ const config: Config = {
       animation: {
         marquee: "marquee 25s linear infinite",
         "marquee-fast": "marquee 15s linear infinite",
+        "marquee-reverse": "marquee-reverse 15s linear infinite",
       },
       keyframes: {
         marquee: {
           "0%": { transform: "translateX(0%)" },
           "100%": { transform: "translateX(-100%)" },
+        },
+        "marquee-reverse": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(0%)" },
         },
       },
     },

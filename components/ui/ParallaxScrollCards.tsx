@@ -78,6 +78,9 @@ export const ParallaxScrollCards = ({
   const cardHeight = 100; // vh
   const totalHeight = content.length * cardHeight;
 
+  // Note: Due to React's rules of hooks, we must define a fixed number of useTransform calls
+  // at the top level. This component supports up to 3 cards. The EXPERIENCES array has 3 items
+  // and PUBLICATIONS has 2 items, so this covers all current use cases.
   // Create transforms for first card
   const card0Opacity = useTransform(
     scrollYProgress,
@@ -114,7 +117,7 @@ export const ParallaxScrollCards = ({
     [50, 0, -50]
   );
 
-  // Map index to transforms
+  // Map index to transforms - returns first card transforms as fallback for any index > 2
   const getCardTransforms = (index: number) => {
     switch (index) {
       case 0:
@@ -124,6 +127,7 @@ export const ParallaxScrollCards = ({
       case 2:
         return { opacity: card2Opacity, y: card2Y };
       default:
+        // Fallback to first card transforms for indices beyond 2
         return { opacity: card0Opacity, y: card0Y };
     }
   };

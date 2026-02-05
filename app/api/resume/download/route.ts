@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { OWNER_INFO } from '@/lib/constants';
 
-// Helper function to generate a user-friendly HTML response
+/**
+ * Generates a user-friendly HTML error page response.
+ * @param title - The page title and heading to display
+ * @param message - The descriptive message explaining the situation
+ * @param statusCode - HTTP status code for the response
+ * @returns NextResponse with HTML content
+ */
 function generateHtmlResponse(title: string, message: string, statusCode: number) {
     const html = `
 <!DOCTYPE html>
@@ -91,7 +98,7 @@ export async function GET() {
             // If no resume in database, return a user-friendly HTML page
             return generateHtmlResponse(
                 'Resume Not Available',
-                'The resume is not available at the moment. Please contact Prudhvi Raj Chalapaka directly for a copy of the resume.',
+                `The resume is not available at the moment. Please contact ${OWNER_INFO.name} directly for a copy of the resume.`,
                 404
             );
         }

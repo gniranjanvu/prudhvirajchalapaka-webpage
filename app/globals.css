@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+:root {
+  --nothing-red: #D71921;
+  --material-primary: #6750A4;
+}
+
 @layer base {
   body {
     @apply antialiased bg-white dark:bg-black text-black dark:text-white;
@@ -7,6 +12,63 @@
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
+  }
+}
+
+/* Glass Morphism Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.dark .glass-card {
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.05);
+}
+
+/* Gradient Mesh Background */
+.gradient-mesh {
+  background: 
+    radial-gradient(ellipse at 20% 0%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(255, 119, 115, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(74, 222, 128, 0.1) 0%, transparent 50%);
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Animated Gradient Border */
+.gradient-border {
+  position: relative;
+  background: linear-gradient(white, white) padding-box,
+    linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%) border-box;
+  border: 2px solid transparent;
+  animation: rotate-gradient 3s linear infinite;
+}
+
+.dark .gradient-border {
+  background: linear-gradient(black, black) padding-box,
+    linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%) border-box;
+}
+
+@keyframes rotate-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
   }
 }
 

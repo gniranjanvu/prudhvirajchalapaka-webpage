@@ -17,7 +17,6 @@ import {
   Send,
   CheckCircle
 } from 'lucide-react'
-import Confetti from '@/components/ui/Confetti';
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -47,11 +46,9 @@ export function Footer() {
 
   return (
     <footer ref={footerRef} className="bg-gray-900 dark:bg-black text-white relative overflow-hidden">
-      {isInView && <Confetti />}
-
       {/* Large Marquee Strip */}
       <div className="border-y border-gray-800 py-4 bg-gradient-to-r from-gray-900 via-accent/20 to-gray-900 overflow-hidden pause-on-hover group">
-        <div className="flex whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused]">
+        <div className="flex whitespace-nowrap animate-marquee-seamless group-hover:[animation-play-state:paused]">
           {[...Array(4)].map((_, i) => (
             <span key={i} className="text-2xl md:text-4xl font-display font-bold px-8 text-white">
               CONNECT WITH ME @ {OWNER_INFO.email} • PRUDHVI RAJ CHALAPAKA •

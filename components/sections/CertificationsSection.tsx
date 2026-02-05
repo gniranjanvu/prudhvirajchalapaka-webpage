@@ -17,12 +17,40 @@ export default function CertificationsSection() {
             </div>
 
             <div className="flex overflow-hidden relative pause-on-hover group/container">
-                <div className="flex gap-6 px-4 animate-marquee-seamless hover:[animation-play-state:paused] w-max">
-                    {/* Duplicate for seamless loop */}
-                    {[...CERTIFICATIONS, ...CERTIFICATIONS].map((cert, i) => (
+                <div className="flex animate-marquee-seamless hover:[animation-play-state:paused]">
+                    {/* First set of certifications */}
+                    {CERTIFICATIONS.map((cert, i) => (
                         <div
-                            key={`${cert.id}-${i}`}
-                            className="shrink-0 w-[300px] p-6 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"
+                            key={`${cert.id}-a-${i}`}
+                            className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"
+                        >
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+                                    <Award className="w-6 h-6" />
+                                </div>
+                                {cert.link && (
+                                    <Link href={cert.link} target="_blank">
+                                        <ExternalLink className="w-4 h-4 text-gray-400 hover:text-purple-500" />
+                                    </Link>
+                                )}
+                            </div>
+
+                            <h3 className="font-bold text-lg leading-tight mb-1 group-hover:text-purple-500 transition-colors">
+                                {cert.title}
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{cert.issuer}</p>
+
+                            <div className="flex items-center justify-between mt-auto">
+                                <div className="text-xs font-mono text-gray-400">{cert.date}</div>
+                                <button className="text-xs font-bold text-purple-600 hover:underline">View Certificate</button>
+                            </div>
+                        </div>
+                    ))}
+                    {/* Duplicate for seamless loop */}
+                    {CERTIFICATIONS.map((cert, i) => (
+                        <div
+                            key={`${cert.id}-b-${i}`}
+                            className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">

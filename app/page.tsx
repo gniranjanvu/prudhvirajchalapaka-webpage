@@ -1,8 +1,15 @@
 import { Navigation } from '@/components/layout/Navigation'
 import { Footer } from '@/components/layout/Footer'
-import { HeroSection } from '@/components/sections/HeroSection'
-import { ExperienceSection } from '@/components/sections/ExperienceSection'
-import { ContactSection } from '@/components/sections/ContactSection'
+import { 
+  HeroSection, 
+  ExperienceSection, 
+  EducationSection,
+  ProjectsSection,
+  SkillsSection,
+  AchievementsSection,
+  PublicationsSection,
+  ContactSection 
+} from '@/components/sections'
 
 export default function Home() {
   return (
@@ -11,6 +18,11 @@ export default function Home() {
       <main>
         <HeroSection />
         <ExperienceSection />
+        <EducationSection />
+        <ProjectsSection />
+        <SkillsSection />
+        <AchievementsSection />
+        <PublicationsSection />
         <ContactSection />
       </main>
       <Footer />

@@ -151,7 +151,9 @@ export default function SkillsSection() {
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
         >
           <AnimatePresence mode="popLayout">
-            {filteredSkills.map((skill) => (
+            {filteredSkills.map((skill) => {
+              const iconUrl = getIconUrl(skill.name);
+              return (
               <motion.div
                 layout
                 key={skill.name}
@@ -167,10 +169,10 @@ export default function SkillsSection() {
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-16 h-16 mb-4 relative rounded-xl bg-gray-50 dark:bg-black p-3 flex items-center justify-center border border-gray-100 dark:border-white/5 group-hover:border-blue-500/20 transition-colors">
                     {/* Show icon if available, fallback to text */}
-                    {getIconUrl(skill.name) ? (
+                    {iconUrl ? (
                       <>
                         <img
-                          src={getIconUrl(skill.name)!}
+                          src={iconUrl}
                           alt={skill.name}
                           className="w-10 h-10 object-contain dark:invert transition-all"
                           onError={(e) => {
@@ -190,7 +192,7 @@ export default function SkillsSection() {
                   <span className="text-xs text-gray-400 mt-2">{skill.category}</span>
                 </div>
               </motion.div>
-            ))}
+            )})}
           </AnimatePresence>
         </motion.div>
       </div>

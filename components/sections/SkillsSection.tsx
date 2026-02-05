@@ -7,8 +7,36 @@ import Image from "next/image";
 import { ClientSideParticles } from "@/components/ui/ClientSideParticles";
 import { cn } from "@/lib/utils/cn";
 
+// Mapping for skill names to Simple Icons slugs
+// Some icons don't exist on Simple Icons or have different slugs
+const iconSlugMap: Record<string, string | null> = {
+  "MATLAB": null, // Not available on Simple Icons
+  "Java": "openjdk",
+  "ROS": "ros",
+  "ROS2": "ros", // ROS2 uses same icon as ROS
+  "YOLO": null, // Not available on Simple Icons
+  "STM32": "stmicroelectronics",
+  "Jetson Nano": "nvidia",
+  "Gazebo": null, // Not available on Simple Icons
+  "SolidWorks": "dassaultsystemes",
+  "Fusion 360": "autodesk",
+  "3D Printing": null, // Not available on Simple Icons
+  "Raspberry Pi": "raspberrypi",
+  "C++": "cplusplus",
+};
+
 // Helper to get icon URL
-const getIconUrl = (name: string) => {
+const getIconUrl = (name: string): string | null => {
+  // Check if we have a specific mapping for this skill
+  if (name in iconSlugMap) {
+    const slug = iconSlugMap[name];
+    if (slug === null) {
+      return null; // No icon available
+    }
+    return `https://cdn.simpleicons.org/${slug}`;
+  }
+  
+  // Default slug generation for skills not in the map
   const slug = name.toLowerCase().replace(/\s+/g, "").replace(/\./g, "").replace(/\+/g, "plus");
   return `https://cdn.simpleicons.org/${slug}`;
 };
@@ -138,17 +166,23 @@ export default function SkillsSection() {
 
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-16 h-16 mb-4 relative rounded-xl bg-gray-50 dark:bg-black p-3 flex items-center justify-center border border-gray-100 dark:border-white/5 group-hover:border-blue-500/20 transition-colors">
-                    {/* Fallback to text if image fails or use SimpleIcons */}
-                    <img
-                      src={getIconUrl(skill.name)}
-                      alt={skill.name}
-                      className="w-10 h-10 object-contain dark:invert transition-all"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                    <span className="hidden text-xl font-bold text-blue-500">{skill.name[0]}</span>
+                    {/* Show icon if available, fallback to text */}
+                    {getIconUrl(skill.name) ? (
+                      <>
+                        <img
+                          src={getIconUrl(skill.name)!}
+                          alt={skill.name}
+                          className="w-10 h-10 object-contain dark:invert transition-all"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <span className="hidden text-xl font-bold text-blue-500">{skill.name[0]}</span>
+                      </>
+                    ) : (
+                      <span className="text-xl font-bold text-blue-500">{skill.name[0]}</span>
+                    )}
                   </div>
 
                   <h3 className="font-bold text-gray-900 dark:text-white mb-2">{skill.name}</h3>

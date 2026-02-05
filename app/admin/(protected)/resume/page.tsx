@@ -132,7 +132,7 @@ export default function ResumeManagerPage() {
             await supabase
                 .from('resumes')
                 .update({ is_current: false })
-                .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all
+                .eq('is_current', true); // Update only currently active ones
 
             // Then set the selected one as current
             const { error } = await supabase

@@ -8,7 +8,7 @@ import Image from "next/image";
 
 export default function EducationSection() {
   return (
-    <section id="education" className="pt-20 pb-0 bg-gray-50 dark:bg-zinc-950 relative overflow-hidden">
+    <section id="education" className="pt-20 pb-10 bg-gray-50 dark:bg-zinc-950 relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />

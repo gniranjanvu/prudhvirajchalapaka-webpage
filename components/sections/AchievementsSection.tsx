@@ -13,12 +13,43 @@ export default function AchievementsSection() {
       </div>
 
       <div className="flex overflow-hidden relative pause-on-hover group/container">
-        <div className="flex gap-8 px-4 animate-marquee-seamless-reverse hover:[animation-play-state:paused] w-max">
-          {/* Duplicate for seamless loop */}
-          {[...ACHIEVEMENTS, ...ACHIEVEMENTS].map((item, i) => (
+        <div className="flex animate-marquee-seamless-reverse hover:[animation-play-state:paused]">
+          {/* First set of achievements */}
+          {ACHIEVEMENTS.map((item, i) => (
             <div
-              key={`${item.id}-${i}`}
-              className="shrink-0 w-[350px] md:w-[400px] p-8 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"
+              key={`${item.id}-a-${i}`}
+              className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"
+            >
+              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Trophy className="w-24 h-24" />
+              </div>
+
+              <div className="relative z-10">
+                <span className="inline-block px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-600 text-xs font-bold mb-4 uppercase tracking-wider">
+                  {item.type}
+                </span>
+                <h3 className="text-2xl font-bold font-display mb-2">{item.title}</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+                  {item.description}
+                </p>
+
+                <div className="flex items-center gap-3 text-sm font-medium mb-6">
+                  <span className="text-gray-900 dark:text-white">{item.organization}</span>
+                  <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                  <span className="text-gray-400">{item.date}</span>
+                </div>
+
+                <button className="text-sm font-bold text-yellow-600 hover:text-yellow-700 flex items-center gap-2">
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
+          {/* Duplicate for seamless loop */}
+          {ACHIEVEMENTS.map((item, i) => (
+            <div
+              key={`${item.id}-b-${i}`}
+              className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"
             >
               <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Trophy className="w-24 h-24" />

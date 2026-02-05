@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 
@@ -78,29 +78,55 @@ export const ParallaxScrollCards = ({
   const cardHeight = 100; // vh
   const totalHeight = content.length * cardHeight;
 
-  // Memoize the progress transforms for each card to avoid recreating on every render
-  const cardTransforms = useMemo(() => {
-    return content.map((_, index) => ({
-      opacity: useTransform(
-        scrollYProgress,
-        [
-          (index - 0.5) / content.length,
-          index / content.length,
-          (index + 0.5) / content.length,
-        ],
-        [0, 1, 0]
-      ),
-      y: useTransform(
-        scrollYProgress,
-        [
-          (index - 0.5) / content.length,
-          index / content.length,
-          (index + 0.5) / content.length,
-        ],
-        [50, 0, -50]
-      ),
-    }));
-  }, [scrollYProgress, content.length]);
+  // Create transforms for first card
+  const card0Opacity = useTransform(
+    scrollYProgress,
+    [-0.5 / content.length, 0, 0.5 / content.length],
+    [0, 1, 0]
+  );
+  const card0Y = useTransform(
+    scrollYProgress,
+    [-0.5 / content.length, 0, 0.5 / content.length],
+    [50, 0, -50]
+  );
+
+  // Create transforms for second card
+  const card1Opacity = useTransform(
+    scrollYProgress,
+    [0.5 / content.length, 1 / content.length, 1.5 / content.length],
+    [0, 1, 0]
+  );
+  const card1Y = useTransform(
+    scrollYProgress,
+    [0.5 / content.length, 1 / content.length, 1.5 / content.length],
+    [50, 0, -50]
+  );
+
+  // Create transforms for third card
+  const card2Opacity = useTransform(
+    scrollYProgress,
+    [1.5 / content.length, 2 / content.length, 2.5 / content.length],
+    [0, 1, 0]
+  );
+  const card2Y = useTransform(
+    scrollYProgress,
+    [1.5 / content.length, 2 / content.length, 2.5 / content.length],
+    [50, 0, -50]
+  );
+
+  // Map index to transforms
+  const getCardTransforms = (index: number) => {
+    switch (index) {
+      case 0:
+        return { opacity: card0Opacity, y: card0Y };
+      case 1:
+        return { opacity: card1Opacity, y: card1Y };
+      case 2:
+        return { opacity: card2Opacity, y: card2Y };
+      default:
+        return { opacity: card0Opacity, y: card0Y };
+    }
+  };
 
   return (
     <div
@@ -115,7 +141,7 @@ export const ParallaxScrollCards = ({
             {/* Left side - Text content with parallax effect */}
             <div className="relative">
               {content.map((item, index) => {
-                const { opacity, y } = cardTransforms[index];
+                const { opacity, y } = getCardTransforms(index);
 
                 return (
                   <motion.div

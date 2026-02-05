@@ -4,14 +4,16 @@ import { useRef } from "react";
 import { StickyScroll } from "@/components/ui/StickyScrollReveal";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Briefcase, MapPin, Calendar } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { EXPERIENCES } from "@/lib/constants";
+import { ParallaxScrollCards } from "@/components/ui/ParallaxScrollCards";
 
 // Maximum number of technologies to display on the card
 const MAX_DISPLAYED_TECHNOLOGIES = 4;
 
 export default function ExperienceSection() {
-  const content = EXPERIENCES.map((exp, index) => ({
+  const content = EXPERIENCES.map((exp) => ({
     title: `${exp.role}${exp.isCurrent ? ' (Current)' : ''}`,
     description: exp.description,
     content: (
@@ -64,8 +66,6 @@ export default function ExperienceSection() {
       </div>
     ),
   }));
-
-export default function ExperienceSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,

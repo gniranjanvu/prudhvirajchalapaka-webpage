@@ -1,268 +1,129 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { OWNER_INFO, ROLES, HERO_STICKERS } from '@/lib/constants'
-import { Button } from '@/components/ui/Button'
-import { ArrowDown, Download, ExternalLink } from 'lucide-react'
+import { useRef } from "react";
+import { useScroll, useTransform, motion } from "framer-motion";
+import { MouseSpotlight } from "@/components/ui/MouseSpotlight";
+import { TextReveal } from "@/components/ui/TextReveal";
+import { Button } from "@/components/ui/Button";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Download } from "lucide-react";
+import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
 
-export function HeroSection() {
-  const [currentRole, setCurrentRole] = useState(0)
-  const [displayText, setDisplayText] = useState('')
-  const [isTyping, setIsTyping] = useState(true)
-  const charIndexRef = useRef(0)
+const stickers = [
+  { text: "#ROS2 🤖", x: "10%", y: "20%", rotate: -10, delay: 0 },
+  { text: "#AI 🧠", x: "85%", y: "15%", rotate: 15, delay: 0.5 },
+  { text: "#Embedded ⚡", x: "5%", y: "60%", rotate: 5, delay: 1 },
+  { text: "#PLC 🔧", x: "80%", y: "70%", rotate: -8, delay: 1.5 },
+  { text: "#Vision 👁️", x: "15%", y: "85%", rotate: 12, delay: 2 },
+  { text: "#Debugging 🐛", x: "75%", y: "40%", rotate: -5, delay: 2.5 },
+  { text: "#Gazebo 🌐", x: "50%", y: "90%", rotate: 0, delay: 3 },
+];
 
-  useEffect(() => {
-    const role = ROLES[currentRole]
-    charIndexRef.current = isTyping ? 0 : role.length
-    
-    if (isTyping) {
-      const typeInterval = setInterval(() => {
-        if (charIndexRef.current <= role.length) {
-          setDisplayText(role.substring(0, charIndexRef.current))
-          charIndexRef.current++
-        } else {
-          clearInterval(typeInterval)
-          setTimeout(() => setIsTyping(false), 2000)
-        }
-      }, 80)
-      
-      return () => clearInterval(typeInterval)
-    } else {
-      const deleteInterval = setInterval(() => {
-        if (charIndexRef.current > 0) {
-          charIndexRef.current--
-          setDisplayText(role.substring(0, charIndexRef.current))
-        } else {
-          clearInterval(deleteInterval)
-          setCurrentRole((prev) => (prev + 1) % ROLES.length)
-          setIsTyping(true)
-        }
-      }, 40)
-      
-      return () => clearInterval(deleteInterval)
-    }
-  }, [currentRole, isTyping])
+export default function HeroSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: 'easeOut' as const,
-      },
-    },
-  }
-
-  const nameLetters = "PRUDHVI RAJ".split('')
-  const lastNameLetters = "CHALAPAKA".split('')
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-black dark:to-gray-900" />
-      
-      {/* Dot Pattern Overlay */}
-      <div className="absolute inset-0 dot-pattern opacity-30" />
-      
-      {/* Gradient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-material-primary/10 rounded-full blur-3xl animate-pulse animation-delay-300" />
+    <section ref={containerRef} id="home" className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden bg-dot-pattern">
+      <MouseSpotlight />
 
-      {/* Content */}
-      <motion.div 
-        className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Floating Stickers - Top */}
-        <motion.div 
-          className="flex flex-wrap gap-2 justify-center mb-8"
-          variants={itemVariants}
+      {/* Background Decorative Blobs */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-red-500/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]" />
+
+      {/* Stickers */}
+      {stickers.map((sticker, i) => (
+        <motion.div
+          key={sticker.text}
+          className="absolute z-20 px-4 py-2 bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl text-sm font-mono font-bold text-foreground shadow-lg pointer-events-none select-none"
+          style={{
+            left: sticker.x,
+            top: sticker.y,
+            rotate: sticker.rotate
+          }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: [0, -10, 0],
+          }}
+          transition={{
+            opacity: { duration: 0.5, delay: sticker.delay },
+            scale: { duration: 0.5, delay: sticker.delay },
+            y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 2 }
+          }}
         >
-          {HERO_STICKERS.slice(0, 4).map((sticker, index) => (
-            <motion.span
-              key={sticker}
-              className="sticker text-xs sm:text-sm"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                y: [0, -8, 0],
-              }}
-              transition={{ 
-                delay: 0.5 + index * 0.1,
-                duration: 0.4,
-                y: {
-                  repeat: Infinity,
-                  duration: 3 + index * 0.5,
-                  ease: "easeInOut",
-                }
-              }}
-            >
-              {sticker}
-            </motion.span>
-          ))}
+          {sticker.text}
         </motion.div>
+      ))}
 
-        {/* Main Name */}
-        <motion.div className="mb-4" variants={itemVariants}>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-display font-bold tracking-tight">
-            <span className="block">
-              {nameLetters.map((letter, index) => (
-                <motion.span
-                  key={index}
-                  className="inline-block"
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: 0.3 + index * 0.05,
-                    duration: 0.5,
-                    ease: 'easeOut' as const,
-                  }}
-                >
-                  {letter === ' ' ? '\u00A0' : letter}
-                </motion.span>
-              ))}
-            </span>
-          </h1>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-display font-bold tracking-tight mt-2">
-            <span className="gradient-text">
-              {lastNameLetters.map((letter, index) => (
-                <motion.span
-                  key={index}
-                  className="inline-block"
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: 0.6 + index * 0.05,
-                    duration: 0.5,
-                    ease: 'easeOut' as const,
-                  }}
-                >
-                  {letter}
-                </motion.span>
-              ))}
-            </span>
-          </h2>
-        </motion.div>
+      <motion.div style={{ y, opacity }} className="container relative z-10 px-6 text-center">
+        {/* Top Tag */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-md text-xs font-mono mb-8 animate-fade-in opacity-0" style={{ animationDelay: '0.2s' }}>
+          <span className="w-2 h-2 rounded-full bg-[#D71921] animate-pulse" />
+          <span>AVAILABLE FOR RESEARCH & COLLABORATION</span>
+        </div>
 
-        {/* Typewriter Title */}
-        <motion.div 
-          className="h-12 sm:h-16 mb-8 flex items-center justify-center"
-          variants={itemVariants}
-        >
-          <p className="text-xl sm:text-2xl md:text-3xl font-mono text-gray-700 dark:text-gray-300">
-            <span className="text-accent font-semibold">&gt; </span>
-            <span className="border-r-2 border-accent pr-1">{displayText}</span>
-          </p>
-        </motion.div>
-
-        {/* Profile Photo - Gradient Border */}
-        <motion.div 
-          className="mb-10 flex justify-center"
-          variants={itemVariants}
-        >
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-accent via-material-primary to-accent rounded-full blur opacity-50 group-hover:opacity-75 transition duration-500 animate-pulse" />
-            <div className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-full bg-gradient-to-br from-accent to-material-primary p-1">
-              <div className="w-full h-full rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-4xl sm:text-5xl md:text-6xl font-display font-bold text-accent">
-                PR
-              </div>
-            </div>
+        {/* Profile Photo with Liquid Glass Border */}
+        <div className="relative w-40 h-40 mx-auto mb-8 group">
+          {/* Liquid Border Animation */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D71921] to-purple-600 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] animate-liquid-morph blur-md opacity-75 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-1 bg-gray-100 dark:bg-black rounded-[60%_40%_30%_70%/60%_30%_70%_40%] animate-liquid-morph flex items-center justify-center overflow-hidden border border-white/20">
+            <Image
+              src="https://github.com/prudhvirajchalapaka.png"
+              alt="Prudhvi Raj Chalapaka"
+              width={160}
+              height={160}
+              className="w-full h-full object-cover"
+            />
           </div>
-        </motion.div>
+        </div>
 
-        {/* Bio */}
-        <motion.p 
-          className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed px-4"
-          variants={itemVariants}
-        >
-          {OWNER_INFO.bio}
-        </motion.p>
+        {/* Main Title */}
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <TextReveal text="PRUDHVI RAJ" className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-foreground" delay={0.3} />
+        </div>
 
-        {/* CTAs */}
-        <motion.div 
-          className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-          variants={itemVariants}
-        >
-          <Button 
-            variant="accent" 
-            size="lg" 
-            className="gap-2 ripple group"
-            onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            <ExternalLink className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            View My Work
-          </Button>
-          <Button variant="outline" size="lg" className="gap-2 group">
-            <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
-            Download CV
-          </Button>
-        </motion.div>
+        {/* Typewriter Subtitle */}
+        <div className="h-12 mb-10 overflow-hidden">
+          <TypewriterEffect
+            words={[
+              { text: "Robotics & Automation Engineer", className: "text-xl md:text-2xl text-muted-foreground font-mono text-[#D71921]" },
+              { text: "ROS/ROS2 Developer", className: "text-xl md:text-2xl text-muted-foreground font-mono text-blue-500" },
+              { text: "Industrial Automation Specialist", className: "text-xl md:text-2xl text-muted-foreground font-mono text-green-500" },
+              { text: "Research Enthusiast", className: "text-xl md:text-2xl text-muted-foreground font-mono text-purple-500" },
+            ]}
+            className="text-xl md:text-2xl"
+          />
+        </div>
 
-        {/* Floating Stickers - Bottom */}
-        <motion.div 
-          className="flex flex-wrap gap-2 justify-center mb-12"
-          variants={itemVariants}
-        >
-          {HERO_STICKERS.slice(4).map((sticker, index) => (
-            <motion.span
-              key={sticker}
-              className="sticker text-xs sm:text-sm"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                y: [0, -6, 0],
-              }}
-              transition={{ 
-                delay: 1 + index * 0.1,
-                duration: 0.4,
-                y: {
-                  repeat: Infinity,
-                  duration: 4 + index * 0.3,
-                  ease: "easeInOut",
-                }
-              }}
-            >
-              {sticker}
-            </motion.span>
-          ))}
-        </motion.div>
-
-        {/* Scroll Indicator */}
-        <motion.div 
-          className="flex flex-col items-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-        >
-          <span className="text-xs font-mono text-gray-500 dark:text-gray-500 mb-2 uppercase tracking-widest">
-            Scroll Down
-          </span>
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          >
-            <ArrowDown className="w-5 h-5 text-accent" />
-          </motion.div>
-        </motion.div>
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in opacity-0" style={{ animationDelay: '0.8s' }}>
+          <Link href="#projects">
+            <Button variant="default" size="lg" className="rounded-full px-8 bg-[#D71921] hover:bg-[#b0151b] text-white">
+              View Work <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/resume.pdf" target="_blank">
+            <Button variant="outline" size="lg" className="rounded-full px-8 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm">
+              <Download className="mr-2 w-4 h-4" /> CV / Resume
+            </Button>
+          </Link>
+        </div>
       </motion.div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
+        <span className="text-xs font-mono uppercase tracking-widest">Scroll</span>
+        <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-foreground to-transparent" />
+      </div>
     </section>
-  )
+  );
 }

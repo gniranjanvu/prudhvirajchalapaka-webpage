@@ -1,52 +1,34 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { ThemeProvider } from "@/components/providers";
+import type { Metadata } from 'next';
+import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { ThemeProvider, AuthProvider, ToastProvider } from '@/components/providers';
+import { Navbar } from '@/components/layout/Navbar';
+import './globals.css';
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: {
-    default: "Prudhvi Raj Chalapaka | Robotics & Automation Engineer",
-    template: "%s | Prudhvi Raj Chalapaka",
+  title: 'Prudhvi Raj Chalapaka | Robotics & Automation Engineer',
+  description: 'Portfolio of Prudhvi Raj Chalapaka, specializing in ROS2, Industrial Automation, and Autonomous Navigation.',
+  icons: {
+    icon: '/favicon.ico',
   },
-  description:
-    "Ambitious Robotics & Automation Engineer with strong foundation in ROS/ROS2, Industrial Automation and autonomous navigation. Proven research capability with Elsevier publication on robotic surgery and pharmacotherapy.",
-  keywords: [
-    "Robotics",
-    "ROS",
-    "ROS2",
-    "Automation",
-    "Embedded Systems",
-    "AI",
-    "Machine Learning",
-    "Industrial Automation",
-    "Prudhvi Raj Chalapaka",
-  ],
-  authors: [{ name: "Prudhvi Raj Chalapaka" }],
-  creator: "Prudhvi Raj Chalapaka",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://prudhvirajchalapaka.in",
     title: "Prudhvi Raj Chalapaka | Robotics & Automation Engineer",
-    description:
-      "Ambitious Robotics & Automation Engineer with strong foundation in ROS/ROS2, Industrial Automation and autonomous navigation.",
+    description: 'Portfolio of Prudhvi Raj Chalapaka, specializing in ROS2, Industrial Automation, and Autonomous Navigation.',
     siteName: "Prudhvi Raj Chalapaka",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Prudhvi Raj Chalapaka | Robotics & Automation Engineer",
-    description:
-      "Ambitious Robotics & Automation Engineer with strong foundation in ROS/ROS2, Industrial Automation and autonomous navigation.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
   },
 };
 
@@ -56,18 +38,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" 
-          rel="stylesheet" 
-        />
+        {/* Preconnect for other assets if needed */}
       </head>
-      <body className="antialiased font-sans">
+      <body className="font-sans antialiased bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 selection:bg-red-500/30 selection:text-red-500 overflow-x-hidden">
         <ThemeProvider>
-          {children}
+          <AuthProvider>
+            <ToastProvider>
+              <Navbar />
+              {children}
+            </ToastProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

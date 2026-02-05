@@ -36,6 +36,7 @@ export const NAV_LINKS = [
   { label: 'Projects', href: '#projects' },
   { label: 'Skills', href: '#skills' },
   { label: 'Achievements', href: '#achievements' },
+  { label: 'Certifications', href: '#certifications' },
   { label: 'Publications', href: '#publications' },
   { label: 'Contact', href: '#contact' },
 ]
@@ -280,33 +281,33 @@ export const SKILLS = [
   { id: 3, name: 'C', category: 'programming', level: 80, icon: 'c' },
   { id: 4, name: 'JavaScript', category: 'programming', level: 70, icon: 'javascript' },
   { id: 5, name: 'MATLAB', category: 'programming', level: 75, icon: 'matlab' },
-  
+
   // Frameworks & Libraries
   { id: 6, name: 'ROS/ROS2', category: 'frameworks', level: 90, icon: 'ros' },
   { id: 7, name: 'NavStack', category: 'frameworks', level: 85, icon: 'nav' },
   { id: 8, name: 'OpenCV', category: 'frameworks', level: 80, icon: 'opencv' },
   { id: 9, name: 'TensorFlow', category: 'frameworks', level: 75, icon: 'tensorflow' },
   { id: 10, name: 'MoveIt2', category: 'frameworks', level: 70, icon: 'moveit' },
-  
+
   // Hardware & Boards
   { id: 11, name: 'Arduino', category: 'hardware', level: 90, icon: 'arduino' },
   { id: 12, name: 'Raspberry Pi', category: 'hardware', level: 85, icon: 'raspberrypi' },
   { id: 13, name: 'ESP32', category: 'hardware', level: 85, icon: 'esp32' },
   { id: 14, name: 'STM32', category: 'hardware', level: 75, icon: 'stm32' },
   { id: 15, name: 'NVIDIA Jetson', category: 'hardware', level: 70, icon: 'nvidia' },
-  
+
   // Tools & Software
   { id: 16, name: 'Gazebo', category: 'tools', level: 85, icon: 'gazebo' },
   { id: 17, name: 'Git/GitHub', category: 'tools', level: 90, icon: 'git' },
   { id: 18, name: 'Linux', category: 'tools', level: 90, icon: 'linux' },
   { id: 19, name: 'Docker', category: 'tools', level: 75, icon: 'docker' },
   { id: 20, name: 'VS Code', category: 'tools', level: 90, icon: 'vscode' },
-  
+
   // CAD/CAM
   { id: 21, name: 'SolidWorks', category: 'cad', level: 80, icon: 'solidworks' },
   { id: 22, name: 'Fusion 360', category: 'cad', level: 75, icon: 'fusion' },
   { id: 23, name: 'AutoCAD', category: 'cad', level: 70, icon: 'autocad' },
-  
+
   // Technologies
   { id: 24, name: 'SLAM', category: 'technologies', level: 80, icon: 'slam' },
   { id: 25, name: 'Computer Vision', category: 'technologies', level: 80, icon: 'vision' },

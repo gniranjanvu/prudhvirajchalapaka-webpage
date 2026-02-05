@@ -1,234 +1,216 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardContent } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { PROJECTS, PROJECT_TYPES } from '@/lib/constants'
-import { Folder, ExternalLink, Github, ArrowRight, CheckCircle, Clock } from 'lucide-react'
+import { useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
-export function ProjectsSection() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [showAll, setShowAll] = useState(false)
+gsap.registerPlugin(ScrollTrigger);
 
-  const categories = ['all', ...new Set(PROJECTS.map(p => p.category))]
-  
-  const filteredProjects = selectedCategory === 'all' 
-    ? PROJECTS 
-    : PROJECTS.filter(p => p.category === selectedCategory)
+const projects = [
+  {
+    title: "IRAVATH",
+    category: "Autonomous Navigation",
+    description:
+      "Autonomous Rover with 3D-printed components, trained for object detection and measurement, Rocker-Boggie mechanism for terrain stability.",
+    tech: ["ROS", "NavStack", "Jetson", "ML"],
+    image: "/images/projects/iravath.jpg", // Placeholder
+    link: "/projects/iravath",
+    color: "from-orange-500 to-red-500",
+  },
+  {
+    title: "DWA LOCAL PLANNER",
+    category: "Path Planning",
+    description:
+      "Custom Local DWA Planner without standard nav2 packages. Implemented algorithm from scratch for better control in constrained environments.",
+    tech: ["ROS2", "Gazebo", "RViz", "C++"],
+    image: "/images/projects/dwa_planner.jpg", // Placeholder
+    link: "/projects/dwa-planner",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    title: "MECANUM ROBOT",
+    category: "Mobile Robotics",
+    description:
+      "Mecanum wheeled robot with manipulator for Agriculture and Hospitality. Omnidirectional movement capabilities.",
+    tech: ["Arduino", "Gazebo", "ROS", "Python"],
+    image: "/images/projects/mecanum.jpg", // Placeholder
+    link: "/projects/mecanum-robot",
+    color: "from-emerald-500 to-green-500",
+  },
+  {
+    title: "MODULAR MFG SYSTEM",
+    category: "Industrial Automation",
+    description:
+      "Automated manufacturing system using onboard sensor data. Integration of PLCs and pneumatic systems for efficient production.",
+    tech: ["Pneumatics", "PLC", "Arduino", "IoT"],
+    image: "/images/projects/modular-mfg.jpg", // Placeholder
+    link: "/projects/modular-mfg",
+    color: "from-purple-500 to-pink-500",
+  },
+  {
+    title: "ROBOTIC ARM",
+    category: "Manipulators",
+    description:
+      "6DOF Robotic Arm designed in Fusion 360, 3D printed, controlled via mobile app. Inverse kinematics implementation for precise control.",
+    tech: ["Arduino", "Custom PCB", "Android", "C++"],
+    image: "/images/projects/robotic-arm.jpg", // Placeholder
+    link: "/projects/robotic-arm",
+    color: "from-yellow-500 to-orange-500",
+  },
+];
 
-  const displayedProjects = showAll ? filteredProjects : filteredProjects.slice(0, 6)
+export default function ProjectsSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const shatterRef = useRef<HTMLDivElement>(null);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
+  useGSAP(() => {
+    const section = sectionRef.current;
+    const container = containerRef.current;
+    const shatter = shatterRef.current;
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: 'easeOut' as const,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -20,
-      transition: { duration: 0.3 }
+    if (!section || !container || !shatter) return;
+
+    // Create fragments dynamically
+    shatter.innerHTML = '';
+    const numFragments = 20;
+    const fragments: HTMLDivElement[] = [];
+
+    for (let i = 0; i < numFragments; i++) {
+      const frag = document.createElement("div");
+      frag.className = "absolute bg-zinc-900 border border-white/5";
+
+      // Random positioning grid 5x4
+      const width = 100 / 5;
+      const height = 100 / 4;
+      const x = (i % 5) * width;
+      const y = Math.floor(i / 5) * height;
+
+      frag.style.left = `${x}%`;
+      frag.style.top = `${y}%`;
+      frag.style.width = `${width}%`;
+      frag.style.height = `${height}%`;
+      frag.style.clipPath = `polygon(
+            ${Math.random() * 20}% ${Math.random() * 20}%, 
+            ${100 - Math.random() * 20}% ${Math.random() * 20}%, 
+            ${100 - Math.random() * 20}% ${100 - Math.random() * 20}%, 
+            ${Math.random() * 20}% ${100 - Math.random() * 20}%
+        )`;
+
+      shatter.appendChild(frag);
+      fragments.push(frag);
     }
-  }
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: "+=2000",
+        pin: true,
+        scrub: 1,
+      },
+    });
+
+    // 1. Shatter Phase
+    tl.to(fragments, {
+      x: () => (Math.random() - 0.5) * window.innerWidth * 1.5,
+      y: () => (Math.random() - 0.5) * window.innerHeight * 1.5,
+      rotation: () => Math.random() * 360,
+      scale: 0,
+      opacity: 0,
+      stagger: { amount: 0.5, from: "center" },
+      ease: "power2.in",
+      duration: 1
+    })
+      .set(shatter, { display: "none" })
+
+      // 2. Horizontal Scroll Phase
+      .to(container, {
+        x: () => -(container.scrollWidth - window.innerWidth),
+        ease: "none",
+        duration: 2
+      });
+
+  }, { scope: sectionRef });
 
   return (
-    <section id="projects" className="py-20 md:py-32 bg-white dark:bg-black relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 dot-pattern opacity-20" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* Section Header */}
-        <motion.div 
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <span className="inline-block px-4 py-1.5 bg-accent/10 text-accent text-sm font-mono uppercase tracking-wider rounded-full mb-4">
-            Portfolio
-          </span>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6">
-            Featured <span className="gradient-text">Projects</span>
-          </h2>
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            A showcase of my work in robotics, automation, and AI
+    <section ref={sectionRef} id="projects" className="relative h-screen w-full overflow-hidden bg-black text-white">
+
+      {/* Shatter Overlay */}
+      <div ref={shatterRef} className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-900">
+        <h2 className="text-6xl md:text-9xl font-bold font-display text-white relative z-10 pointer-events-none mix-blend-difference">PROJECTS</h2>
+      </div>
+
+      {/* Horizontal Container */}
+      <div ref={containerRef} className="flex h-full w-fit items-center px-10 md:px-20 gap-10">
+
+        {/* Intro Card */}
+        <div className="w-[80vw] md:w-[30vw] shrink-0">
+          <h3 className="text-4xl md:text-5xl font-bold mb-4 font-display">Featured Work</h3>
+          <p className="text-gray-400 text-lg">
+            Explore a curated selection of my robotics and engineering projects.
+            <br className="hidden md:block" />
+            From autonomous rovers to industrial automation.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Category Filters */}
-        <motion.div 
-          className="flex flex-wrap justify-center gap-2 mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                selectedCategory === category
-                  ? 'bg-accent text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Projects Grid */}
-        <motion.div 
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <AnimatePresence mode="popLayout">
-            {displayedProjects.map((project) => (
-              <motion.div
-                key={project.id}
-                variants={itemVariants}
-                layout
-                exit="exit"
-              >
-                <Card className="glass-card h-full hover:shadow-glass-lg transition-all duration-300 group overflow-hidden">
-                  {/* Image Placeholder */}
-                  <div className="h-48 bg-gradient-to-br from-accent/20 to-material-primary/20 relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Folder className="w-16 h-16 text-accent/50" />
-                    </div>
-                    {/* Featured Badge */}
-                    {project.featured && (
-                      <div className="absolute top-4 right-4">
-                        <Badge variant="accent" className="text-xs">
-                          Featured
-                        </Badge>
-                      </div>
-                    )}
-                    {/* Status */}
-                    <div className="absolute bottom-4 left-4">
-                      <Badge 
-                        variant={project.status === 'completed' ? 'default' : 'outline'}
-                        className="text-xs flex items-center gap-1"
-                      >
-                        {project.status === 'completed' ? (
-                          <CheckCircle className="w-3 h-3" />
-                        ) : (
-                          <Clock className="w-3 h-3" />
-                        )}
-                        {project.status === 'completed' ? 'Completed' : 'In Progress'}
-                      </Badge>
-                    </div>
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-
-                  <CardContent className="p-6">
-                    {/* Category */}
-                    <span className="text-xs font-mono text-accent uppercase tracking-wider">
-                      {project.category}
-                    </span>
-
-                    {/* Title */}
-                    <h3 className="text-xl font-display font-bold mt-2 mb-3 group-hover:text-accent transition-colors">
-                      {project.title}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
-                      {project.description}
-                    </p>
-
-                    {/* Technologies */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {project.technologies.slice(0, 4).map((tech) => (
-                        <Badge key={tech} variant="outline" className="text-xs">
-                          {tech}
-                        </Badge>
-                      ))}
-                      {project.technologies.length > 4 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{project.technologies.length - 4}
-                        </Badge>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      {project.github && (
-                        <a 
-                          href={project.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-accent transition-colors"
-                        >
-                          <Github className="w-4 h-4" />
-                          Code
-                        </a>
-                      )}
-                      {project.demo && (
-                        <a 
-                          href={project.demo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-accent transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Demo
-                        </a>
-                      )}
-                      <button className="ml-auto flex items-center gap-1 text-sm font-medium text-accent hover:gap-2 transition-all">
-                        Details <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* View All Button */}
-        {filteredProjects.length > 6 && (
-          <motion.div 
-            className="text-center mt-12"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+        {projects.map((project, index) => (
+          <div
+            key={index}
+            className="group relative h-[60vh] md:h-[70vh] w-[85vw] md:w-[60vh] shrink-0 bg-gray-900 rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 shadow-2xl"
           >
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => setShowAll(!showAll)}
-              className="gap-2"
-            >
-              {showAll ? 'Show Less' : 'View All Projects'}
-              <ArrowRight className={`w-4 h-4 transition-transform ${showAll ? 'rotate-90' : ''}`} />
-            </Button>
-          </motion.div>
-        )}
+            {/* Background Gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
+
+            {/* Content Container */}
+            <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-end z-10">
+              <div className="mb-auto">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md text-xs font-mono mb-6 border border-white/10 text-white/80">
+                  {project.category}
+                </span>
+                <h3 className="text-3xl md:text-5xl font-bold font-display leading-tight">{project.title}</h3>
+              </div>
+
+              <p className="text-gray-300 leading-relaxed mb-8 line-clamp-4 text-sm md:text-base">
+                {project.description}
+              </p>
+
+              <div className="flex flex-wrap gap-2 mb-8">
+                {project.tech.map((t, i) => (
+                  <span key={i} className="px-2 py-1 bg-black/50 rounded text-xs text-gray-400 font-mono border border-white/5">#{t}</span>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Link href={project.link}>
+                  <Button className="rounded-full bg-white text-black hover:bg-gray-200 border-none px-6">View Project <ArrowRight className="ml-2 w-4 h-4" /></Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Big Number Decoration */}
+            <div className="absolute top-4 right-6 text-white/5 font-black text-8xl md:text-9xl -z-10 select-none font-display">
+              0{index + 1}
+            </div>
+          </div>
+        ))}
+
+        {/* View All CTA */}
+        <div className="h-[60vh] md:h-[70vh] w-[80vw] md:w-[40vw] shrink-0 flex items-center justify-center">
+          <Link href="/projects">
+            <div className="w-48 h-48 md:w-64 md:h-64 rounded-full border border-white/20 flex flex-col items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer group relative overflow-hidden backdrop-blur-sm bg-white/5">
+              <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
+              <span className="text-2xl font-bold group-hover:scale-110 transition-transform relative z-10">View All</span>
+              <span className="text-sm text-gray-400 group-hover:text-black mt-2 relative z-10">See Archive</span>
+            </div>
+          </Link>
+        </div>
       </div>
     </section>
-  )
+  );
 }

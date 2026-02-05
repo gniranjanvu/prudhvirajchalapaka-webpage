@@ -8,6 +8,7 @@ interface ThemeContextType {
   theme: Theme
   setTheme: (theme: Theme) => void
   resolvedTheme: 'light' | 'dark'
+  toggleTheme: () => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -25,23 +26,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = window.document.documentElement
-    
+
     const getSystemTheme = (): 'light' | 'dark' => {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
 
     const resolved = theme === 'system' ? getSystemTheme() : theme
     setResolvedTheme(resolved)
-    
+
     root.classList.remove('light', 'dark')
     root.classList.add(resolved)
-    
+
     localStorage.setItem('theme', theme)
   }, [theme])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    
+
     const handleChange = () => {
       if (theme === 'system') {
         const resolved = mediaQuery.matches ? 'dark' : 'light'
@@ -50,23 +51,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.add(resolved)
       }
     }
-    
+
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [theme])
+
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
   }
 
+  const toggleTheme = () => {
+    setThemeState(prev => prev === 'dark' ? 'light' : 'dark')
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   )
 }
 
-export function useTheme() {
+export const useTheme = () => {
   const context = useContext(ThemeContext)
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider')

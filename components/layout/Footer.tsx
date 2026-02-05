@@ -1,22 +1,23 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import { OWNER_INFO, SOCIAL_LINKS, NAV_LINKS } from '@/lib/constants'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Linkedin, 
-  Github, 
-  ArrowUp, 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Linkedin,
+  Github,
+  ArrowUp,
   Heart,
   Send,
   CheckCircle
 } from 'lucide-react'
+import Confetti from '@/components/ui/Confetti';
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -24,16 +25,19 @@ export function Footer() {
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isSubscribing, setIsSubscribing] = useState(false)
 
+  const footerRef = useRef(null);
+  const isInView = useInView(footerRef, { once: true });
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
-    
+
     setIsSubscribing(true)
     await new Promise(resolve => setTimeout(resolve, 1000))
     setIsSubscribing(false)
     setIsSubscribed(true)
     setEmail('')
-    
+
     setTimeout(() => setIsSubscribed(false), 3000)
   }
 
@@ -42,10 +46,12 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-gray-900 dark:bg-black text-white relative overflow-hidden">
+    <footer ref={footerRef} className="bg-gray-900 dark:bg-black text-white relative overflow-hidden">
+      {isInView && <Confetti />}
+
       {/* Large Marquee Strip */}
-      <div className="border-y border-gray-800 py-4 bg-gradient-to-r from-gray-900 via-accent/20 to-gray-900 overflow-hidden">
-        <div className="flex whitespace-nowrap animate-marquee">
+      <div className="border-y border-gray-800 py-4 bg-gradient-to-r from-gray-900 via-accent/20 to-gray-900 overflow-hidden pause-on-hover group">
+        <div className="flex whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused]">
           {[...Array(4)].map((_, i) => (
             <span key={i} className="text-2xl md:text-4xl font-display font-bold px-8 text-white">
               CONNECT WITH ME @ {OWNER_INFO.email} • PRUDHVI RAJ CHALAPAKA •
@@ -65,8 +71,8 @@ export function Footer() {
             <ul className="space-y-3">
               {NAV_LINKS.slice(0, 6).map((link) => (
                 <li key={link.href}>
-                  <a 
-                    href={link.href} 
+                  <a
+                    href={link.href}
                     className="text-gray-400 hover:text-white hover:pl-2 transition-all duration-200 inline-block"
                   >
                     {link.label}
@@ -83,15 +89,15 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               <li>
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className="text-gray-400 hover:text-white hover:pl-2 transition-all duration-200 inline-block"
                 >
                   Resume / CV
                 </a>
               </li>
               <li>
-                <a 
+                <a
                   href={`https://github.com/${OWNER_INFO.github}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -101,7 +107,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a 
+                <a
                   href={`https://linkedin.com/in/${OWNER_INFO.linkedin}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -111,16 +117,16 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="#publications" 
+                <a
+                  href="#publications"
                   className="text-gray-400 hover:text-white hover:pl-2 transition-all duration-200 inline-block"
                 >
                   Publications
                 </a>
               </li>
               <li>
-                <a 
-                  href="#achievements" 
+                <a
+                  href="#achievements"
                   className="text-gray-400 hover:text-white hover:pl-2 transition-all duration-200 inline-block"
                 >
                   Certifications
@@ -138,7 +144,7 @@ export function Footer() {
               Subscribe for latest updates and posts from my journey.
             </p>
             {isSubscribed ? (
-              <motion.div 
+              <motion.div
                 className="flex items-center gap-2 text-green-400"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -156,9 +162,9 @@ export function Footer() {
                   required
                   className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                 />
-                <Button 
-                  type="submit" 
-                  variant="accent" 
+                <Button
+                  type="submit"
+                  variant="accent"
                   className="shrink-0"
                   disabled={isSubscribing}
                 >
@@ -182,14 +188,14 @@ export function Footer() {
                 <MapPin className="w-5 h-5 text-accent mt-0.5" />
                 <span className="text-gray-400">{OWNER_INFO.location}</span>
               </div>
-              <a 
+              <a
                 href={`mailto:${OWNER_INFO.email}`}
                 className="flex items-start gap-3 text-gray-400 hover:text-white transition-colors"
               >
                 <Mail className="w-5 h-5 text-accent mt-0.5" />
                 <span>{OWNER_INFO.email}</span>
               </a>
-              <a 
+              <a
                 href={`tel:${OWNER_INFO.phone}`}
                 className="flex items-start gap-3 text-gray-400 hover:text-white transition-colors"
               >
@@ -199,7 +205,7 @@ export function Footer() {
 
               {/* Social Icons */}
               <div className="flex gap-3 pt-4">
-                <a 
+                <a
                   href={`https://linkedin.com/in/${OWNER_INFO.linkedin}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -208,7 +214,7 @@ export function Footer() {
                 >
                   <Linkedin className="w-5 h-5" />
                 </a>
-                <a 
+                <a
                   href={`https://github.com/${OWNER_INFO.github}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -217,7 +223,7 @@ export function Footer() {
                 >
                   <Github className="w-5 h-5" />
                 </a>
-                <a 
+                <a
                   href={`mailto:${OWNER_INFO.email}`}
                   className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-accent hover:text-white transition-all"
                   aria-label="Email"
@@ -242,7 +248,7 @@ export function Footer() {
                 <p className="text-gray-400">{OWNER_INFO.title}</p>
               </div>
             </div>
-            
+
             <div className="text-center md:text-right">
               <p className="text-sm text-gray-500 mb-2">
                 Made with <Heart className="w-4 h-4 inline text-accent" /> using Next.js & Tailwind
@@ -256,7 +262,7 @@ export function Footer() {
           <p className="text-gray-500 text-sm">
             © {currentYear} {OWNER_INFO.name}. All rights reserved.
           </p>
-          
+
           <button
             onClick={scrollToTop}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"

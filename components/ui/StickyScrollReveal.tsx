@@ -20,7 +20,7 @@ export const StickyScroll = ({
     const ref = useRef<any>(null);
     const { scrollYProgress } = useScroll({
         target: ref,
-        offset: ["start start", "end end"],
+        offset: ["start start", "end start"],
     });
     const cardLength = content.length;
 
@@ -47,20 +47,21 @@ export const StickyScroll = ({
 
     return (
         <motion.div
-            className="h-[200vh] relative flex justify-center space-x-10 rounded-md p-10"
+            className="min-h-[100vh] relative flex justify-center space-x-10 rounded-md p-10"
             ref={ref}
         >
             <div className="div relative flex items-start px-4">
                 <div className="max-w-2xl relative">
                     {content.map((item, index) => (
-                        <div key={item.title + index} className="my-20">
+                        <div key={`sticky-item-${index}`} className="my-20 min-h-[40vh]">
                             <motion.h2
                                 initial={{
                                     opacity: 0,
                                 }}
                                 animate={{
-                                    opacity: 1, // activeCard === index ? 1 : 0.3 (Animation Removed)
+                                    opacity: activeCard === index ? 1 : 0.3,
                                 }}
+                                transition={{ duration: 0.3 }}
                                 className="text-2xl font-bold text-slate-100 dark:text-slate-100"
                             >
                                 {item.title}
@@ -70,15 +71,16 @@ export const StickyScroll = ({
                                     opacity: 0,
                                 }}
                                 animate={{
-                                    opacity: 1, // activeCard === index ? 1 : 0.3 (Animation Removed)
+                                    opacity: activeCard === index ? 1 : 0.3,
                                 }}
+                                transition={{ duration: 0.3 }}
                                 className="text-kg text-slate-300 max-w-sm mt-10 dark:text-slate-300"
                             >
                                 {item.description}
                             </motion.p>
                         </div>
                     ))}
-                    <div className="h-40" />
+                    <div className="h-20" />
                 </div>
             </div>
             <motion.div

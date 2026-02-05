@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
 import { Link as ScrollLink } from 'react-scroll'
 import Link from 'next/link'
-import { Moon, Sun, Menu, X, FileText } from 'lucide-react'
+import { Moon, Sun, Menu, X, FileText, Download } from 'lucide-react'
 import { useTheme } from '@/components/providers'
-import { NAV_LINKS, OWNER_INFO } from '@/lib/constants'
-import { Button } from '@/components/ui/Button'
+import { NAV_LINKS } from '@/lib/constants'
 
 export function Navbar() {
     const { theme, toggleTheme } = useTheme()
@@ -30,7 +29,7 @@ export function Navbar() {
         <>
             <motion.nav
                 className={`fixed top-4 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-                    ? 'py-4 max-w-5xl mx-auto rounded-full bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/10 shadow-lg'
+                    ? 'py-3 max-w-6xl mx-auto rounded-full bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/10 shadow-lg'
                     : 'py-6 bg-transparent'
                     }`}
                 variants={{
@@ -41,17 +40,17 @@ export function Navbar() {
                 transition={{ duration: 0.35, ease: "easeInOut" }}
             >
                 <div className="w-full px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
 
-                        {/* Logo */}
-                        <Link href="/" className="group relative">
-                            <span className="font-display font-bold text-xl tracking-wider text-gray-900 dark:text-white group-hover:text-accent transition-colors">
+                        {/* Logo - Only visible when NOT scrolled */}
+                        <Link href="/" className={`group relative transition-all duration-300 ${isScrolled ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
+                            <span className="font-display font-bold text-xl tracking-wider text-gray-900 dark:text-white group-hover:text-accent transition-colors whitespace-nowrap">
                                 [PRUDHVI]
                             </span>
                         </Link>
 
-                        {/* Desktop Links */}
-                        <div className="hidden lg:flex items-center gap-4 xl:gap-6">
+                        {/* Desktop Links - All navigation items including CV */}
+                        <div className={`hidden lg:flex items-center ${isScrolled ? 'gap-3 xl:gap-4 flex-1 justify-center' : 'gap-4 xl:gap-6'}`}>
                             {NAV_LINKS.map((link) => (
                                 <ScrollLink
                                     key={link.href}
@@ -60,40 +59,56 @@ export function Navbar() {
                                     smooth={true}
                                     offset={-100}
                                     duration={500}
-                                    className="text-xs xl:text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors uppercase tracking-wide whitespace-nowrap"
+                                    className={`font-medium text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors uppercase tracking-wide whitespace-nowrap ${isScrolled ? 'text-[10px] xl:text-xs' : 'text-xs xl:text-sm'}`}
                                 >
                                     {link.label}
                                 </ScrollLink>
                             ))}
+                            {/* CV Link */}
+                            <Link
+                                href="/api/resume/download"
+                                className={`font-medium text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors uppercase tracking-wide whitespace-nowrap flex items-center gap-1 ${isScrolled ? 'text-[10px] xl:text-xs' : 'text-xs xl:text-sm'}`}
+                            >
+                                <Download className="w-3 h-3" />
+                                CV
+                            </Link>
                         </div>
 
-                        {/* Actions */}
-                        <div className="hidden lg:flex items-center gap-4">
+                        {/* Theme Toggle - Separate on right corner */}
+                        <div className="hidden lg:flex items-center">
                             <button
                                 onClick={toggleTheme}
-                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
                                 aria-label="Toggle Theme"
                             >
                                 {theme === 'dark' ? (
-                                    <Moon className="w-5 h-5 text-accent" /> // Extremely Dark
+                                    <Moon className="w-5 h-5 text-accent" />
                                 ) : (
-                                    <Sun className="w-5 h-5 text-orange-500" /> // Sunny
+                                    <Sun className="w-5 h-5 text-orange-500" />
                                 )}
                             </button>
-
-                            <Button variant="outline" size="sm" className="gap-2 border-gray-200 dark:border-gray-800">
-                                <FileText className="w-4 h-4" />
-                                <span className="hidden xl:inline">CV</span>
-                            </Button>
                         </div>
 
-                        {/* Mobile Toggle */}
-                        <button
-                            className="lg:hidden p-2 text-gray-900 dark:text-white"
-                            onClick={() => setMobileMenuOpen(true)}
-                        >
-                            <Menu className="w-6 h-6" />
-                        </button>
+                        {/* Mobile - Theme Toggle and Menu Button */}
+                        <div className="lg:hidden flex items-center gap-2">
+                            <button
+                                onClick={toggleTheme}
+                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
+                                aria-label="Toggle Theme"
+                            >
+                                {theme === 'dark' ? (
+                                    <Moon className="w-5 h-5 text-accent" />
+                                ) : (
+                                    <Sun className="w-5 h-5 text-orange-500" />
+                                )}
+                            </button>
+                            <button
+                                className="p-2 text-gray-900 dark:text-white"
+                                onClick={() => setMobileMenuOpen(true)}
+                            >
+                                <Menu className="w-6 h-6" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </motion.nav>
@@ -133,16 +148,15 @@ export function Navbar() {
                                         {link.label}
                                     </ScrollLink>
                                 ))}
-                            </div>
-
-                            <div className="flex justify-center gap-6 mt-8">
-                                <button
-                                    onClick={() => { toggleTheme(); setMobileMenuOpen(false); }}
-                                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white"
+                                {/* CV Link in mobile menu */}
+                                <Link
+                                    href="/api/resume/download"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors flex items-center gap-2"
                                 >
-                                    {theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-                                    <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
-                                </button>
+                                    <Download className="w-6 h-6" />
+                                    CV / Resume
+                                </Link>
                             </div>
                         </div>
                     </motion.div>

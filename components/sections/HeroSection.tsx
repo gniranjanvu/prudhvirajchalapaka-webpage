@@ -106,12 +106,12 @@ export default function HeroSection() {
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in opacity-0" style={{ animationDelay: '0.8s' }}>
-          <Link href="#projects">
+          <Link href="/projects">
             <Button variant="default" size="lg" className="rounded-full px-8 bg-[#D71921] hover:bg-[#b0151b] text-white">
               View Work <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </Link>
-          <Link href="/resume.pdf" target="_blank">
+          <Link href="/api/resume/download">
             <Button variant="outline" size="lg" className="rounded-full px-8 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm">
               <Download className="mr-2 w-4 h-4" /> CV / Resume
             </Button>

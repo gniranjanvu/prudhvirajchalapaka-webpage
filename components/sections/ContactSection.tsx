@@ -72,7 +72,7 @@ export function ContactSection() {
             <div className="flex animate-marquee whitespace-nowrap">
               {[...Array(4)].map((_, i) => (
                 <span key={i} className="text-xl md:text-2xl font-display font-bold px-8 text-gray-900 dark:text-white">
-                  WANNA TALK WITH ME? 👋 • LET&apos;S COLLABORATE • OPEN FOR OPPORTUNITIES •
+                  WANNA TALK WITH ME? 👋 • LET'S COLLABORATE • OPEN FOR OPPORTUNITIES •
                 </span>
               ))}
             </div>
@@ -91,10 +91,10 @@ export function ContactSection() {
             Get In Touch
           </span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6">
-            Let&apos;s <span className="gradient-text">Connect</span>
+            Let's <span className="gradient-text">Connect</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Have a project in mind or want to discuss opportunities? I&apos;d love to hear from you.
+            Have a project in mind or want to discuss opportunities? I'd love to hear from you.
           </p>
         </motion.div>
 
@@ -122,7 +122,7 @@ export function ContactSection() {
                     </div>
                     <h4 className="text-xl font-bold mb-2">Message Sent!</h4>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Thank you for reaching out. I&apos;ll get back to you soon.
+                      Thank you for reaching out. I'll get back to you soon.
                     </p>
                   </motion.div>
                 ) : (
@@ -322,7 +322,7 @@ export function ContactSection() {
                 </div>
                 <h3 className="text-xl font-display font-bold mb-2">Open to Opportunities</h3>
                 <p className="text-white/80 text-sm mb-4">
-                  I&apos;m currently available for freelance projects, internships, and full-time positions in robotics and automation.
+                  I'm currently available for freelance projects, internships, and full-time positions in robotics and automation.
                 </p>
                 <p className="text-xs text-white/60">
                   Response time: Usually within 24 hours

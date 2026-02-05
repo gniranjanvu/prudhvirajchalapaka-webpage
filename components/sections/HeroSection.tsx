@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { OWNER_INFO, ROLES, HERO_STICKERS } from '@/lib/constants'
 import { Button } from '@/components/ui/Button'
@@ -10,16 +10,17 @@ export function HeroSection() {
   const [currentRole, setCurrentRole] = useState(0)
   const [displayText, setDisplayText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
+  const charIndexRef = useRef(0)
 
   useEffect(() => {
     const role = ROLES[currentRole]
-    let charIndex = 0
+    charIndexRef.current = isTyping ? 0 : role.length
     
     if (isTyping) {
       const typeInterval = setInterval(() => {
-        if (charIndex <= role.length) {
-          setDisplayText(role.substring(0, charIndex))
-          charIndex++
+        if (charIndexRef.current <= role.length) {
+          setDisplayText(role.substring(0, charIndexRef.current))
+          charIndexRef.current++
         } else {
           clearInterval(typeInterval)
           setTimeout(() => setIsTyping(false), 2000)
@@ -29,9 +30,9 @@ export function HeroSection() {
       return () => clearInterval(typeInterval)
     } else {
       const deleteInterval = setInterval(() => {
-        if (charIndex > 0) {
-          charIndex--
-          setDisplayText(role.substring(0, charIndex))
+        if (charIndexRef.current > 0) {
+          charIndexRef.current--
+          setDisplayText(role.substring(0, charIndexRef.current))
         } else {
           clearInterval(deleteInterval)
           setCurrentRole((prev) => (prev + 1) % ROLES.length)

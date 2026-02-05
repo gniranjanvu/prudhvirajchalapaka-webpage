@@ -168,7 +168,7 @@ export function PublicationsSection() {
               className="text-center glass-card p-4 hover:shadow-glass transition-all"
             >
               <div className="text-2xl md:text-3xl font-display font-bold text-accent">
-                {stat.value}+
+                {stat.value}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {stat.label}

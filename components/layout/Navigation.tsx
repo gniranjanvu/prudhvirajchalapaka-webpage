@@ -17,6 +17,10 @@ export function Navigation() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY)
+      
+      // Only update if scroll difference is significant (> 5px)
+      if (scrollDifference < 5) return
       
       // Show/hide based on scroll direction
       if (currentScrollY > lastScrollY && currentScrollY > 100) {

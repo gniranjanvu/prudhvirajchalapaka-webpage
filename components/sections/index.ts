@@ -1,8 +1,9 @@
-export { HeroSection } from './HeroSection'
-export { ExperienceSection } from './ExperienceSection'
-export { EducationSection } from './EducationSection'
-export { ProjectsSection } from './ProjectsSection'
-export { SkillsSection } from './SkillsSection'
-export { AchievementsSection } from './AchievementsSection'
-export { PublicationsSection } from './PublicationsSection'
-export { ContactSection } from './ContactSection'
+export { default as HeroSection } from './HeroSection';
+export { default as ExperienceSection } from './ExperienceSection';
+export { default as EducationSection } from './EducationSection';
+export { default as ProjectsSection } from './ProjectsSection';
+export { default as SkillsSection } from './SkillsSection';
+export { default as AchievementsSection } from './AchievementsSection';
+export { default as CertificationsSection } from './CertificationsSection';
+export { default as PublicationsSection } from './PublicationsSection';
+export { default as ContactSection } from './ContactSection';

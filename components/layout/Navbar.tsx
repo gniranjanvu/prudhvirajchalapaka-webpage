@@ -65,13 +65,13 @@ export function Navbar() {
                                 </ScrollLink>
                             ))}
                             {/* CV Link */}
-                            <Link
+                            <a
                                 href="/api/resume/download"
                                 className={`font-medium text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors uppercase tracking-wide whitespace-nowrap flex items-center gap-1 ${isScrolled ? 'text-[10px] xl:text-xs' : 'text-xs xl:text-sm'}`}
                             >
                                 <Download className="w-3 h-3" />
                                 CV
-                            </Link>
+                            </a>
                         </div>
 
                         {/* Theme Toggle - Separate on right corner */}
@@ -149,14 +149,14 @@ export function Navbar() {
                                     </ScrollLink>
                                 ))}
                                 {/* CV Link in mobile menu */}
-                                <Link
+                                <a
                                     href="/api/resume/download"
                                     onClick={() => setMobileMenuOpen(false)}
                                     className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors flex items-center gap-2"
                                 >
                                     <Download className="w-6 h-6" />
                                     CV / Resume
-                                </Link>
+                                </a>
                             </div>
                         </div>
                     </motion.div>

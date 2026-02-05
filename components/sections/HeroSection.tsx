@@ -111,11 +111,11 @@ export default function HeroSection() {
               View Work <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </Link>
-          <Link href="/api/resume/download">
+          <a href="/api/resume/download">
             <Button variant="outline" size="lg" className="rounded-full px-8 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm">
               <Download className="mr-2 w-4 h-4" /> CV / Resume
             </Button>
-          </Link>
+          </a>
         </div>
       </motion.div>
 

@@ -2,12 +2,14 @@
 
 import { useRef } from "react";
 import { StickyScroll } from "@/components/ui/StickyScrollReveal";
+import { ParallaxScrollCards } from "@/components/ui/ParallaxScrollCards";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { Quote, ExternalLink } from "lucide-react";
+import { Quote, ExternalLink, BookOpen, Calendar, Users } from "lucide-react";
 import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
 import { PUBLICATIONS } from "@/lib/constants";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { cn } from "@/lib/utils/cn";
 
 export default function PublicationsSection() {
   const sectionRef = useRef<HTMLElement>(null);

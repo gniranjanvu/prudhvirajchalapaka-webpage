@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
-import { Link as ScrollLink } from 'react-scroll'
 import Link from 'next/link'
 import { Moon, Sun, Menu, X, FileText, Download } from 'lucide-react'
 import { useTheme } from '@/components/providers'
@@ -24,6 +23,30 @@ export function Navbar() {
         }
         setIsScrolled(latest > 50);
     })
+
+    const scrollToSection = useCallback((sectionId: string, offset: number = -100) => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+                top: elementPosition + offset,
+                behavior: 'smooth'
+            });
+        }
+    }, []);
+
+    const handleNavClick = useCallback((href: string, offset: number = -100) => {
+        const sectionId = href.replace('#', '');
+        scrollToSection(sectionId, offset);
+    }, [scrollToSection]);
+
+    const handleMobileNavClick = useCallback((href: string) => {
+        setMobileMenuOpen(false);
+        // Small delay to allow menu close animation
+        setTimeout(() => {
+            handleNavClick(href, -50);
+        }, 100);
+    }, [handleNavClick]);
 
     return (
         <>
@@ -52,17 +75,13 @@ export function Navbar() {
                         {/* Desktop Links - All navigation items including CV */}
                         <div className={`hidden lg:flex items-center ${isScrolled ? 'gap-3 xl:gap-4 flex-1 justify-center' : 'gap-4 xl:gap-6'}`}>
                             {NAV_LINKS.map((link) => (
-                                <ScrollLink
+                                <button
                                     key={link.href}
-                                    to={link.href.replace('#', '')}
-                                    spy={true}
-                                    smooth={true}
-                                    offset={-100}
-                                    duration={500}
+                                    onClick={() => handleNavClick(link.href)}
                                     className={`font-medium text-gray-600 dark:text-gray-300 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors uppercase tracking-wide whitespace-nowrap ${isScrolled ? 'text-[10px] xl:text-xs' : 'text-xs xl:text-sm'}`}
                                 >
                                     {link.label}
-                                </ScrollLink>
+                                </button>
                             ))}
                             {/* CV Link */}
                             <a
@@ -135,18 +154,13 @@ export function Navbar() {
 
                             <div className="flex flex-col gap-6 items-center justify-center flex-1">
                                 {NAV_LINKS.map((link) => (
-                                    <ScrollLink
+                                    <button
                                         key={link.href}
-                                        to={link.href.replace('#', '')}
-                                        spy={true}
-                                        smooth={true}
-                                        offset={-50}
-                                        duration={500}
-                                        onClick={() => setMobileMenuOpen(false)}
+                                        onClick={() => handleMobileNavClick(link.href)}
                                         className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors"
                                     >
                                         {link.label}
-                                    </ScrollLink>
+                                    </button>
                                 ))}
                                 {/* CV Link in mobile menu */}
                                 <a

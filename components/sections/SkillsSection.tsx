@@ -84,17 +84,11 @@ const StarRating = ({ rating }: { rating: number }) => {
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
-        <motion.div
+        <Star
           key={star}
-          initial={{ opacity: 0, scale: 0 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ delay: star * 0.1, duration: 0.2 }}
-        >
-          <Star
-            className={`w-3 h-3 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300 dark:text-gray-700"
-              }`}
-          />
-        </motion.div>
+          className={`w-3 h-3 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300 dark:text-gray-700"
+            }`}
+        />
       ))}
     </div>
   );

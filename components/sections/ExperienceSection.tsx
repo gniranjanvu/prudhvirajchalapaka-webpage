@@ -1,10 +1,11 @@
 "use client";
 
-import { ParallaxScrollCards } from "@/components/ui/ParallaxScrollCards";
+import { useRef } from "react";
+import { StickyScroll } from "@/components/ui/StickyScrollReveal";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { ArrowRight, Calendar, MapPin, Briefcase } from "lucide-react";
-import { EXPERIENCES } from "@/lib/constants";
+import { ArrowRight } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 // Maximum number of technologies to display on the card
 const MAX_DISPLAYED_TECHNOLOGIES = 4;
@@ -64,21 +65,54 @@ export default function ExperienceSection() {
     ),
   }));
 
+export default function ExperienceSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "start start"],
+  });
+
+  const headerY = useTransform(scrollYProgress, [0, 1], [100, 0]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
+
   return (
-    <section id="experience" className="relative bg-black overflow-hidden">
-      {/* Header */}
-      <div className="container mx-auto px-4 pt-20 pb-10">
-        <div className="text-center space-y-4">
-          <span className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-xs font-bold uppercase tracking-wider border border-blue-500/20">
-            Professional Journey
-          </span>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white">
+    <section id="experience" ref={sectionRef} className="py-20 bg-black dark:bg-black relative overflow-hidden">
+      {/* Parallax Background Gradient */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.5, 0.3]),
+        }}
+      >
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-pink-500/20 to-indigo-500/20 rounded-full blur-3xl" />
+      </motion.div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        <motion.div
+          className="mb-12"
+          style={{ y: headerY, opacity: headerOpacity }}
+        >
+          <motion.h2
+            className="text-4xl md:text-5xl font-bold font-display text-white mb-4"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            viewport={{ once: true }}
+          >
             Experience
-          </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            My professional timeline showcasing roles and accomplishments in robotics and automation
-          </p>
-        </div>
+          </motion.h2>
+          <motion.p
+            className="text-gray-400 max-w-xl"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+            viewport={{ once: true }}
+          >
+            My professional timeline.
+          </motion.p>
+        </motion.div>
+        <StickyScroll content={content} />
       </div>
 
       {/* Parallax Cards */}

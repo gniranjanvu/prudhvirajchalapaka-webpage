@@ -1,14 +1,25 @@
 "use client";
 
-import { ParallaxScrollCards } from "@/components/ui/ParallaxScrollCards";
+import { useRef } from "react";
+import { StickyScroll } from "@/components/ui/StickyScrollReveal";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { ExternalLink, BookOpen, Users, Calendar } from "lucide-react";
+import { Quote, ExternalLink } from "lucide-react";
 import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
 import { PUBLICATIONS } from "@/lib/constants";
-import { cn } from "@/lib/utils/cn";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function PublicationsSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "start start"],
+  });
+
+  const headerY = useTransform(scrollYProgress, [0, 1], [100, 0]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
+  const headerScale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+
   const content = PUBLICATIONS.map((pub) => ({
     title: pub.title,
     description: pub.abstract,
@@ -95,17 +106,48 @@ export default function PublicationsSection() {
   }));
 
   return (
-    <section id="publications" className="relative bg-black border-t border-gray-800 overflow-hidden">
-      {/* Header */}
-      <div className="container mx-auto px-4 pt-20 pb-10">
-        <div className="text-center space-y-4">
-          <span className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 text-xs font-bold uppercase tracking-wider border border-blue-500/20">
+    <section id="publications" ref={sectionRef} className="py-20 bg-black dark:bg-black border-t border-gray-800 relative overflow-hidden">
+      {/* Parallax Background Gradient */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.4, 0.2]),
+        }}
+      >
+        <div className="absolute top-1/4 left-0 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-full blur-3xl" />
+      </motion.div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        <motion.div
+          className="mb-20 text-center"
+          style={{ y: headerY, opacity: headerOpacity, scale: headerScale }}
+        >
+          <motion.span
+            className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 text-xs font-bold mb-4 uppercase tracking-wider border border-blue-500/20"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+          >
             Research & Analysis
-          </span>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white">
+          </motion.span>
+          <motion.h2
+            className="text-4xl md:text-5xl font-bold font-display mb-6 text-gray-900 dark:text-white"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true }}
+          >
             Publications
-          </h2>
-          <div className="flex justify-center h-12 items-center">
+          </motion.h2>
+          <motion.div
+            className="flex justify-center h-12 items-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             <TypewriterEffect
               words={[
                 { text: "Advancing", className: "text-gray-500" },
@@ -116,8 +158,10 @@ export default function PublicationsSection() {
               className="text-xl md:text-2xl"
               cursorClassName="bg-blue-500"
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
+
+        <StickyScroll content={content} />
       </div>
 
       {/* Parallax Cards */}

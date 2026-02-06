@@ -36,8 +36,7 @@ export async function POST(request: NextRequest) {
         ip_address: ipAddress,
         user_agent: userAgent,
         is_read: false,
-        is_archived: false,
-        created_at: new Date().toISOString()
+        is_archived: false
       }])
       .select()
       .single();

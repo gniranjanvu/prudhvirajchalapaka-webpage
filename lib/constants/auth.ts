@@ -20,5 +20,6 @@ export const SECURITY_ALERT_EMAIL = 'prudhvirajchalapaka07@gmail.com';
  * Check if an email is allowed to access admin features
  */
 export function isAllowedAdminEmail(email: string): boolean {
-  return ALLOWED_ADMIN_EMAILS.includes(email.toLowerCase().trim() as any);
+  const normalizedEmail = email.toLowerCase().trim();
+  return ALLOWED_ADMIN_EMAILS.some(allowedEmail => allowedEmail === normalizedEmail);
 }

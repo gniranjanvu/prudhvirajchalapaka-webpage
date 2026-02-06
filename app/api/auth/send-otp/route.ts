@@ -33,8 +33,7 @@ export async function POST(request: NextRequest) {
         ip_address: ipAddress,
         user_agent: userAgent,
         status: 'failed',
-        failure_reason: 'Unauthorized email - not in whitelist',
-        created_at: new Date().toISOString()
+        failure_reason: 'Unauthorized email - not in whitelist'
       });
 
       // Send security alert email
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
                   <p style="margin: 5px 0; color: #4b5563;"><strong>Email:</strong> ${normalizedEmail}</p>
                   <p style="margin: 5px 0; color: #4b5563;"><strong>IP Address:</strong> ${ipAddress}</p>
                   <p style="margin: 5px 0; color: #4b5563;"><strong>User Agent:</strong> ${userAgent}</p>
-                  <p style="margin: 5px 0; color: #4b5563;"><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+                  <p style="margin: 5px 0; color: #4b5563;"><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
                 </div>
 
                 <p style="color: #6b7280; font-size: 14px; margin-top: 25px;">

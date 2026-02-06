@@ -47,8 +47,7 @@ export async function POST(request: NextRequest) {
         ip_address: ipAddress,
         user_agent: userAgent,
         status: 'failed',
-        failure_reason: `OTP verification failed: ${error.message}`,
-        created_at: new Date().toISOString()
+        failure_reason: `OTP verification failed: ${error.message}`
       });
 
       return NextResponse.json(
@@ -69,8 +68,7 @@ export async function POST(request: NextRequest) {
         email: normalizedEmail,
         ip_address: ipAddress,
         user_agent: userAgent,
-        status: 'success',
-        created_at: new Date().toISOString()
+        status: 'success'
       });
     }
 

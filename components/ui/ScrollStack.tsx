@@ -50,7 +50,8 @@ const ScrollStack = ({
   const animationFrameRef = useRef<number | null>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const cardsRef = useRef<HTMLElement[]>([]);
-  const lastTransformsRef = useRef<Map<number, { translateY: number; scale: number; rotation: number; blur: number }>>(new Map());
+  const cardOriginalTopsRef = useRef<number[]>([]);
+  const lastTransformsRef = useRef<Map<number, { translateY: number; scale: number; rotation: number; blur: number; zIndex: number }>>(new Map());
   const isUpdatingRef = useRef(false);
 
   const calculateProgress = useCallback((scrollTop: number, start: number, end: number) => {
@@ -116,35 +117,48 @@ const ScrollStack = ({
       : scrollerRef.current?.querySelector('.scroll-stack-end');
 
     const endElementTop = endElement ? getElementOffset(endElement as HTMLElement) : 0;
+    const totalCards = cardsRef.current.length;
 
     cardsRef.current.forEach((card, i) => {
       if (!card) return;
 
-      const cardTop = getElementOffset(card);
-      const triggerStart = cardTop - stackPositionPx - itemStackDistance * i;
-      const triggerEnd = cardTop - scaleEndPositionPx;
-      const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
-      const pinEnd = endElementTop - containerHeight / 2;
-
-      const scaleProgress = calculateProgress(scrollTop, triggerStart, triggerEnd);
+      // Use stored original positions for stability
+      const cardTop = cardOriginalTopsRef.current[i] || getElementOffset(card);
+      
+      // Calculate stack offset for this card (each card stacks slightly lower)
+      const stackOffset = itemStackDistance * i;
+      
+      // When should this card start pinning? When its top reaches the stack position
+      const pinStart = cardTop - stackPositionPx - stackOffset;
+      // When should pinning end? When all cards have stacked
+      const pinEnd = endElementTop - containerHeight + stackPositionPx + itemStackDistance * (totalCards - 1);
+      
+      // Calculate scale progress - scales down as it becomes part of the stack
+      const scaleStart = cardTop - containerHeight;
+      const scaleEnd = cardTop - stackPositionPx;
+      const scaleProgress = calculateProgress(scrollTop, scaleStart, scaleEnd);
+      
+      // Calculate target scale based on card's position in stack (earlier cards scale smaller)
       const targetScale = baseScale + i * itemScale;
       const scale = 1 - scaleProgress * (1 - targetScale);
+      
       const rotation = rotationAmount ? i * rotationAmount * scaleProgress : 0;
 
+      // Calculate blur based on depth in stack
       let blur = 0;
-      if (blurAmount) {
+      if (blurAmount > 0) {
         let topCardIndex = 0;
         for (let j = 0; j < cardsRef.current.length; j++) {
-          const jCardTop = getElementOffset(cardsRef.current[j]);
-          const jTriggerStart = jCardTop - stackPositionPx - itemStackDistance * j;
-          if (scrollTop >= jTriggerStart) {
+          const jCardTop = cardOriginalTopsRef.current[j] || getElementOffset(cardsRef.current[j]);
+          const jPinStart = jCardTop - stackPositionPx - itemStackDistance * j;
+          if (scrollTop >= jPinStart) {
             topCardIndex = j;
           }
         }
 
         if (i < topCardIndex) {
           const depthInStack = topCardIndex - i;
-          blur = Math.max(0, depthInStack * blurAmount);
+          blur = Math.min(depthInStack * blurAmount, blurAmount * 3); // Cap the blur
         }
       }
 
@@ -152,16 +166,23 @@ const ScrollStack = ({
       const isPinned = scrollTop >= pinStart && scrollTop <= pinEnd;
 
       if (isPinned) {
-        translateY = scrollTop - cardTop + stackPositionPx + itemStackDistance * i;
+        // Pin the card at its stack position
+        translateY = scrollTop - cardTop + stackPositionPx + stackOffset;
       } else if (scrollTop > pinEnd) {
-        translateY = pinEnd - cardTop + stackPositionPx + itemStackDistance * i;
+        // After pin ends, card stays at its final position
+        translateY = pinEnd - cardTop + stackPositionPx + stackOffset;
       }
+      // else: card hasn't reached stack position yet, translateY stays 0
+
+      // Z-index: Cards that are pinned later should be on top
+      const zIndex = isPinned || scrollTop > pinStart ? 10 + i : 1;
 
       const newTransform = {
         translateY: Math.round(translateY * 100) / 100,
         scale: Math.round(scale * 1000) / 1000,
         rotation: Math.round(rotation * 100) / 100,
-        blur: Math.round(blur * 100) / 100
+        blur: Math.round(blur * 100) / 100,
+        zIndex
       };
 
       const lastTransform = lastTransformsRef.current.get(i);
@@ -170,7 +191,8 @@ const ScrollStack = ({
         Math.abs(lastTransform.translateY - newTransform.translateY) > 0.1 ||
         Math.abs(lastTransform.scale - newTransform.scale) > 0.001 ||
         Math.abs(lastTransform.rotation - newTransform.rotation) > 0.1 ||
-        Math.abs(lastTransform.blur - newTransform.blur) > 0.1;
+        Math.abs(lastTransform.blur - newTransform.blur) > 0.1 ||
+        lastTransform.zIndex !== newTransform.zIndex;
 
       if (hasChanged) {
         const transform = `translate3d(0, ${newTransform.translateY}px, 0) scale(${newTransform.scale}) rotate(${newTransform.rotation}deg)`;
@@ -178,6 +200,7 @@ const ScrollStack = ({
 
         card.style.transform = transform;
         card.style.filter = filter;
+        card.style.zIndex = String(newTransform.zIndex);
 
         lastTransformsRef.current.set(i, newTransform);
       }
@@ -283,6 +306,15 @@ const ScrollStack = ({
     cardsRef.current = cards;
     const transformsCache = lastTransformsRef.current;
 
+    // Store original positions before any transforms
+    cardOriginalTopsRef.current = cards.map(card => {
+      if (useWindowScroll) {
+        const rect = card.getBoundingClientRect();
+        return rect.top + window.scrollY;
+      }
+      return card.offsetTop;
+    });
+
     cards.forEach((card, i) => {
       if (i < cards.length - 1) {
         card.style.marginBottom = `${itemDistance}px`;
@@ -292,10 +324,12 @@ const ScrollStack = ({
       card.style.backfaceVisibility = 'hidden';
       card.style.transform = 'translateZ(0)';
       card.style.perspective = '1000px';
+      card.style.position = 'relative';
     });
 
     setupLenis();
 
+    // Initial transform calculation
     updateCardTransforms();
 
     return () => {
@@ -307,6 +341,7 @@ const ScrollStack = ({
       }
       stackCompletedRef.current = false;
       cardsRef.current = [];
+      cardOriginalTopsRef.current = [];
       transformsCache.clear();
       isUpdatingRef.current = false;
     };

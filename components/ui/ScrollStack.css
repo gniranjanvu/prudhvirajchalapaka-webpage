@@ -13,8 +13,9 @@
 }
 
 .scroll-stack-inner {
-  padding: 5vh 0 50rem;
+  padding: 10vh 0 40vh;
   min-height: 100vh;
+  position: relative;
 }
 
 .scroll-stack-card-wrapper {
@@ -23,13 +24,16 @@
 
 .scroll-stack-card {
   transform-origin: top center;
-  will-change: transform, filter;
+  will-change: transform, filter, z-index;
   backface-visibility: hidden;
   transform-style: preserve-3d;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 -2px 20px rgba(0, 0, 0, 0.3),
+    0 10px 40px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
   min-height: 22rem;
   width: 100%;
-  margin: 30px 0;
+  margin: 20px 0;
   border-radius: 28px;
   box-sizing: border-box;
   -webkit-transform: translateZ(0);
@@ -37,7 +41,8 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, rgba(24, 24, 27, 0.98), rgba(39, 39, 42, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.3s ease;
 }
 
 .scroll-stack-end {

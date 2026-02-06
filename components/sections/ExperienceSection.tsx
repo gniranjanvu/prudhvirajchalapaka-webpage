@@ -240,13 +240,13 @@ export default function ExperienceSection() {
         {/* Scroll Stack Experience Cards */}
         <ScrollStack
           className="min-h-[120vh]"
-          itemDistance={120}
-          itemScale={0.04}
-          itemStackDistance={35}
-          stackPosition="25%"
-          scaleEndPosition="15%"
-          baseScale={0.88}
-          blurAmount={2}
+          itemDistance={150}
+          itemScale={0.02}
+          itemStackDistance={40}
+          stackPosition="15%"
+          scaleEndPosition="10%"
+          baseScale={0.92}
+          blurAmount={0}
           useWindowScroll={true}
         >
           {experiences.map((experience, index) => (

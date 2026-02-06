@@ -81,7 +81,7 @@ export default function HeroSection() {
             {/* Availability Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-md text-xs font-mono animate-fade-in opacity-0" style={{ animationDelay: '0.2s' }}>
               <span className="w-2 h-2 rounded-full bg-[#D71921] animate-pulse" />
-              <span>AVAILABLE FOR RESEARCH &amp; COLLABORATION</span>
+              <span>AVAILABLE FOR RESEARCH & COLLABORATION</span>
             </div>
 
             {/* Typewriter Subtitle */}

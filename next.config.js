@@ -29,6 +29,7 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  turbopack: {},
   webpack: (config) => {
     config.module.rules.push({
       test: /\.glb$/,

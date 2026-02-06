@@ -1,3 +1,5 @@
+/// <reference types="@react-three/fiber" />
+
 declare module '*.glb';
 declare module '*.png';
 
@@ -14,5 +16,3 @@ declare global {
     }
   }
 }
-
-export {};

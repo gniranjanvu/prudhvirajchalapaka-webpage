@@ -45,3 +45,7 @@ next-env.d.ts
 
 # Temporary
 /tmp/
+
+# API Keys (should never be committed)
+resend_api.txt
+supabase_api.txt

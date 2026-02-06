@@ -174,8 +174,10 @@ const ScrollStack = ({
       }
       // else: card hasn't reached stack position yet, translateY stays 0
 
-      // Z-index: Cards that are pinned later should be on top
-      const zIndex = isPinned || scrollTop > pinStart ? 10 + i : 1;
+      // Z-index: Cards scroll in from above (higher z-index) and settle on top of the stack
+      // Before pinning: card should be above all previous cards (use 100 + i)
+      // During/after pinning: card maintains its stacking order (use 10 + i)
+      const zIndex = isPinned || scrollTop > pinStart ? 10 + i : 100 + i;
 
       const newTransform = {
         translateY: Math.round(translateY * 100) / 100,

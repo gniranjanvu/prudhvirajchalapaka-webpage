@@ -1,16 +1,16 @@
 -- Seed data for Prudhvi Raj Chalapaka's portfolio
 
 -- Insert skill categories
-INSERT INTO skill_categories (id, name, slug, icon, "order") VALUES
-('a1b2c3d4-e5f6-4a4a-8b8b-1c1c1c1c1c1c', 'Programming Languages', 'programming-languages', 'code', 1),
-('b2c3d4e5-f6a1-4b4b-9c9c-2d2d2d2d2d2d', 'Frameworks & Libraries', 'frameworks-libraries', 'layers', 2),
-('c3d4e5f6-a1b2-4c4c-0d0d-3e3e3e3e3e3e', 'Hardware & Boards', 'hardware-boards', 'cpu', 3),
-('d4e5f6a1-b2c3-4d4d-1e1e-4f4f4f4f4f4f', 'Tools & Software', 'tools-software', 'wrench', 4),
-('e5f6a1b2-c3d4-4e4e-2f2f-5a5a5a5a5a5a', 'CAD/CAM', 'cad-cam', 'box', 5),
-('f6a1b2c3-d4e5-4f4f-3a3a-6b6b6b6b6b6b', 'Technologies', 'technologies', 'zap', 6);
+INSERT INTO skill_categories (id, name, display_order) VALUES
+('a1b2c3d4-e5f6-4a4a-8b8b-1c1c1c1c1c1c', 'Programming Languages', 1),
+('b2c3d4e5-f6a1-4b4b-9c9c-2d2d2d2d2d2d', 'Frameworks & Libraries', 2),
+('c3d4e5f6-a1b2-4c4c-0d0d-3e3e3e3e3e3e', 'Hardware & Boards', 3),
+('d4e5f6a1-b2c3-4d4d-1e1e-4f4f4f4f4f4f', 'Tools & Software', 4),
+('e5f6a1b2-c3d4-4e4e-2f2f-5a5a5a5a5a5a', 'CAD/CAM', 5),
+('f6a1b2c3-d4e5-4f4f-3a3a-6b6b6b6b6b6b', 'Technologies', 6);
 
 -- Insert skills
-INSERT INTO skills (name, category_id, rating, "order") VALUES
+INSERT INTO skills (name, category_id, proficiency, display_order) VALUES
 -- Programming Languages
 ('Python', 'a1b2c3d4-e5f6-4a4a-8b8b-1c1c1c1c1c1c', 5, 1),
 ('C', 'a1b2c3d4-e5f6-4a4a-8b8b-1c1c1c1c1c1c', 5, 2),
@@ -52,9 +52,8 @@ INSERT INTO skills (name, category_id, rating, "order") VALUES
 ('PLCs', 'f6a1b2c3-d4e5-4f4f-3a3a-6b6b6b6b6b6b', 4, 3);
 
 -- Insert experiences
-INSERT INTO experiences (slug, role, company, location, start_date, end_date, is_current, description, technologies, achievements, published, "order") VALUES
-('robotics-engineer-intern-karthikesh', 
- 'Robotics Engineer Intern', 
+INSERT INTO experiences (role, company_name, location, start_date, end_date, is_current, description, tech_stack, is_published, display_order, slug) VALUES
+('Robotics Engineer Intern', 
  'Karthikesh Robotics', 
  'Chennai, India',
  '2025-05-01',
@@ -62,12 +61,11 @@ INSERT INTO experiences (slug, role, company, location, start_date, end_date, is
  false,
  'Working on advanced robotics projects involving ROS2, autonomous navigation, and industrial automation systems.',
  ARRAY['ROS2', 'Python', 'C++', 'NavStack', 'Gazebo', 'Linux'],
- ARRAY['Developed autonomous navigation solutions', 'Implemented path planning algorithms', 'Integrated sensors and actuators'],
  true,
- 1),
+ 1,
+ 'robotics-engineer-intern-karthikesh'),
  
-('teaching-assistant-vignans', 
- 'Teaching Assistantship Intern', 
+('Teaching Assistantship Intern', 
  'Vignans University', 
  'Guntur, India',
  '2025-01-01',
@@ -75,12 +73,11 @@ INSERT INTO experiences (slug, role, company, location, start_date, end_date, is
  false,
  'Assisted in teaching robotics and automation courses, mentored students in ROS and embedded systems projects.',
  ARRAY['ROS', 'Arduino', 'Python', 'Teaching', 'Mentoring'],
- ARRAY['Mentored 20+ students in robotics projects', 'Conducted practical sessions on ROS', 'Assisted in lab setup and maintenance'],
  true,
- 2),
+ 2,
+ 'teaching-assistant-vignans'),
  
-('ros-intern-karthikesh', 
- 'ROS Intern', 
+('ROS Intern', 
  'Karthikesh Robotics', 
  'Online',
  '2025-01-01',
@@ -88,72 +85,68 @@ INSERT INTO experiences (slug, role, company, location, start_date, end_date, is
  false,
  'Focused on learning and implementing ROS (Robot Operating System) concepts and developing ROS-based applications.',
  ARRAY['ROS', 'ROS2', 'Python', 'C++', 'Gazebo'],
- ARRAY['Completed ROS training program', 'Built multiple ROS packages', 'Implemented sensor integration'],
  true,
- 3);
+ 3,
+ 'ros-intern-karthikesh');
 
 -- Insert education
-INSERT INTO education (slug, degree, major, institution, location, start_date, end_date, is_current, grade, description, achievements, published, "order") VALUES
-('btech-robotics-vignans',
- 'B.Tech',
+INSERT INTO education (degree, major, institution_name, location, start_year, end_year, is_current, grade, description, is_published, display_order, slug) VALUES
+('B.Tech',
  'Robotics & Automation',
  'Vignans University',
  'Guntur, India',
- '2021-09-01',
- '2025-06-30',
+ 2021,
+ 2025,
  false,
  'CGPA: 7.62/10',
  'Comprehensive program covering robotics, automation, control systems, and industrial automation with focus on ROS/ROS2 and embedded systems.',
- ARRAY['Published research paper in Elsevier', 'Vice-President of Robotics Club (SPARC)', 'Multiple project awards and recognitions'],
  true,
- 1),
+ 1,
+ 'btech-robotics-vignans'),
  
-('intermediate-nri',
- 'Intermediate (MPC)',
+('Intermediate (MPC)',
  'Mathematics, Physics, Chemistry',
  'NRI Junior College',
  'Guntur, India',
- '2019-06-01',
- '2021-05-31',
+ 2019,
+ 2021,
  false,
  '804/1000',
  'Pre-university education with focus on Mathematics, Physics, and Chemistry.',
- ARRAY[],
  true,
- 2),
+ 2,
+ 'intermediate-nri'),
  
-('ssc-gretnaltes',
- 'SSC (10th Grade)',
- null,
+('SSC (10th Grade)',
+ 'General',
  'Gretnaltes Public School',
  'Guntur, India',
- '2018-06-01',
- '2019-05-31',
+ 2018,
+ 2019,
  false,
  'GPA: 9.2/10',
  'Secondary school education with strong academic performance.',
- ARRAY[],
  true,
- 3);
+ 3,
+ 'ssc-gretnaltes');
 
 -- Insert project categories
-INSERT INTO project_categories (id, name, slug, description) VALUES
-('p1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c', 'Robotics', 'robotics', 'Robotics and autonomous systems projects'),
-('p2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6d', 'Automation', 'automation', 'Industrial automation and control systems'),
-('p3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7e', 'Embedded', 'embedded', 'Embedded systems and hardware projects');
+INSERT INTO project_categories (id, name, slug, display_order) VALUES
+('p1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c', 'Robotics', 'robotics', 1),
+('p2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6d', 'Automation', 'automation', 2),
+('p3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7e', 'Embedded', 'embedded', 3);
 
 -- Insert projects
-INSERT INTO projects (slug, title, description, long_description, category_id, technologies, features, github_url, is_featured, published, "order") VALUES
+INSERT INTO projects (slug, title, short_description, full_description, category_id, tech_stack, github_url, is_featured, status, display_order) VALUES
 ('iravath-autonomous-rover',
  'Iravath - Autonomous Rover',
  'Advanced autonomous rover with ROS, NavStack, and ML capabilities for outdoor navigation.',
  'Iravath is a sophisticated autonomous rover designed for outdoor navigation using ROS, NavStack, and machine learning. The rover features advanced path planning, obstacle avoidance, and real-time decision-making capabilities powered by Jetson Nano.',
  'p1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
  ARRAY['ROS', 'NavStack', 'Jetson Nano', 'Python', 'C++', 'Machine Learning', 'OpenCV'],
- ARRAY['Autonomous navigation', 'Real-time path planning', 'Obstacle detection and avoidance', 'ML-based decision making', 'Sensor fusion'],
  'https://github.com/prudhvirajchalapaka',
  true,
- true,
+ 'published',
  1),
  
 ('dwa-local-planner',
@@ -162,10 +155,9 @@ INSERT INTO projects (slug, title, description, long_description, category_id, t
  'Custom implementation of the Dynamic Window Approach (DWA) algorithm for local path planning in ROS2. This project demonstrates advanced understanding of motion planning and control for mobile robots.',
  'p1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
  ARRAY['ROS2', 'C++', 'Python', 'Gazebo', 'RViz'],
- ARRAY['DWA algorithm implementation', 'Real-time trajectory generation', 'Collision avoidance', 'Simulation in Gazebo'],
  'https://github.com/prudhvirajchalapaka',
  true,
- true,
+ 'published',
  2),
  
 ('mecanum-wheeled-robot',
@@ -174,10 +166,9 @@ INSERT INTO projects (slug, title, description, long_description, category_id, t
  'A mecanum wheeled mobile robot capable of omnidirectional movement. The robot is controlled using Arduino and integrated with ROS for advanced control and navigation capabilities. Simulated in Gazebo for testing and validation.',
  'p1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c',
  ARRAY['Arduino', 'ROS', 'Gazebo', 'C++', 'Python'],
- ARRAY['Omnidirectional movement', 'ROS integration', 'Gazebo simulation', 'Custom motor control'],
  'https://github.com/prudhvirajchalapaka',
  false,
- true,
+ 'published',
  3),
  
 ('modular-manufacturing-system',
@@ -186,10 +177,9 @@ INSERT INTO projects (slug, title, description, long_description, category_id, t
  'A comprehensive modular manufacturing system demonstrating industrial automation principles. The system uses pneumatic actuators controlled by PLC and Arduino, showcasing integration of different automation technologies.',
  'p2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6d',
  ARRAY['PLC', 'Arduino', 'Pneumatics', 'TIA Portal', 'Ladder Logic'],
- ARRAY['Modular design', 'PLC programming', 'Pneumatic control', 'Industrial automation'],
  null,
  true,
- true,
+ 'published',
  4),
  
 ('6dof-robotic-arm',
@@ -198,10 +188,9 @@ INSERT INTO projects (slug, title, description, long_description, category_id, t
  'A 6-axis robotic arm designed and built from scratch. Features custom PCB design, Arduino-based control system, and Android app for wireless control. Demonstrates mechanical design, electronics, and software integration.',
  'p3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7e',
  ARRAY['Arduino', 'Android', 'PCB Design', 'Servo Motors', 'Java'],
- ARRAY['6 degrees of freedom', 'Custom PCB', 'Android app control', 'Inverse kinematics'],
  null,
  false,
- true,
+ 'published',
  5);
 
 -- Insert achievements

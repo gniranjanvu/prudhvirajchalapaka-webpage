@@ -2,57 +2,60 @@
 export interface Profile {
   id: string;
   email: string;
-  full_name?: string;
+  display_name?: string;
+  bio?: string;
   avatar_url?: string;
+  phone?: string;
+  location?: string;
+  social_links?: any;
+  is_admin: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface Experience {
   id: string;
-  slug: string;
   role: string;
-  company: string;
-  company_name?: string; // For DB compatibility
-  company_logo?: string;
-  company_logo_url?: string; // For DB compatibility
+  company_name: string;
+  company_logo_url?: string;
   hero_image_url?: string;
-  location: string;
   start_date: string;
   end_date?: string;
   is_current: boolean;
-  description: string;
-  technologies: string[];
-  tech_stack?: string[]; // For DB compatibility
-  achievements?: string[];
+  location?: string;
+  employment_type?: string;
+  description?: string;
+  tech_stack?: string[];
   certificate_url?: string;
   gallery_urls?: string[];
   video_urls?: string[];
-  employment_type?: string;
-  display_order?: number;
-  published: boolean;
-  is_published?: boolean; // For DB compatibility
-  order: number;
+  display_order: number;
+  is_published: boolean;
+  slug?: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface Education {
   id: string;
-  slug: string;
+  institution_name: string;
+  university_board?: string;
+  institution_logo_url?: string;
   degree: string;
-  major?: string;
-  institution: string;
-  institution_logo?: string;
-  location: string;
-  start_date: string;
-  end_date?: string;
+  major: string;
+  start_year: number;
+  end_year?: number;
   is_current: boolean;
   grade?: string;
-  description: string;
-  achievements?: string[];
-  published: boolean;
-  order: number;
+  location?: string;
+  description?: string;
+  key_courses?: string[];
+  certificate_url?: string;
+  gallery_urls?: string[];
+  video_urls?: string[];
+  display_order: number;
+  is_published: boolean;
+  slug?: string;
   created_at: string;
   updated_at: string;
 }
@@ -61,35 +64,38 @@ export interface ProjectCategory {
   id: string;
   name: string;
   slug: string;
-  description?: string;
+  display_order: number;
   created_at: string;
 }
 
 export interface Project {
   id: string;
-  slug: string;
   title: string;
-  description: string;
-  long_description?: string;
+  slug: string;
   category_id?: string;
   category?: ProjectCategory;
-  featured_image?: string;
-  gallery_images?: string[];
-  technologies: string[];
-  features?: string[];
+  hero_image_url?: string;
+  short_description?: string;
+  full_description?: string;
+  is_featured: boolean;
+  tech_stack?: string[];
   github_url?: string;
   demo_url?: string;
-  video_url?: string;
-  start_date?: string;
-  end_date?: string;
-  is_featured: boolean;
-  published: boolean;
+  documentation_url?: string;
+  action_buttons?: any[];
+  gallery_urls?: string[];
+  video_urls?: string[];
+  contributors?: any[];
+  enable_comments: boolean;
+  enable_likes: boolean;
   likes_count: number;
   views_count: number;
-  order: number;
+  display_order: number;
+  status: string;
+  development_date?: string;
   meta_title?: string;
   meta_description?: string;
-  meta_keywords?: string[];
+  keywords?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -97,11 +103,12 @@ export interface Project {
 export interface ProjectComment {
   id: string;
   project_id: string;
+  parent_id?: string;
   author_name: string;
   author_email: string;
-  comment: string;
-  parent_id?: string;
-  approved: boolean;
+  content: string;
+  status: 'pending' | 'approved' | 'spam' | 'deleted';
+  is_admin_reply: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -109,43 +116,47 @@ export interface ProjectComment {
 export interface ProjectLike {
   id: string;
   project_id: string;
-  user_ip: string;
+  visitor_id: string;
+  ip_address?: string;
   created_at: string;
 }
 
 export interface SkillCategory {
   id: string;
   name: string;
-  slug: string;
-  icon?: string;
-  order: number;
+  display_order: number;
   created_at: string;
 }
 
 export interface Skill {
   id: string;
-  name: string;
   category_id: string;
   category?: SkillCategory;
-  icon?: string;
-  rating: number; // 1-5 stars
-  order: number;
+  name: string;
+  icon_url?: string;
+  proficiency: number; // 1-5
+  years_experience?: number;
+  display_order: number;
+  is_visible: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface Certification {
   id: string;
-  title: string;
+  name: string;
   issuer: string;
+  issuer_logo_url?: string;
   issue_date: string;
   expiry_date?: string;
+  no_expiry: boolean;
   credential_id?: string;
   credential_url?: string;
+  certificate_file_url?: string;
   description?: string;
-  logo?: string;
-  published: boolean;
-  order: number;
+  related_skills?: string[];
+  display_order: number;
+  is_published: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -153,14 +164,14 @@ export interface Certification {
 export interface Achievement {
   id: string;
   title: string;
-  description: string;
-  date: string;
+  date_achieved: string;
   issuer?: string;
-  type: 'award' | 'recognition' | 'competition' | 'leadership' | 'milestone';
-  icon?: string;
-  image?: string;
-  published: boolean;
-  order: number;
+  hero_image_url?: string;
+  certificate_url?: string;
+  description?: string;
+  category: 'award' | 'recognition' | 'competition' | 'leadership' | 'milestone' | 'other';
+  display_order: number;
+  is_published: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -168,21 +179,16 @@ export interface Achievement {
 export interface Publication {
   id: string;
   title: string;
-  authors: string[];
+  publication_type: 'journal' | 'conference' | 'book_chapter' | 'patent' | 'thesis' | 'technical_report' | 'other';
+  authors: any[];
   venue: string;
-  publication_type: 'journal' | 'conference' | 'workshop' | 'preprint';
-  date: string;
-  abstract: string;
-  doi?: string;
-  url?: string;
+  publication_date: string;
+  doi_url?: string;
+  abstract?: string;
   pdf_url?: string;
-  citations?: {
-    apa?: string;
-    mla?: string;
-    bibtex?: string;
-  };
-  published: boolean;
-  order: number;
+  keywords?: string[];
+  display_order: number;
+  is_published: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -196,9 +202,9 @@ export interface Message {
   message: string;
   is_read: boolean;
   is_archived: boolean;
-  replied_at?: string;
+  ip_address?: string;
+  user_agent?: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Subscriber {
@@ -213,38 +219,40 @@ export interface Resume {
   id: string;
   file_url: string;
   file_name: string;
-  file_size: number;
-  version: string;
-  is_current: boolean;
+  file_size?: number;
+  is_active: boolean;
+  download_count: number;
   uploaded_at: string;
-  uploaded_by: string;
 }
 
 export interface SiteSetting {
   id: string;
   key: string;
   value: any;
-  type: 'string' | 'number' | 'boolean' | 'json';
   updated_at: string;
 }
 
 export interface OTPToken {
   id: string;
   email: string;
-  token: string;
-  expires_at: string;
+  otp_code: string;
   attempts: number;
-  verified: boolean;
+  expires_at: string;
+  used_at?: string;
   created_at: string;
 }
 
 export interface LoginHistory {
   id: string;
-  user_id: string;
-  ip_address: string;
-  user_agent: string;
-  success: boolean;
-  logged_in_at: string;
+  user_id?: string;
+  email: string;
+  ip_address?: string;
+  user_agent?: string;
+  device_info?: any;
+  location?: string;
+  status: 'success' | 'failed';
+  failure_reason?: string;
+  created_at: string;
 }
 
 // Form Types

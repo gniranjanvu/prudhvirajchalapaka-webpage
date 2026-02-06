@@ -1,1 +1,0 @@
-resend_api_key = re_jhDWYHnL_EGHrbG2YSdZadgFxMD63d7Yr

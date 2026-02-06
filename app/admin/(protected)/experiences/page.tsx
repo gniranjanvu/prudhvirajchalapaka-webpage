@@ -170,7 +170,7 @@ export default function ExperiencePage() {
                                         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                                             <span className="font-medium text-gray-900 dark:text-gray-300">{exp.company_name}</span>
                                             <span>•</span>
-                                            <span className="capitalize">{exp.employment_type?.replace('-', ' ')}</span>
+                                            <span className="capitalize">{exp.employment_type?.replace(/-/g, ' ')}</span>
                                             <span>•</span>
                                             <span>
                                                 {formatDate(exp.start_date)} - {exp.is_current ? 'Present' : exp.end_date ? formatDate(exp.end_date) : 'N/A'}

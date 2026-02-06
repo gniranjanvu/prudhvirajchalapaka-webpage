@@ -202,7 +202,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
                 )}
                 {experience.employment_type && (
                   <span className="px-3 py-1 bg-accent/10 text-accent text-sm font-medium rounded-full border border-accent/20 capitalize">
-                    {experience.employment_type.replace('-', ' ')}
+                    {experience.employment_type.replace(/-/g, ' ')}
                   </span>
                 )}
               </div>
@@ -355,7 +355,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
                 {experience.employment_type && (
                   <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
                     <span className="text-gray-500 dark:text-gray-400">Type</span>
-                    <span className="font-medium capitalize">{experience.employment_type.replace('-', ' ')}</span>
+                    <span className="font-medium capitalize">{experience.employment_type.replace(/-/g, ' ')}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">

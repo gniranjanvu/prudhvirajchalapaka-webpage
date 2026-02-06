@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { isAllowedAdminEmail, SECURITY_ALERT_EMAIL } from '@/lib/constants/auth';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,7 +39,8 @@ export async function POST(request: NextRequest) {
 
       // Send security alert email
       try {
-        await resend.emails.send({
+        if (resend) {
+          await resend.emails.send({
           from: 'Security <security@prudhvirajchalapaka.in>',
           to: SECURITY_ALERT_EMAIL,
           subject: '🚨 Unauthorized Login Attempt Detected',
@@ -69,6 +71,9 @@ export async function POST(request: NextRequest) {
             </div>
           `
         });
+        } else {
+          console.warn('Resend API key not configured, skipping security alert email');
+        }
       } catch (emailError) {
         console.error('Failed to send security alert email:', emailError);
         // Don't fail the request if email sending fails

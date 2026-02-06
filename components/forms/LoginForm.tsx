@@ -36,8 +36,7 @@ export default function LoginForm() {
                         toast({
                             title: "🚫 Access Denied",
                             description: "This email is not authorized to access the admin dashboard. An alert has been sent to the administrator.",
-                            type: "error",
-                            duration: 8000
+                            type: "error"
                         });
                     } else {
                         throw error;

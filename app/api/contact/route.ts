@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,7 +52,8 @@ export async function POST(request: NextRequest) {
 
     // Send notification email to admin
     try {
-      await resend.emails.send({
+      if (resend) {
+        await resend.emails.send({
         from: 'Contact Form <contact@prudhvirajchalapaka.in>',
         to: 'prudhvirajchalapaka07@gmail.com',
         replyTo: email,
@@ -91,6 +93,9 @@ export async function POST(request: NextRequest) {
           </div>
         `
       });
+      } else {
+        console.warn('Resend API key not configured, skipping notification email');
+      }
     } catch (emailError) {
       console.error('Failed to send notification email:', emailError);
       // Don't fail the request if email sending fails

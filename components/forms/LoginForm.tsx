@@ -30,7 +30,20 @@ export default function LoginForm() {
         try {
             if (step === 'email') {
                 const { error } = await signInWithOTP(data.email);
-                if (error) throw error;
+                if (error) {
+                    // Check if it's an unauthorized email error
+                    if (error.message.includes('Unauthorized') || error.message.includes('Access Denied')) {
+                        toast({
+                            title: "🚫 Access Denied",
+                            description: "This email is not authorized to access the admin dashboard. An alert has been sent to the administrator.",
+                            type: "error",
+                            duration: 8000
+                        });
+                    } else {
+                        throw error;
+                    }
+                    return;
+                }
 
                 toast({
                     title: "OTP Sent!",

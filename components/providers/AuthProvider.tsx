@@ -43,25 +43,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, [supabase]);
 
     const signInWithOTP = async (email: string) => {
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: `${window.location.origin}/admin/dashboard`,
-            },
-        });
-        return { error };
+        try {
+            const response = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                return { error: new Error(result.error || 'Failed to send OTP') };
+            }
+
+            return { error: null };
+        } catch (error: any) {
+            return { error: error instanceof Error ? error : new Error('Failed to send OTP') };
+        }
     };
 
     const verifyOTP = async (email: string, token: string) => {
-        const { error } = await supabase.auth.verifyOtp({
-            email,
-            token,
-            type: "email",
-        });
-        if (!error) {
-            router.push("/admin/dashboard");
+        try {
+            const response = await fetch('/api/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, token }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                return { error: new Error(result.error || 'Failed to verify OTP') };
+            }
+
+            // Refresh the session after successful verification
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                setSession(session);
+                setUser(session.user);
+                router.push("/admin/dashboard");
+            }
+
+            return { error: null };
+        } catch (error: any) {
+            return { error: error instanceof Error ? error : new Error('Failed to verify OTP') };
         }
-        return { error };
     };
 
     const signOut = async () => {

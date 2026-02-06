@@ -247,7 +247,7 @@ export default function ExperienceSection() {
           scaleEndPosition="15%"
           baseScale={0.88}
           blurAmount={2}
-          useWindowScroll={false}
+          useWindowScroll={true}
         >
           {experiences.map((experience, index) => (
             <ScrollStackItem key={experience.id} itemClassName="">

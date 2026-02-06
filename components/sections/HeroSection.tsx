@@ -6,9 +6,11 @@ import { MouseSpotlight } from "@/components/ui/MouseSpotlight";
 import { TextReveal } from "@/components/ui/TextReveal";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { ArrowRight, Download } from "lucide-react";
 import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
+
+const Lanyard = dynamic(() => import('@/components/ui/Lanyard'), { ssr: false });
 
 const stickers = [
   { text: "#ROS2 🤖", x: "10%", y: "20%", rotate: -10, delay: 0 },
@@ -64,58 +66,52 @@ export default function HeroSection() {
         </motion.div>
       ))}
 
-      <motion.div style={{ y, opacity }} className="container relative z-10 px-6 text-center">
-        {/* Top Tag */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-md text-xs font-mono mb-8 animate-fade-in opacity-0" style={{ animationDelay: '0.2s' }}>
-          <span className="w-2 h-2 rounded-full bg-[#D71921] animate-pulse" />
-          <span>AVAILABLE FOR RESEARCH & COLLABORATION</span>
-        </div>
-
-        {/* Profile Photo with Liquid Glass Border */}
-        <div className="relative w-40 h-40 mx-auto mb-8 group">
-          {/* Liquid Border Animation */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#D71921] to-purple-600 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] animate-liquid-morph blur-md opacity-75 group-hover:opacity-100 transition-opacity" />
-          <div className="absolute inset-1 bg-gray-100 dark:bg-black rounded-[60%_40%_30%_70%/60%_30%_70%_40%] animate-liquid-morph flex items-center justify-center overflow-hidden border border-white/20">
-            <Image
-              src="https://github.com/prudhvirajchalapaka.png"
-              alt="Prudhvi Raj Chalapaka"
-              width={160}
-              height={160}
-              className="w-full h-full object-cover"
-            />
+      <motion.div style={{ y, opacity }} className="container relative z-10 px-6 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full max-w-7xl mx-auto">
+          
+          {/* Left: Lanyard */}
+          <div className="h-[500px] lg:h-[600px] relative">
+            <Lanyard position={[0, 0, 20]} gravity={[0, -40, 0]} />
           </div>
-        </div>
+          
+          {/* Right: Text content */}
+          <div className="flex flex-col items-start gap-6">
+            <TextReveal text="PRUDHVI RAJ" className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-foreground" delay={0.3} />
+            
+            {/* Availability Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-md text-xs font-mono animate-fade-in opacity-0" style={{ animationDelay: '0.2s' }}>
+              <span className="w-2 h-2 rounded-full bg-[#D71921] animate-pulse" />
+              <span>AVAILABLE FOR RESEARCH &amp; COLLABORATION</span>
+            </div>
 
-        {/* Main Title */}
-        <div className="flex flex-col items-center gap-2 mb-6">
-          <TextReveal text="PRUDHVI RAJ" className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-foreground" delay={0.3} />
-        </div>
+            {/* Typewriter Subtitle */}
+            <div className="h-12 overflow-hidden">
+              <TypewriterEffect
+                words={[
+                  { text: "Robotics & Automation Engineer", className: "text-xl md:text-2xl text-muted-foreground font-mono text-[#D71921]" },
+                  { text: "ROS/ROS2 Developer", className: "text-xl md:text-2xl text-muted-foreground font-mono text-blue-500" },
+                  { text: "Industrial Automation Specialist", className: "text-xl md:text-2xl text-muted-foreground font-mono text-green-500" },
+                  { text: "Research Enthusiast", className: "text-xl md:text-2xl text-muted-foreground font-mono text-purple-500" },
+                ]}
+                className="text-xl md:text-2xl"
+              />
+            </div>
 
-        {/* Typewriter Subtitle */}
-        <div className="h-12 mb-10 overflow-hidden">
-          <TypewriterEffect
-            words={[
-              { text: "Robotics & Automation Engineer", className: "text-xl md:text-2xl text-muted-foreground font-mono text-[#D71921]" },
-              { text: "ROS/ROS2 Developer", className: "text-xl md:text-2xl text-muted-foreground font-mono text-blue-500" },
-              { text: "Industrial Automation Specialist", className: "text-xl md:text-2xl text-muted-foreground font-mono text-green-500" },
-              { text: "Research Enthusiast", className: "text-xl md:text-2xl text-muted-foreground font-mono text-purple-500" },
-            ]}
-            className="text-xl md:text-2xl"
-          />
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in opacity-0" style={{ animationDelay: '0.8s' }}>
-          <Link href="/projects">
-            <Button variant="default" size="lg" className="rounded-full px-8 bg-[#D71921] hover:bg-[#b0151b] text-white">
-              View Work <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </Link>
-          <a href="/api/resume/download">
-            <Button variant="outline" size="lg" className="rounded-full px-8 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm">
-              <Download className="mr-2 w-4 h-4" /> CV / Resume
-            </Button>
-          </a>
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in opacity-0" style={{ animationDelay: '0.8s' }}>
+              <a href="/api/resume/download">
+                <Button variant="default" size="lg" className="rounded-full px-8 bg-[#D71921] hover:bg-[#b0151b] text-white">
+                  <Download className="mr-2 w-4 h-4" /> Download Resume
+                </Button>
+              </a>
+              <Link href="/projects">
+                <Button variant="outline" size="lg" className="rounded-full px-8 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm">
+                  View Work <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+          
         </div>
       </motion.div>
 

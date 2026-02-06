@@ -29,6 +29,13 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.glb$/,
+      type: 'asset/resource',
+    });
+    return config;
+  },
 }
 
 module.exports = nextConfig

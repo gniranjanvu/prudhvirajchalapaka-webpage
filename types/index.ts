@@ -13,15 +13,25 @@ export interface Experience {
   slug: string;
   role: string;
   company: string;
+  company_name?: string; // For DB compatibility
   company_logo?: string;
+  company_logo_url?: string; // For DB compatibility
+  hero_image_url?: string;
   location: string;
   start_date: string;
   end_date?: string;
   is_current: boolean;
   description: string;
   technologies: string[];
+  tech_stack?: string[]; // For DB compatibility
   achievements?: string[];
+  certificate_url?: string;
+  gallery_urls?: string[];
+  video_urls?: string[];
+  employment_type?: string;
+  display_order?: number;
   published: boolean;
+  is_published?: boolean; // For DB compatibility
   order: number;
   created_at: string;
   updated_at: string;

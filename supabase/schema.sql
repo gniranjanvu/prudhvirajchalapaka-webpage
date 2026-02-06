@@ -32,6 +32,7 @@ CREATE TABLE experiences (
   role TEXT NOT NULL,
   company_name TEXT NOT NULL,
   company_logo_url TEXT,
+  hero_image_url TEXT,
   start_date DATE NOT NULL,
   end_date DATE,
   is_current BOOLEAN DEFAULT FALSE,

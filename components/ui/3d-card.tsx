@@ -101,7 +101,7 @@ export const CardItem = ({
     rotateZ = 0,
     ...rest
 }: {
-    as?: React.ElementType;
+    as?: any; // Changed from React.ElementType to fix React 19 polymorphic component type inference
     children: React.ReactNode;
     className?: string;
     translateX?: number | string;

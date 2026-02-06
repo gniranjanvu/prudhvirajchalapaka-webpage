@@ -49,3 +49,4 @@ next-env.d.ts
 # API Keys (should never be committed)
 resend_api.txt
 supabase_api.txt
+.env.local

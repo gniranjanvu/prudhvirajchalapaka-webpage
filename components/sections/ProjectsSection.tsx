@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -18,7 +17,7 @@ const projects = [
     description:
       "Autonomous Rover with 3D-printed components, trained for object detection and measurement, Rocker-Boggie mechanism for terrain stability.",
     tech: ["ROS", "NavStack", "Jetson", "ML"],
-    image: "/images/projects/iravath.jpg", // Placeholder
+    image: "/images/projects/iravath.jpg",
     link: "/projects/iravath",
     color: "from-orange-500 to-red-500",
   },
@@ -28,7 +27,7 @@ const projects = [
     description:
       "Custom Local DWA Planner without standard nav2 packages. Implemented algorithm from scratch for better control in constrained environments.",
     tech: ["ROS2", "Gazebo", "RViz", "C++"],
-    image: "/images/projects/dwa_planner.jpg", // Placeholder
+    image: "/images/projects/dwa_planner.jpg",
     link: "/projects/dwa-planner",
     color: "from-blue-500 to-cyan-500",
   },
@@ -38,7 +37,7 @@ const projects = [
     description:
       "Mecanum wheeled robot with manipulator for Agriculture and Hospitality. Omnidirectional movement capabilities.",
     tech: ["Arduino", "Gazebo", "ROS", "Python"],
-    image: "/images/projects/mecanum.jpg", // Placeholder
+    image: "/images/projects/mecanum.jpg",
     link: "/projects/mecanum-robot",
     color: "from-emerald-500 to-green-500",
   },
@@ -48,7 +47,7 @@ const projects = [
     description:
       "Automated manufacturing system using onboard sensor data. Integration of PLCs and pneumatic systems for efficient production.",
     tech: ["Pneumatics", "PLC", "Arduino", "IoT"],
-    image: "/images/projects/modular-mfg.jpg", // Placeholder
+    image: "/images/projects/modular-mfg.jpg",
     link: "/projects/modular-mfg",
     color: "from-purple-500 to-pink-500",
   },
@@ -58,7 +57,7 @@ const projects = [
     description:
       "6DOF Robotic Arm designed in Fusion 360, 3D printed, controlled via mobile app. Inverse kinematics implementation for precise control.",
     tech: ["Arduino", "Custom PCB", "Android", "C++"],
-    image: "/images/projects/robotic-arm.jpg", // Placeholder
+    image: "/images/projects/robotic-arm.jpg",
     link: "/projects/robotic-arm",
     color: "from-yellow-500 to-orange-500",
   },
@@ -67,102 +66,76 @@ const projects = [
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const shatterRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     const section = sectionRef.current;
     const container = containerRef.current;
-    const shatter = shatterRef.current;
 
-    if (!section || !container || !shatter) return;
+    if (!section || !container) return;
 
-    // Create fragments dynamically
-    shatter.innerHTML = '';
-    const numFragments = 20;
-    const fragments: HTMLDivElement[] = [];
+    // Calculate the exact amount of horizontal scroll needed
+    const getScrollAmount = () => {
+      return -(container.scrollWidth - window.innerWidth);
+    };
 
-    for (let i = 0; i < numFragments; i++) {
-      const frag = document.createElement("div");
-      frag.className = "absolute bg-zinc-900 border border-white/5";
-
-      // Random positioning grid 5x4
-      const width = 100 / 5;
-      const height = 100 / 4;
-      const x = (i % 5) * width;
-      const y = Math.floor(i / 5) * height;
-
-      frag.style.left = `${x}%`;
-      frag.style.top = `${y}%`;
-      frag.style.width = `${width}%`;
-      frag.style.height = `${height}%`;
-      frag.style.clipPath = `polygon(
-            ${Math.random() * 20}% ${Math.random() * 20}%, 
-            ${100 - Math.random() * 20}% ${Math.random() * 20}%, 
-            ${100 - Math.random() * 20}% ${100 - Math.random() * 20}%, 
-            ${Math.random() * 20}% ${100 - Math.random() * 20}%
-        )`;
-
-      shatter.appendChild(frag);
-      fragments.push(frag);
-    }
-
-    const tl = gsap.timeline({
+    // Horizontal scroll animation — pinned and scrubbed
+    gsap.to(container, {
+      x: getScrollAmount,
+      ease: "none",
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "+=2000",
+        // End distance = the amount of horizontal overflow, creating a 1:1 scroll feel
+        end: () => `+=${container.scrollWidth - window.innerWidth}`,
         pin: true,
-        scrub: 1,
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+        anticipatePin: 1,
       },
     });
 
-    // 1. Shatter Phase
-    tl.to(fragments, {
-      x: () => (Math.random() - 0.5) * window.innerWidth * 1.5,
-      y: () => (Math.random() - 0.5) * window.innerHeight * 1.5,
-      rotation: () => Math.random() * 360,
-      scale: 0,
-      opacity: 0,
-      stagger: { amount: 0.5, from: "center" },
-      ease: "power2.in",
-      duration: 1
-    })
-      .set(shatter, { display: "none" })
-
-      // 2. Horizontal Scroll Phase
-      .to(container, {
-        x: () => -(container.scrollWidth - window.innerWidth),
-        ease: "none",
-        duration: 2
+    // Fade-in and slide-up the section header
+    if (headerRef.current) {
+      gsap.from(headerRef.current, {
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
       });
+    }
 
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} id="projects" className="relative h-screen w-full overflow-hidden bg-black text-white">
+    <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white">
 
-      {/* Shatter Overlay */}
-      <div ref={shatterRef} className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-900">
-        <h2 className="text-6xl md:text-9xl font-bold font-display text-white relative z-10 pointer-events-none mix-blend-difference">PROJECTS</h2>
+      {/* Section Header — visible at the top before you scroll horizontally */}
+      <div ref={headerRef} className="pt-20 pb-8 px-6 md:px-20">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono mb-4">
+          <Rocket className="w-4 h-4 text-[#D71921]" />
+          <span>Featured Work</span>
+        </div>
+        <h2 className="text-4xl md:text-7xl font-bold font-display leading-tight">
+          PROJECTS
+        </h2>
+        <p className="text-gray-400 text-lg mt-4 max-w-xl">
+          A curated selection of my robotics and engineering projects — from autonomous rovers to industrial automation.
+        </p>
       </div>
 
-      {/* Horizontal Container */}
-      <div ref={containerRef} className="flex h-full w-fit items-center px-10 md:px-20 gap-10">
-
-        {/* Intro Card */}
-        <div className="w-[80vw] md:w-[30vw] shrink-0">
-          <h3 className="text-4xl md:text-5xl font-bold mb-4 font-display">Featured Work</h3>
-          <p className="text-gray-400 text-lg">
-            Explore a curated selection of my robotics and engineering projects.
-            <br className="hidden md:block" />
-            From autonomous rovers to industrial automation.
-          </p>
-        </div>
+      {/* Horizontal Scroll Container */}
+      <div ref={containerRef} className="flex h-[70vh] w-fit items-center px-10 md:px-20 gap-8 pb-10">
 
         {projects.map((project, index) => (
           <div
             key={index}
-            className="group relative h-[60vh] md:h-[70vh] w-[85vw] md:w-[60vh] shrink-0 bg-gray-900 rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 shadow-2xl"
+            className="group relative h-[55vh] md:h-[60vh] w-[80vw] md:w-[55vh] shrink-0 bg-gray-900 rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 shadow-2xl"
           >
             {/* Background Gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
@@ -194,16 +167,16 @@ export default function ProjectsSection() {
             </div>
 
             {/* Big Number Decoration */}
-            <div className="absolute top-4 right-6 text-white/5 font-black text-8xl md:text-9xl -z-10 select-none font-display">
+            <div className="absolute top-4 right-6 text-white/5 font-black text-8xl md:text-9xl select-none font-display">
               0{index + 1}
             </div>
           </div>
         ))}
 
         {/* View All CTA */}
-        <div className="h-[60vh] md:h-[70vh] w-[80vw] md:w-[40vw] shrink-0 flex items-center justify-center">
+        <div className="h-[55vh] md:h-[60vh] w-[70vw] md:w-[35vw] shrink-0 flex items-center justify-center">
           <Link href="/projects">
-            <div className="w-48 h-48 md:w-64 md:h-64 rounded-full border border-white/20 flex flex-col items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer group relative overflow-hidden backdrop-blur-sm bg-white/5">
+            <div className="w-44 h-44 md:w-56 md:h-56 rounded-full border border-white/20 flex flex-col items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer group relative overflow-hidden backdrop-blur-sm bg-white/5">
               <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
               <span className="text-2xl font-bold group-hover:scale-110 transition-transform relative z-10">View All</span>
               <span className="text-sm text-gray-400 group-hover:text-black mt-2 relative z-10">See Archive</span>

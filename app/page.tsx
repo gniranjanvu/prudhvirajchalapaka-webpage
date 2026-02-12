@@ -14,9 +14,9 @@ export default function Home() {
     <main className="w-full overflow-hidden">
       <HeroSection />
       <ExperienceSection />
-      <EducationSection />
       <ProjectsSection />
       <SkillsSection />
+      <EducationSection />
       <AchievementsSection />
       <CertificationsSection />
       <PublicationsSection />

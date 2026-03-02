@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowRight, Briefcase, MapPin, Calendar, Building2 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -169,11 +168,8 @@ export default function ExperienceSection() {
   
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "start start"],
+    offset: ["start start", "end end"],
   });
-
-  const headerY = useTransform(scrollYProgress, [0, 1], [100, 0]);
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
 
   // Fetch experiences from API
   useEffect(() => {
@@ -213,10 +209,7 @@ export default function ExperienceSection() {
       </motion.div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <motion.div
-          className="mb-12"
-          style={{ y: headerY, opacity: headerOpacity }}
-        >
+        <div className="sticky top-8 z-20 mb-12 pointer-events-none">
           <motion.h2
             className="text-4xl md:text-5xl font-bold font-display text-white mb-4"
             initial={{ opacity: 0, x: -50 }}
@@ -235,17 +228,17 @@ export default function ExperienceSection() {
           >
             My professional journey and roles.
           </motion.p>
-        </motion.div>
+        </div>
 
         {/* Scroll Stack Experience Cards */}
         <ScrollStack
-          className="min-h-[120vh]"
-          itemDistance={150}
+          className="min-h-[180vh]"
+          itemDistance={200}
           itemScale={0.02}
-          itemStackDistance={40}
-          stackPosition="15%"
+          itemStackDistance={50}
+          stackPosition="20%"
           scaleEndPosition="10%"
-          baseScale={0.92}
+          baseScale={0.94}
           blurAmount={0}
           useWindowScroll={true}
         >

@@ -278,7 +278,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     shell.addEventListener('pointerleave', pointerLeaveHandler);
 
     const handleClick = (): void => {
-      if (!enableMobileTilt || location.protocol !== 'https:') return;
+      if (!enableMobileTilt || window.location.protocol !== 'https:') return;
       const anyMotion = window.DeviceMotionEvent as typeof DeviceMotionEvent & {
         requestPermission?: () => Promise<string>;
       };

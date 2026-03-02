@@ -204,7 +204,7 @@ export default function ExperienceSection() {
 
                 {/* Description */}
                 {experience.description && (
-                  <p className="text-white/40 text-sm leading-relaxed mb-4 line-clamp-2">{experience.description}</p>
+                  <p className="text-white/40 text-sm leading-relaxed mb-4 line-clamp-2" title={experience.description}>{experience.description}</p>
                 )}
 
                 {/* Tech Stack */}

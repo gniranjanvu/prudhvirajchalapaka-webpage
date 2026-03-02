@@ -22,7 +22,8 @@ const EDUCATION_DATA = [
     specialization: "Specialization in Robotics & Embedded Systems. Active member of Robotics Club.",
     image: "https://images.unsplash.com/photo-1523580846011-d3a5bc2549c1?q=80&w=2070&auto=format&fit=crop",
     color: "from-blue-600 to-cyan-500",
-    shadowColor: "blue",
+    shadowClass: "dark:shadow-blue-500/5",
+    gradeColor: "text-blue-500",
     icon: GraduationCap,
     shortTitle: "B.Tech",
   },
@@ -37,7 +38,8 @@ const EDUCATION_DATA = [
     specialization: "Focus on advanced mathematics and physical sciences.",
     image: "https://images.unsplash.com/photo-1544531838-3dc52c41624b?q=80&w=2070&auto=format&fit=crop",
     color: "from-purple-600 to-pink-500",
-    shadowColor: "purple",
+    shadowClass: "dark:shadow-purple-500/5",
+    gradeColor: "text-purple-500",
     icon: BookOpen,
     shortTitle: "Intermediate",
   },
@@ -136,7 +138,7 @@ export default function EducationSection() {
               <div
                 key={edu.id}
                 ref={(el) => { cardsRef.current[index] = el; }}
-                className={`rounded-2xl border border-black/[0.08] dark:border-white/[0.08] overflow-hidden bg-white dark:bg-zinc-900 shadow-lg dark:shadow-2xl dark:shadow-${edu.shadowColor}-500/5`}
+                className={`rounded-2xl border border-black/[0.08] dark:border-white/[0.08] overflow-hidden bg-white dark:bg-zinc-900 shadow-lg dark:shadow-2xl ${edu.shadowClass}`}
               >
                 {/* Card Image Header */}
                 <div className="relative w-full h-48 sm:h-56 overflow-hidden">
@@ -178,7 +180,7 @@ export default function EducationSection() {
                         <Award className="w-4 h-4 text-yellow-500" />
                         <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">{edu.gradeLabel}</span>
                       </div>
-                      <span className={`text-lg font-bold ${edu.shadowColor === 'blue' ? 'text-blue-500' : 'text-purple-500'}`}>
+                      <span className={`text-lg font-bold ${edu.gradeColor}`}>
                         {edu.grade}
                       </span>
                     </div>

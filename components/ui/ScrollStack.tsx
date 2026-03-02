@@ -7,6 +7,7 @@ import './ScrollStack.css';
 export interface ScrollStackProps {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   itemDistance?: number;
   itemScale?: number;
   itemStackDistance?: number;
@@ -33,6 +34,7 @@ export const ScrollStackItem = ({
 const ScrollStack = ({
   children,
   className = '',
+  style,
   itemDistance = 100,
   itemScale = 0.03,
   itemStackDistance = 30,
@@ -364,7 +366,7 @@ const ScrollStack = ({
   ]);
 
   return (
-    <div className={`scroll-stack-scroller${useWindowScroll ? ' scroll-stack-window-mode' : ''} ${className}`.trim()} ref={scrollerRef}>
+    <div className={`scroll-stack-scroller${useWindowScroll ? ' scroll-stack-window-mode' : ''} ${className}`.trim()} ref={scrollerRef} style={style}>
       <div className="scroll-stack-inner">
         {children}
         {/* Spacer so the last pin can release cleanly */}

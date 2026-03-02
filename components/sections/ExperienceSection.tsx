@@ -227,7 +227,6 @@ export default function ExperienceSection() {
 
         {/* Scroll Stack Experience Cards */}
         <ScrollStack
-          className={`min-h-[${dynamicMinHeight}]`}
           style={{ minHeight: dynamicMinHeight }}
           itemDistance={200}
           itemScale={0.02}

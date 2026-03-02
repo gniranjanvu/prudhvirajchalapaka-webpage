@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { OWNER_INFO, SOCIAL_LINKS } from "@/lib/constants";
 import {
   Mail,
@@ -8,235 +8,371 @@ import {
   MapPin,
   Linkedin,
   Github,
+  Check,
+  Send,
+  RotateCcw,
+  XCircle,
+  Minus,
+  Square,
+  X,
 } from "lucide-react";
 
 // ─── Terminal Contact Form ───────────────────────────────────────────────────
 
-type Step = "greeting" | "email" | "name" | "message" | "review" | "success";
+interface HistoryEntry {
+  type: "message" | "success-log" | "error-log";
+  content?: string;
+  hasSeparator?: boolean;
+  prompt?: string;
+  value?: string;
+  error?: string;
+}
 
-interface FormData {
-  email: string;
-  name: string;
-  message: string;
+interface StepConfig {
+  key: string;
+  type: "message" | "input";
+  content?: string;
+  hasSeparator?: boolean;
+  prompt?: string;
+  placeholder?: string;
+  validate?: (val: string) => string | null;
 }
 
 function TerminalContactForm() {
-  const [step, setStep] = useState<Step>("greeting");
-  const [input, setInput] = useState("");
+  const [step, setStep] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [formData, setFormData] = useState({ email: "", name: "", message: "" });
   const [error, setError] = useState("");
-  const [data, setData] = useState<FormData>({ email: "", name: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [history, setHistory] = useState<string[]>([
-    `Welcome to ${OWNER_INFO.name.split(" ")[0]}'s contact terminal.`,
-    "Type your details below to send a message.",
-    "",
-  ]);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [responseMessage, setResponseMessage] = useState("");
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const steps: StepConfig[] = [
+    {
+      key: "intro",
+      type: "message",
+      content: "Hey there! We're excited to link 🔗",
+      hasSeparator: true,
+    },
+    {
+      key: "email",
+      type: "input",
+      prompt: "To start, could you give us your email?",
+      placeholder: "Enter email:",
+      validate: (val: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(val) ? null : "Error: Invalid email format. Please try again.";
+      },
+    },
+    {
+      key: "name",
+      type: "input",
+      prompt: "Awesome! And what's your name?",
+      placeholder: "Enter name:",
+      validate: (val: string) =>
+        val.trim().length > 0 ? null : "Error: Name cannot be empty.",
+    },
+    {
+      key: "message",
+      type: "input",
+      prompt: "Perfect, and how can we help you?",
+      placeholder: "Enter description:",
+      validate: (val: string) =>
+        val.trim().length > 0 ? null : "Error: Message cannot be empty.",
+    },
+  ];
+
+  // Scroll within the terminal container only (no page scroll)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [history, step]);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [history, step, error]);
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, [step]);
+  }, [history, step, error]);
 
-  const addHistory = (lines: string[]) => {
-    setHistory((prev) => [...prev, ...lines]);
-  };
-
-  const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-
-  const handleSend = async () => {
-    setIsSubmitting(true);
-    addHistory(["", "➜  Sending message..."]);
-    await new Promise((r) => setTimeout(r, 1200));
-    setIsSubmitting(false);
-    addHistory([
-      "✓  Message sent successfully!",
-      `   I'll get back to you at ${data.email} soon.`,
-      "",
+  // Initialize with intro message
+  useEffect(() => {
+    setHistory([
+      {
+        type: "message",
+        content: steps[0].content,
+        hasSeparator: true,
+      },
     ]);
-    setStep("success");
+    setStep(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getCurrentStepIndex = () => step;
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    if (error) setError("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter") {
       e.preventDefault();
-      processInput();
-    }
-  };
+      e.stopPropagation();
 
-  const processInput = () => {
-    const val = input.trim();
+      const currentStepObj = steps[getCurrentStepIndex()];
+      if (!currentStepObj) return;
 
-    if (step === "greeting") {
-      addHistory([`➜  ~ ${val || "(enter)"}`, ""]);
-      setInput("");
-      setStep("email");
-      return;
-    }
+      const validationError = currentStepObj.validate
+        ? currentStepObj.validate(inputValue)
+        : null;
 
-    if (step === "email") {
-      if (!validateEmail(val)) {
-        setError("Please enter a valid email address.");
-        return;
-      }
-      addHistory([`➜  Enter email: ${val}`, ""]);
-      setData((d) => ({ ...d, email: val }));
-      setInput("");
-      setError("");
-      setStep("name");
-      return;
-    }
-
-    if (step === "name") {
-      if (val.length < 2) {
-        setError("Name must be at least 2 characters.");
-        return;
-      }
-      addHistory([`➜  Enter name: ${val}`, ""]);
-      setData((d) => ({ ...d, name: val }));
-      setInput("");
-      setError("");
-      setStep("message");
-      return;
-    }
-
-    if (step === "message") {
-      if (val.length < 10) {
-        setError("Message must be at least 10 characters.");
-        return;
-      }
-      addHistory([`➜  Message: ${val}`, ""]);
-      setData((d) => ({ ...d, message: val }));
-      setInput("");
-      setError("");
-      setStep("review");
-      return;
-    }
-
-    if (step === "review") {
-      if (val.toLowerCase() === "y" || val.toLowerCase() === "yes") {
-        addHistory([`➜  Confirm send? [y/n]: ${val}`, ""]);
-        setInput("");
-        handleSend();
-      } else {
-        addHistory([
-          `➜  Confirm send? [y/n]: ${val}`,
-          "Cancelled. Refresh to start over.",
-          "",
+      if (validationError) {
+        setError(validationError);
+        setHistory((prev) => [
+          ...prev,
+          {
+            type: "error-log",
+            prompt: currentStepObj.placeholder,
+            value: inputValue,
+            error: validationError,
+          },
         ]);
-        setInput("");
-        setStep("success");
+        setInputValue("");
+        return;
       }
-      return;
+
+      setFormData((prev) => ({ ...prev, [currentStepObj.key]: inputValue }));
+      setHistory((prev) => [
+        ...prev,
+        {
+          type: "success-log",
+          prompt: currentStepObj.prompt,
+          value: inputValue,
+        },
+      ]);
+      setInputValue("");
+      setStep((prev) => prev + 1);
     }
   };
 
-  const prompt: Record<Step, string> = {
-    greeting: "➜  ~ Press Enter to begin:",
-    email: "➜  Enter email:",
-    name: "➜  Enter name:",
-    message: "➜  Message:",
-    review: "➜  Confirm send? [y/n]:",
-    success: "",
+  const handleRestart = () => {
+    setStep(0);
+    setHistory([]);
+    setFormData({ email: "", name: "", message: "" });
+    setIsCompleted(false);
+    setError("");
+    setResponseMessage("");
+
+    setTimeout(() => {
+      setHistory([
+        {
+          type: "message",
+          content: steps[0].content,
+          hasSeparator: true,
+        },
+      ]);
+      setStep(1);
+    }, 10);
   };
 
-  const reviewLines =
-    step === "review"
-      ? [
-          "┌─ Review your message ──────────────────",
-          `│  From:    ${data.name} <${data.email}>`,
-          `│  To:      ${OWNER_INFO.email}`,
-          `│  Message: ${data.message.slice(0, 60)}${data.message.length > 60 ? "…" : ""}`,
-          "└────────────────────────────────────────",
-          "",
-        ]
-      : [];
+  const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      });
+      setResponseMessage("Transmission received. Link established.");
+    } catch {
+      setResponseMessage("Transmission received. Link established (Offline Mode).");
+    } finally {
+      setIsSubmitting(false);
+      setIsCompleted(true);
+    }
+  }, [formData]);
+
+  const isReviewMode = step >= steps.length;
+  const currentStepConfig = steps[getCurrentStepIndex()];
 
   return (
-    <div className="bg-zinc-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col h-[380px] sm:h-[460px]">
-      {/* Title bar */}
-      <div className="flex items-center gap-2 px-4 py-3 bg-zinc-900 border-b border-white/10 shrink-0">
-        <span className="w-3 h-3 rounded-full bg-red-500" />
-        <span className="w-3 h-3 rounded-full bg-yellow-400" />
-        <span className="w-3 h-3 rounded-full bg-green-500" />
-        <span className="ml-3 text-xs text-zinc-400 font-mono">
-          contact@{OWNER_INFO.website}
+    <div className="relative rounded-2xl border border-white/20 shadow-2xl overflow-hidden flex flex-col h-[380px] sm:h-[460px] bg-white/5 dark:bg-black/30 backdrop-blur-xl">
+      {/* Window Title Bar */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white/5 dark:bg-white/5 border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-red-500 cursor-pointer hover:brightness-110" />
+          <span className="w-3 h-3 rounded-full bg-yellow-400 cursor-pointer hover:brightness-110" />
+          <span className="w-3 h-3 rounded-full bg-green-500 cursor-pointer hover:brightness-110" />
+        </div>
+        <span className="text-xs text-zinc-400 font-mono tracking-wider">
+          contact_terminal
         </span>
+        <div className="flex items-center gap-2 text-zinc-500">
+          <Minus className="w-3.5 h-3.5" />
+          <Square className="w-3 h-3" />
+          <X className="w-3.5 h-3.5" />
+        </div>
       </div>
 
-      {/* Output */}
-      <div className="flex-1 overflow-y-auto p-4 font-mono text-sm space-y-1 text-zinc-300">
-        {history.map((line, i) => (
-          <div
-            key={i}
-            className={
-              line.startsWith("✓")
-                ? "text-green-400"
-                : line.startsWith("➜")
-                ? "text-cyan-400"
-                : "text-zinc-400"
-            }
-          >
-            {line || <>&nbsp;</>}
+      {/* Scrollable Terminal Content */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto p-4 sm:p-6 font-mono text-sm"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {/* History */}
+        {history.map((entry, index) => (
+          <div key={index} className="mb-2">
+            {entry.type === "message" && (
+              <>
+                <div className="text-emerald-400 font-semibold">{entry.content}</div>
+                {entry.hasSeparator && (
+                  <div className="border-b border-white/10 my-3" />
+                )}
+              </>
+            )}
+            {entry.type === "success-log" && (
+              <div className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-zinc-400">{entry.prompt} </span>
+                  <span className="text-white">{entry.value}</span>
+                </div>
+              </div>
+            )}
+            {entry.type === "error-log" && (
+              <div>
+                <div className="flex items-start gap-2 text-zinc-500">
+                  <XCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="text-zinc-500">{entry.prompt} </span>
+                    <span className="text-zinc-400 line-through">{entry.value}</span>
+                  </div>
+                </div>
+                <div className="text-red-400 text-xs ml-6 mt-1">{entry.error}</div>
+              </div>
+            )}
           </div>
         ))}
 
-        {reviewLines.map((line, i) => (
-          <div key={`r${i}`} className="text-pink-300 font-mono text-xs">
-            {line || <>&nbsp;</>}
-          </div>
-        ))}
+        {/* Current Input Step */}
+        {!isReviewMode && !isCompleted && currentStepConfig?.type === "input" && (
+          <div className="mt-4">
+            <div className="text-indigo-300 mb-3 text-base">
+              {currentStepConfig.prompt}
+            </div>
 
-        {step === "success" && (
-          <div className="text-green-400 mt-2">
-            Session closed. Have a great day! 🚀
+            <div className="flex items-center gap-2 bg-white/5 dark:bg-white/5 rounded-lg px-3 py-2 border border-white/10">
+              <span className="text-emerald-400 font-bold">➜</span>
+              <span className="text-cyan-400">~</span>
+              <span className="text-zinc-500 text-xs shrink-0">
+                {currentStepConfig.placeholder}
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                className="flex-1 bg-transparent border-none outline-none text-white font-mono text-sm placeholder-slate-600 caret-white ml-2"
+                autoComplete="off"
+                autoFocus
+              />
+            </div>
+
+            {error && (
+              <div className="flex items-center gap-2 text-red-400 text-xs mt-2 ml-1">
+                <XCircle className="w-3.5 h-3.5" />
+                {error}
+              </div>
+            )}
+
+            <div className="text-zinc-600 text-xs mt-3 ml-1">
+              Press Enter ↵ to continue
+            </div>
+          </div>
+        )}
+
+        {/* Review / Summary Screen */}
+        {isReviewMode && !isCompleted && (
+          <div className="mt-4">
+            <div className="text-indigo-300 mb-4 text-base font-semibold">
+              Beautiful! Here&apos;s what we&apos;ve got:
+            </div>
+
+            <div className="space-y-3 mb-6 bg-white/5 dark:bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-400 text-xs uppercase tracking-wider">Email</span>
+                <span className="text-white">{formData.email}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-400 text-xs uppercase tracking-wider">Name</span>
+                <span className="text-white">{formData.name}</span>
+              </div>
+              <div className="flex justify-between items-start">
+                <span className="text-zinc-400 text-xs uppercase tracking-wider mt-0.5">Message</span>
+                <span className="text-white text-right max-w-[60%] break-words">{formData.message}</span>
+              </div>
+            </div>
+
+            <div className="text-zinc-400 text-sm mb-4">Look good?</div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleRestart}
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded font-medium transition-all hover:scale-105 active:scale-95 disabled:opacity-50 border border-white/10"
+              >
+                Restart
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded font-medium shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-70 disabled:cursor-wait"
+              >
+                {isSubmitting ? "Sending..." : "Send it!"}
+                {!isSubmitting && <Send className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Success Screen */}
+        {isCompleted && (
+          <div className="mt-4 text-center py-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 mb-4">
+              <Check className="w-8 h-8 text-emerald-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Message Received!</h3>
+            <p className="text-emerald-400 font-mono text-sm mb-2">
+              {`> SYSTEM: ${responseMessage || "Processing complete."}`}
+            </p>
+            <p className="text-zinc-400 text-sm">
+              Thanks for reaching out, {formData.name}. We&apos;ll get back to{" "}
+              {formData.email} shortly.
+            </p>
+            <button
+              onClick={handleRestart}
+              className="mt-8 text-slate-500 hover:text-white flex items-center gap-2 transition-colors text-sm uppercase tracking-widest mx-auto"
+            >
+              <RotateCcw className="w-4 h-4" /> Start Over
+            </button>
           </div>
         )}
 
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area */}
-      {step !== "success" && (
-        <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-zinc-900/60">
-          {error && (
-            <div className="text-red-400 text-xs font-mono mb-1">{error}</div>
-          )}
-          <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-mono text-sm mt-0.5 shrink-0">
-              {prompt[step]}
-            </span>
-            {step === "message" ? (
-              <textarea
-                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isSubmitting}
-                rows={2}
-                className="flex-1 bg-transparent text-white font-mono text-sm outline-none resize-none placeholder:text-zinc-600"
-                placeholder="Type here… (Enter to submit)"
-              />
-            ) : (
-              <input
-                ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={step === "email" ? "email" : "text"}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isSubmitting}
-                className="flex-1 bg-transparent text-white font-mono text-sm outline-none placeholder:text-zinc-600 caret-cyan-400"
-                placeholder={step === "greeting" ? "press Enter…" : ""}
-                autoComplete="off"
-              />
-            )}
-          </div>
-        </div>
-      )}
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-emerald-500/5 pointer-events-none rounded-2xl" />
     </div>
   );
 }

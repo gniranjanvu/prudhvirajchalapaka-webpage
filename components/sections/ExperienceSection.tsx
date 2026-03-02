@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Briefcase, MapPin, Calendar, Building2 } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import ScrollStack, { ScrollStackItem } from "@/components/ui/ScrollStack";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -165,11 +165,6 @@ export default function ExperienceSection() {
   const [experiences, setExperiences] = useState<DBExperience[]>(FALLBACK_EXPERIENCES);
   const [isLoading, setIsLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
 
   // Fetch experiences from API
   useEffect(() => {
@@ -197,32 +192,27 @@ export default function ExperienceSection() {
 
   return (
     <section id="experience" ref={sectionRef} className="py-20 bg-black dark:bg-black relative overflow-hidden">
-      {/* Parallax Background Gradient */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.5, 0.3]),
-        }}
-      >
+      {/* Background Gradient */}
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-pink-500/20 to-indigo-500/20 rounded-full blur-3xl" />
-      </motion.div>
+      </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="sticky top-8 z-20 mb-12 pointer-events-none">
+        <div className="mb-16">
           <motion.h2
-            className="text-4xl md:text-5xl font-bold font-display text-white mb-4"
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-4"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             viewport={{ once: true }}
           >
             Experience
           </motion.h2>
           <motion.p
-            className="text-gray-400 max-w-xl"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            className="text-gray-400 max-w-xl text-sm sm:text-base"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             viewport={{ once: true }}
           >

@@ -182,7 +182,7 @@ function TerminalContactForm() {
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
     try {
-      await fetch("/api/contact", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -191,9 +191,12 @@ function TerminalContactForm() {
           message: formData.message,
         }),
       });
+      if (!response.ok) {
+        throw new Error("Failed to send message");
+      }
       setResponseMessage("Transmission received. Link established.");
     } catch {
-      setResponseMessage("Transmission received. Link established (Offline Mode).");
+      setResponseMessage("Transmission failed. Please try again later.");
     } finally {
       setIsSubmitting(false);
       setIsCompleted(true);

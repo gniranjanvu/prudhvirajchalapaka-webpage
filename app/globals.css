@@ -154,3 +154,9 @@
 ::-webkit-scrollbar-thumb {
   @apply bg-gray-300 dark:bg-zinc-700 rounded-full hover:bg-[#D71921] transition-colors;
 }
+
+/* ProfileCard holographic animation */
+@keyframes pc-holo-bg {
+  0% { background-position: 0 var(--background-y), 0 0, center; }
+  100% { background-position: 0 var(--background-y), 90% 90%, center; }
+}

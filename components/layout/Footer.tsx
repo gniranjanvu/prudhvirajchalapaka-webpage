@@ -17,6 +17,7 @@ import {
   Send,
   CheckCircle
 } from 'lucide-react'
+import ProfileCard from '@/components/ui/ProfileCard'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -250,6 +251,23 @@ export function Footer() {
               <p className="text-sm text-gray-500 mb-2">
                 Made with <Heart className="w-4 h-4 inline text-accent" /> using Next.js & Tailwind
               </p>
+            </div>
+
+            <div className="flex-shrink-0">
+              <ProfileCard
+                avatarUrl={`https://github.com/${OWNER_INFO.github}.png`}
+                name={OWNER_INFO.name}
+                title={OWNER_INFO.title}
+                handle={OWNER_INFO.github}
+                status="Available"
+                contactText="Contact"
+                showUserInfo={true}
+                behindGlowEnabled={true}
+                onContactClick={() => {
+                  window.location.href = `mailto:${OWNER_INFO.email}`;
+                }}
+                className="[&_section]:!h-[280px] [&_section]:!max-h-[280px]"
+              />
             </div>
           </div>
         </div>

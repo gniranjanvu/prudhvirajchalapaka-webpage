@@ -246,6 +246,80 @@
   }
 }
 
+/* Small phones */
+@media (max-width: 480px) {
+  .scroll-stack-inner {
+    padding: 10vh 0 20vh;
+  }
+
+  .scroll-stack-card {
+    min-height: auto;
+    margin: 12px 0;
+    border-radius: 20px;
+  }
+
+  .experience-card-image {
+    flex: 0 0 140px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .experience-card-content {
+    padding: 1rem;
+    gap: 0.625rem;
+  }
+
+  .experience-role {
+    font-size: 1.125rem;
+  }
+
+  .experience-company {
+    font-size: 0.9rem;
+  }
+
+  .experience-view-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  .experience-placeholder-image svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .experience-card-image {
+    flex: 0 0 30%;
+  }
+
+  .experience-card-content {
+    flex: 0 0 70%;
+    padding: 1.75rem;
+    gap: 0.75rem;
+  }
+
+  .experience-role {
+    font-size: 1.5rem;
+  }
+
+  .experience-view-btn {
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+/* Small laptops */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .experience-card-content {
+    padding: 2rem;
+  }
+
+  .experience-role {
+    font-size: 1.625rem;
+  }
+}
+
 /* Dark mode placeholder image */
 .experience-placeholder-image {
   width: 100%;

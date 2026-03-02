@@ -190,6 +190,10 @@ export default function ExperienceSection() {
     fetchExperiences();
   }, []);
 
+  // Calculate dynamic height based on number of experiences
+  // Each card needs scroll distance + item distance + buffer for first/last
+  const dynamicMinHeight = `${Math.max(180, experiences.length * 60 + 80)}vh`;
+
   return (
     <section id="experience" ref={sectionRef} className="py-20 bg-black dark:bg-black relative overflow-hidden">
       {/* Background Gradient */}
@@ -199,7 +203,8 @@ export default function ExperienceSection() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="mb-16">
+        {/* Sticky header that stays visible while scrolling through cards */}
+        <div className="sticky top-16 z-20 bg-black/80 backdrop-blur-sm pb-8 pt-4 -mx-4 px-4">
           <motion.h2
             className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-4"
             initial={{ opacity: 0, y: 30 }}
@@ -222,17 +227,18 @@ export default function ExperienceSection() {
 
         {/* Scroll Stack Experience Cards */}
         <ScrollStack
-          className="min-h-[180vh]"
+          className={`min-h-[${dynamicMinHeight}]`}
+          style={{ minHeight: dynamicMinHeight }}
           itemDistance={200}
           itemScale={0.02}
           itemStackDistance={50}
-          stackPosition="20%"
+          stackPosition="25%"
           scaleEndPosition="10%"
           baseScale={0.94}
           blurAmount={0}
           useWindowScroll={true}
         >
-          {experiences.map((experience, index) => (
+          {experiences.map((experience) => (
             <ScrollStackItem key={experience.id} itemClassName="">
               <ExperienceCard experience={experience} />
             </ScrollStackItem>

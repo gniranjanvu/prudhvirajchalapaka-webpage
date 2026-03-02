@@ -60,9 +60,9 @@ export function Footer() {
 
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-6">
           {/* Quick Links */}
-          <div>
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-display font-bold mb-6 tracking-wider uppercase text-gray-400">
               Quick Links
             </h3>
@@ -81,7 +81,7 @@ export function Footer() {
           </div>
 
           {/* Resources */}
-          <div>
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-display font-bold mb-6 tracking-wider uppercase text-gray-400">
               Resources
             </h3>
@@ -134,7 +134,7 @@ export function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div>
+          <div className="lg:col-span-3">
             <h3 className="text-lg font-display font-bold mb-6 tracking-wider uppercase text-gray-400">
               Newsletter
             </h3>
@@ -176,29 +176,29 @@ export function Footer() {
             )}
           </div>
 
-          {/* Contact Info */}
-          <div>
+          {/* Contact Info - Get in Touch */}
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-display font-bold mb-6 tracking-wider uppercase text-gray-400">
               Get in Touch
             </h3>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-accent mt-0.5" />
-                <span className="text-gray-400">{OWNER_INFO.location}</span>
+                <MapPin className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+                <span className="text-gray-400 text-sm">{OWNER_INFO.location}</span>
               </div>
               <a
                 href={`mailto:${OWNER_INFO.email}`}
                 className="flex items-start gap-3 text-gray-400 hover:text-white transition-colors"
               >
-                <Mail className="w-5 h-5 text-accent mt-0.5" />
-                <span>{OWNER_INFO.email}</span>
+                <Mail className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+                <span className="text-sm break-all">{OWNER_INFO.email}</span>
               </a>
               <a
                 href={`tel:${OWNER_INFO.phone}`}
                 className="flex items-start gap-3 text-gray-400 hover:text-white transition-colors"
               >
-                <Phone className="w-5 h-5 text-accent mt-0.5" />
-                <span>{OWNER_INFO.phone}</span>
+                <Phone className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+                <span className="text-sm">{OWNER_INFO.phone}</span>
               </a>
 
               {/* Social Icons */}
@@ -231,6 +231,24 @@ export function Footer() {
               </div>
             </div>
           </div>
+
+          {/* Profile Card - placed next to Get in Touch */}
+          <div className="lg:col-span-3 flex items-start justify-center md:justify-end">
+            <ProfileCard
+              avatarUrl="/avatarUrl.png"
+              name={OWNER_INFO.name}
+              title={OWNER_INFO.title}
+              handle={OWNER_INFO.github}
+              status="Available"
+              contactText="Contact"
+              showUserInfo={true}
+              behindGlowEnabled={true}
+              onContactClick={() => {
+                window.location.href = `mailto:${OWNER_INFO.email}`;
+              }}
+              className="[&_section]:!h-[420px] [&_section]:!max-h-[420px]"
+            />
+          </div>
         </div>
 
         {/* Profile Section */}
@@ -251,23 +269,6 @@ export function Footer() {
               <p className="text-sm text-gray-500 mb-2">
                 Made with <Heart className="w-4 h-4 inline text-accent" /> using Next.js & Tailwind
               </p>
-            </div>
-
-            <div className="flex-shrink-0">
-              <ProfileCard
-                avatarUrl={`https://github.com/${OWNER_INFO.github}.png`}
-                name={OWNER_INFO.name}
-                title={OWNER_INFO.title}
-                handle={OWNER_INFO.github}
-                status="Available"
-                contactText="Contact"
-                showUserInfo={true}
-                behindGlowEnabled={true}
-                onContactClick={() => {
-                  window.location.href = `mailto:${OWNER_INFO.email}`;
-                }}
-                className="[&_section]:!h-[280px] [&_section]:!max-h-[280px]"
-              />
             </div>
           </div>
         </div>

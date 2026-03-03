@@ -19,15 +19,31 @@ export interface ProjectPayload {
   views_count?: number;
 }
 
-// GET - Fetch all projects
-export async function GET() {
+// GET - Fetch all projects (supports ?slug=, ?status=, ?featured= query params)
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug');
+    const status = searchParams.get('status');
+    const featured = searchParams.get('featured');
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('projects')
       .select('*')
       .order('display_order', { ascending: true });
+
+    if (slug) {
+      query = query.eq('slug', slug);
+    }
+    if (status) {
+      query = query.eq('status', status);
+    }
+    if (featured !== null) {
+      query = query.eq('is_featured', featured === 'true');
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching projects:', error);

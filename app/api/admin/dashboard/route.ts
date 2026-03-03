@@ -22,7 +22,10 @@ export async function GET() {
       supabase.from('messages').select('*', { count: 'exact', head: true }),
       supabase.from('messages').select('*', { count: 'exact', head: true }).eq('is_read', false),
       supabase.from('subscribers').select('*', { count: 'exact', head: true }).eq('is_active', true),
-      supabase.from('messages').select('id, name, email, message, created_at, is_read').order('created_at', { ascending: false }).limit(5),
+      supabase.from('messages')
+        .select('id, name, email, message, created_at, is_read')
+        .order('created_at', { ascending: false })
+        .limit(5),
     ]);
 
     return NextResponse.json({

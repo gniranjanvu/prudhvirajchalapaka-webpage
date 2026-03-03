@@ -30,7 +30,7 @@ export default function SubscribersPage() {
         if (json.success) setSubscribers(json.data || []);
       }
     } catch {
-      toast({ title: "Error", description: "Failed to load subscribers", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to load subscribers", type: "error" });
     } finally {
       setIsLoading(false);
     }

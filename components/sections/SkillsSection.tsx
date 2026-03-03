@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star } from "lucide-react";
 import Image from "next/image";
@@ -41,7 +41,7 @@ const getIconUrl = (name: string): string | null => {
   return `https://cdn.simpleicons.org/${slug}`;
 };
 
-const allSkills = [
+const FALLBACK_SKILLS = [
   { category: "Programming Languages", name: "Python", rating: 5 },
   { category: "Programming Languages", name: "C", rating: 5 },
   { category: "Programming Languages", name: "C++", rating: 4 },
@@ -62,8 +62,6 @@ const allSkills = [
   { category: "CAD/CAM", name: "Fusion 360", rating: 5 },
   { category: "Technologies", name: "3D Printing", rating: 5 },
 ];
-
-const categories = ["All", ...Array.from(new Set(allSkills.map((s) => s.category)))];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -95,7 +93,31 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 export default function SkillsSection() {
+  const [allSkills, setAllSkills] = useState(FALLBACK_SKILLS);
   const [activeCategory, setActiveCategory] = useState("All");
+
+  useEffect(() => {
+    fetch("/api/skills")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data?.length > 0) {
+          const normalized: typeof FALLBACK_SKILLS = [];
+          for (const cat of json.data) {
+            for (const skill of cat.skills ?? []) {
+              normalized.push({
+                category: cat.name,
+                name: skill.name,
+                rating: skill.proficiency ?? 3,
+              });
+            }
+          }
+          if (normalized.length > 0) setAllSkills(normalized);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const categories = ["All", ...Array.from(new Set(allSkills.map((s) => s.category)))];
 
   const filteredSkills =
     activeCategory === "All"

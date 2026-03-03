@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -10,7 +10,26 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const projects = [
+interface Project {
+  title: string;
+  category: string;
+  description: string;
+  tech: string[];
+  image: string;
+  link: string;
+  color: string;
+}
+
+const COLORS = [
+  "from-orange-500 to-red-500",
+  "from-blue-500 to-cyan-500",
+  "from-emerald-500 to-green-500",
+  "from-purple-500 to-pink-500",
+  "from-yellow-500 to-orange-500",
+  "from-indigo-500 to-blue-500",
+];
+
+const FALLBACK_PROJECTS: Project[] = [
   {
     title: "IRAVATH",
     category: "Autonomous Navigation",
@@ -64,9 +83,32 @@ const projects = [
 ];
 
 export default function ProjectsSection() {
+  const [projects, setProjects] = useState<Project[]>(FALLBACK_PROJECTS);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/projects?featured=true")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data?.length > 0) {
+          setProjects(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            json.data.map((p: any, i: number) => ({
+              title: p.title?.toUpperCase() ?? p.title,
+              category: p.category ?? "",
+              description: p.short_description ?? p.description ?? "",
+              tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
+              image: p.hero_image_url ?? "",
+              link: p.slug ? `/projects/${p.slug}` : "/projects",
+              color: COLORS[i % COLORS.length],
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useGSAP(() => {
     const section = sectionRef.current;

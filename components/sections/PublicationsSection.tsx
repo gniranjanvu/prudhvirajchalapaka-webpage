@@ -10,8 +10,36 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Publication {
+  id: string | number;
+  title: string;
+  authors: string[];
+  journal?: string;
+  venue?: string;
+  year?: number | string;
+  date?: string;
+  doi?: string;
+  abstract?: string;
+  type?: string;
+  publication_type?: string;
+  link?: string;
+  url?: string;
+  citations?: number;
+}
+
+function normalizePub(p: Publication): Publication {
+  return {
+    ...p,
+    journal: p.journal ?? p.venue ?? "",
+    year: p.year ?? (p.date ? new Date(p.date).getFullYear() : ""),
+    type: p.type ?? p.publication_type ?? "journal",
+    link: p.link ?? p.url ?? "",
+    citations: p.citations ?? 0,
+  };
+}
+
 /* ──────────────── Info Panel (left) ──────────────── */
-function PublicationInfo({ pub }: { pub: typeof PUBLICATIONS[number] }) {
+function PublicationInfo({ pub }: { pub: Publication }) {
   return (
     <div className="flex flex-col justify-center h-full">
       {/* Type Badge */}
@@ -35,7 +63,7 @@ function PublicationInfo({ pub }: { pub: typeof PUBLICATIONS[number] }) {
           <Calendar size={14} />
           {pub.year}
         </span>
-        {pub.citations > 0 && (
+        {(pub.citations ?? 0) > 0 && (
           <span className="flex items-center gap-1.5">
             {pub.citations} citation{pub.citations !== 1 ? 's' : ''}
           </span>
@@ -84,7 +112,7 @@ function PublicationInfo({ pub }: { pub: typeof PUBLICATIONS[number] }) {
 }
 
 /* ──────────────── Card Panel (right) ──────────────── */
-function PublicationCard({ pub }: { pub: typeof PUBLICATIONS[number] }) {
+function PublicationCard({ pub }: { pub: Publication }) {
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden h-full min-h-[280px] lg:min-h-[420px] flex flex-col">
       {/* Header gradient */}
@@ -162,11 +190,22 @@ function ProgressDots({ total, active }: { total: number; active: number }) {
    ══════════════════════════════════════════════════════ */
 export default function PublicationsSection() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [publications, setPublications] = useState<Publication[]>(PUBLICATIONS.map(normalizePub));
   const sectionRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const lastSnapRef = useRef(0);
 
-  const publications = PUBLICATIONS;
+  useEffect(() => {
+    fetch("/api/publications")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data?.length > 0) {
+          setPublications(json.data.map(normalizePub));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const count = publications.length;
 
   // GSAP ScrollTrigger: pin the section, scrub through publications

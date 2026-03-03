@@ -1,11 +1,43 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CERTIFICATIONS } from "@/lib/constants";
 import { Award, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
+interface Certification {
+  id: string | number;
+  title: string;
+  issuer: string;
+  date?: string;
+  issue_date?: string;
+  credentialId?: string;
+  credential_id?: string;
+  link?: string;
+  credential_url?: string;
+}
+
 export default function CertificationsSection() {
+    const [certifications, setCertifications] = useState<Certification[]>(CERTIFICATIONS);
+
+    useEffect(() => {
+        fetch("/api/certifications")
+            .then((r) => r.json())
+            .then((json) => {
+                if (json.success && json.data?.length > 0) {
+                    setCertifications(
+                        json.data.map((c: Certification) => ({
+                            ...c,
+                            date: c.date ?? c.issue_date ?? "",
+                            link: c.link ?? c.credential_url ?? "",
+                        }))
+                    );
+                }
+            })
+            .catch(() => {});
+    }, []);
+
     return (
         <section id="certifications" className="py-10 bg-white dark:bg-black overflow-hidden">
             <div className="mb-8 container mx-auto px-4">
@@ -33,7 +65,7 @@ export default function CertificationsSection() {
             <div className="flex overflow-hidden relative pause-on-hover group/container">
                 <div className="flex animate-marquee-seamless hover:[animation-play-state:paused]">
                     {/* Repeat items 4x per half for seamless infinite loop on wide screens */}
-                    {Array.from({ length: 4 }, () => CERTIFICATIONS).flat().map((cert, i) => (
+                    {Array.from({ length: 4 }, () => certifications).flat().map((cert, i) => (
                         <div
                             key={`cert-a-${i}`}
                             className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"
@@ -61,7 +93,7 @@ export default function CertificationsSection() {
                         </div>
                     ))}
                     {/* Duplicate half for seamless loop */}
-                    {Array.from({ length: 4 }, () => CERTIFICATIONS).flat().map((cert, i) => (
+                    {Array.from({ length: 4 }, () => certifications).flat().map((cert, i) => (
                         <div
                             key={`cert-b-${i}`}
                             className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"

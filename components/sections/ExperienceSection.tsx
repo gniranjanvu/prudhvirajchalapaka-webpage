@@ -239,6 +239,8 @@ export default function ExperienceSection() {
     const count = experiences.length;
     if (count === 0) return;
 
+    lastSnapRef.current = 0;
+
     const ctx = gsap.context(() => {
       const step = 1 / count;
 

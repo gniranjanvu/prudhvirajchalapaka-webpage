@@ -76,7 +76,10 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify({
+                    ...data,
+                    end_date: data.end_date || null
+                })
             });
 
             const result = await response.json();

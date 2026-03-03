@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import LoginForm from '@/components/forms/LoginForm';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: 'Admin Login | Prudhvi Raj Portfolio',
     description: 'Secure admin access',

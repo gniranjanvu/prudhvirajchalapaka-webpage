@@ -9,19 +9,33 @@ export default function CertificationsSection() {
     return (
         <section id="certifications" className="py-10 bg-white dark:bg-black overflow-hidden">
             <div className="mb-8 container mx-auto px-4">
-                <div className="flex items-center gap-2 mb-2">
+                <motion.div
+                    className="flex items-center gap-2 mb-2"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
+                >
                     <Award className="w-5 h-5 text-purple-500" />
                     <span className="text-sm font-bold uppercase tracking-widest text-purple-500">Certifications</span>
-                </div>
-                <h2 className="text-3xl font-bold font-display">Licenses & Credentials</h2>
+                </motion.div>
+                <motion.h2
+                    className="text-3xl font-bold font-display"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    viewport={{ once: true }}
+                >
+                    Licenses & Credentials
+                </motion.h2>
             </div>
 
             <div className="flex overflow-hidden relative pause-on-hover group/container">
                 <div className="flex animate-marquee-seamless hover:[animation-play-state:paused]">
-                    {/* First set of certifications */}
-                    {CERTIFICATIONS.map((cert, i) => (
+                    {/* Repeat items 4x per half for seamless infinite loop on wide screens */}
+                    {Array.from({ length: 4 }, () => CERTIFICATIONS).flat().map((cert, i) => (
                         <div
-                            key={`${cert.id}-a-${i}`}
+                            key={`cert-a-${i}`}
                             className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"
                         >
                             <div className="flex justify-between items-start mb-4">
@@ -46,10 +60,10 @@ export default function CertificationsSection() {
                             </div>
                         </div>
                     ))}
-                    {/* Duplicate for seamless loop */}
-                    {CERTIFICATIONS.map((cert, i) => (
+                    {/* Duplicate half for seamless loop */}
+                    {Array.from({ length: 4 }, () => CERTIFICATIONS).flat().map((cert, i) => (
                         <div
-                            key={`${cert.id}-b-${i}`}
+                            key={`cert-b-${i}`}
                             className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"
                         >
                             <div className="flex justify-between items-start mb-4">

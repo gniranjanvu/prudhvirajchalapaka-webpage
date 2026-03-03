@@ -243,6 +243,7 @@ export function Footer() {
               contactText="Contact"
               showUserInfo={true}
               behindGlowEnabled={true}
+              enableMobileTilt={true}
               onContactClick={() => {
                 window.location.href = `mailto:${OWNER_INFO.email}`;
               }}

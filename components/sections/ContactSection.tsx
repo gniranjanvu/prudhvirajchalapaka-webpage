@@ -95,7 +95,7 @@ function TerminalContactForm() {
   }, [history, step, error]);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
   }, [history, step, error]);
 
   // Initialize with intro message
@@ -287,7 +287,6 @@ function TerminalContactForm() {
                 onKeyDown={handleKeyDown}
                 className="flex-1 bg-transparent border-none outline-none text-white font-mono text-sm placeholder-slate-600 caret-white ml-2"
                 autoComplete="off"
-                autoFocus
               />
             </div>
 

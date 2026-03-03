@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, Briefcase, MapPin, Calendar, Building2 } from "lucide-react";
-import { motion } from "framer-motion";
-import ScrollStack, { ScrollStackItem } from "@/components/ui/ScrollStack";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { format } from "date-fns";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Experience type for database records
 interface DBExperience {
@@ -14,6 +17,7 @@ interface DBExperience {
   role: string;
   company_name: string;
   hero_image_url?: string;
+  company_logo_url?: string;
   location?: string;
   start_date: string;
   end_date?: string;
@@ -25,7 +29,7 @@ interface DBExperience {
 }
 
 // Fallback experiences from constants (for when DB is not set up)
-const FALLBACK_EXPERIENCES = [
+const FALLBACK_EXPERIENCES: DBExperience[] = [
   {
     id: '1',
     role: 'Robotics Engineer Intern',
@@ -70,101 +74,147 @@ const FALLBACK_EXPERIENCES = [
   },
 ];
 
-// Maximum number of technologies to display on the card
 const MAX_DISPLAYED_TECHNOLOGIES = 4;
 
-// Experience Card Component
-const ExperienceCard = ({ experience }: { experience: DBExperience }) => {
-  const formatDate = (dateString: string) => {
+/* ──────────────── Info Panel (left) ──────────────── */
+function ExperienceInfo({ experience, formatDate }: { experience: DBExperience; formatDate: (d: string) => string }) {
+  return (
+    <div className="flex flex-col justify-center h-full">
+      {/* Status Badge */}
+      <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide mb-5 w-fit ${
+        experience.is_current
+          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+          : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/25'
+      }`}>
+        <span className={`w-2 h-2 rounded-full ${experience.is_current ? 'bg-emerald-400 animate-pulse' : 'bg-indigo-400'}`} />
+        {experience.is_current ? 'Current Role' : 'Completed'}
+      </span>
+
+      {/* Role */}
+      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">{experience.role}</h3>
+
+      {/* Company */}
+      <div className="flex items-center gap-2 text-white/80 text-lg mb-4">
+        <Building2 size={20} className="text-white/50" />
+        {experience.company_name}
+      </div>
+
+      {/* Meta */}
+      <div className="flex flex-wrap gap-4 text-white/50 text-sm mb-5">
+        {experience.location && (
+          <span className="flex items-center gap-1.5">
+            <MapPin size={14} />
+            {experience.location}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5">
+          <Calendar size={14} />
+          {formatDate(experience.start_date)} -{' '}
+          {experience.is_current ? 'Present' : experience.end_date ? formatDate(experience.end_date) : 'N/A'}
+        </span>
+      </div>
+
+      {/* Description */}
+      {experience.description && (
+        <p className="text-white/40 text-sm leading-relaxed mb-5">{experience.description}</p>
+      )}
+
+      {/* Tech Stack */}
+      {experience.tech_stack && experience.tech_stack.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {experience.tech_stack.slice(0, MAX_DISPLAYED_TECHNOLOGIES).map((tech) => (
+            <span key={tech} className="px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs font-medium text-white/70">
+              {tech}
+            </span>
+          ))}
+          {experience.tech_stack.length > MAX_DISPLAYED_TECHNOLOGIES && (
+            <span className="px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs font-medium text-white/50">
+              +{experience.tech_stack.length - MAX_DISPLAYED_TECHNOLOGIES}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* View Details */}
+      <Link href={`/experience/${experience.id}`}>
+        <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30">
+          View More Details
+          <ArrowRight size={16} />
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/* ──────────────── Image Panel (right) ──────────────── */
+function ExperienceImage({ experience }: { experience: DBExperience }) {
+  const hasImage = experience.hero_image_url || experience.company_logo_url;
+  return (
+    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden h-full min-h-[280px] lg:min-h-[420px] flex items-center justify-center">
+      {hasImage ? (
+        <div className="relative w-full h-full min-h-[280px] lg:min-h-[420px]">
+          <Image
+            src={(experience.company_logo_url || experience.hero_image_url) as string}
+            alt={`${experience.company_name} logo`}
+            fill
+            className="object-contain p-8"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-5 p-10 text-center">
+          <div className="w-24 h-24 rounded-3xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
+            <Briefcase className="w-12 h-12 text-white/20" />
+          </div>
+          <div>
+            <p className="text-white/80 text-xl font-bold mb-1">{experience.company_name}</p>
+            <p className="text-white/40 text-sm">{experience.role}</p>
+          </div>
+          {experience.location && (
+            <p className="text-white/30 text-xs flex items-center gap-1.5">
+              <MapPin size={12} />
+              {experience.location}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ──────────────── Progress Dots ──────────────── */
+function ProgressDots({ total, active }: { total: number; active: number }) {
+  return (
+    <div className="flex gap-2 items-center">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`rounded-full transition-all duration-500 ${
+            i === active ? 'w-8 h-2 bg-violet-500' : 'w-2 h-2 bg-white/20'
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   Main Component
+   ══════════════════════════════════════════════════════ */
+export default function ExperienceSection() {
+  const [experiences, setExperiences] = useState<DBExperience[]>(FALLBACK_EXPERIENCES);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const lastSnapRef = useRef(0);
+
+  const formatDate = useCallback((dateString: string) => {
     try {
       return format(new Date(dateString), 'MMM yyyy');
     } catch {
       return dateString;
     }
-  };
-
-  return (
-    <div className="experience-card">
-      {/* Hero Image Section */}
-      <div className="experience-card-image">
-        {experience.hero_image_url ? (
-          <Image
-            src={experience.hero_image_url}
-            alt={`${experience.company_name} - ${experience.role}`}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 40vw"
-          />
-        ) : (
-          <div className="experience-placeholder-image">
-            <Briefcase className="w-16 h-16" />
-          </div>
-        )}
-      </div>
-
-      {/* Content Section */}
-      <div className="experience-card-content">
-        {/* Status Badge */}
-        <span className={`experience-status-badge ${experience.is_current ? 'current' : 'completed'}`}>
-          <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-          {experience.is_current ? 'Current Role' : 'Completed'}
-        </span>
-
-        {/* Role Title */}
-        <h3 className="experience-role">{experience.role}</h3>
-
-        {/* Company */}
-        <div className="experience-company">
-          <Building2 size={18} />
-          {experience.company_name}
-        </div>
-
-        {/* Meta Information */}
-        <div className="experience-meta">
-          {experience.location && (
-            <span className="experience-meta-item">
-              <MapPin size={14} />
-              {experience.location}
-            </span>
-          )}
-          <span className="experience-meta-item">
-            <Calendar size={14} />
-            {formatDate(experience.start_date)} - {experience.is_current ? 'Present' : experience.end_date ? formatDate(experience.end_date) : 'N/A'}
-          </span>
-        </div>
-
-        {/* Tech Stack */}
-        {experience.tech_stack && experience.tech_stack.length > 0 && (
-          <div className="experience-tech-stack">
-            {experience.tech_stack.slice(0, MAX_DISPLAYED_TECHNOLOGIES).map((tech) => (
-              <span key={tech} className="experience-tech-tag">
-                {tech}
-              </span>
-            ))}
-            {experience.tech_stack.length > MAX_DISPLAYED_TECHNOLOGIES && (
-              <span className="experience-tech-tag">
-                +{experience.tech_stack.length - MAX_DISPLAYED_TECHNOLOGIES}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* View Details Button */}
-        <Link href={`/experience/${experience.id}`}>
-          <span className="experience-view-btn">
-            View Details
-            <ArrowRight size={16} />
-          </span>
-        </Link>
-      </div>
-    </div>
-  );
-};
-
-export default function ExperienceSection() {
-  const [experiences, setExperiences] = useState<DBExperience[]>(FALLBACK_EXPERIENCES);
-  const [isLoading, setIsLoading] = useState(true);
-  const sectionRef = useRef<HTMLElement>(null);
+  }, []);
 
   // Fetch experiences from API
   useEffect(() => {
@@ -172,77 +222,134 @@ export default function ExperienceSection() {
       try {
         const response = await fetch('/api/experiences');
         const result = await response.json();
-
         if (result.success && result.data && result.data.length > 0) {
-          // Filter only published experiences
-          const publishedExperiences = result.data.filter((exp: DBExperience) => exp.is_published !== false);
-          if (publishedExperiences.length > 0) {
-            setExperiences(publishedExperiences);
-          }
+          const published = result.data.filter((exp: DBExperience) => exp.is_published !== false);
+          if (published.length > 0) setExperiences(published);
         }
-      } catch (error) {
+      } catch {
         console.log('Using fallback experiences');
-      } finally {
-        setIsLoading(false);
       }
     };
-
     fetchExperiences();
   }, []);
 
-  // Calculate dynamic height based on number of experiences
-  // Each card needs scroll distance + item distance + buffer for first/last
-  const dynamicMinHeight = `${Math.max(180, experiences.length * 60 + 80)}vh`;
+  // GSAP ScrollTrigger: pin the section, scrub through experiences
+  useEffect(() => {
+    if (!triggerRef.current || !sectionRef.current) return;
+    const count = experiences.length;
+    if (count === 0) return;
+
+    lastSnapRef.current = 0;
+
+    const ctx = gsap.context(() => {
+      const step = 1 / count;
+
+      ScrollTrigger.create({
+        trigger: triggerRef.current,
+        start: 'top top',
+        // Each experience gets 150vh of scroll distance for comfortable pacing
+        end: `+=${count * 150}vh`,
+        pin: true,
+        scrub: 0.8,
+        anticipatePin: 1,
+        // Directional snap — only allows ±1 step, preventing skipping
+        snap: {
+          snapTo: (value: number) => {
+            const rawTarget = Math.round(value / step);
+            // Clamp to at most ±1 step from the last snapped position
+            const clamped = Math.max(0, Math.min(count - 1,
+              Math.max(lastSnapRef.current - 1, Math.min(lastSnapRef.current + 1, rawTarget))
+            ));
+            lastSnapRef.current = clamped;
+            return clamped * step;
+          },
+          duration: { min: 0.25, max: 0.5 },
+          ease: 'power1.inOut',
+          inertia: false,
+        },
+        onUpdate: (self) => {
+          const raw = self.progress * count;
+          const idx = Math.min(Math.floor(raw), count - 1);
+          setActiveIndex(idx);
+        },
+      });
+    }, sectionRef.current);
+
+    return () => ctx.revert();
+  }, [experiences]);
+
+  const activeExperience = experiences[activeIndex] || experiences[0];
 
   return (
-    <section id="experience" ref={sectionRef} className="py-20 bg-black dark:bg-black relative overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-pink-500/20 to-indigo-500/20 rounded-full blur-3xl" />
-      </div>
+    <section id="experience" ref={sectionRef} style={{ backgroundColor: '#000000' }}>
+      {/* Entire section pins: heading + content stay visible throughout */}
+      <div ref={triggerRef} className="relative h-screen overflow-hidden">
+        <div className="container mx-auto px-4 h-full flex flex-col">
+          {/* Heading – stays visible throughout sticky scroll */}
+          <div className="pt-16 pb-6 shrink-0">
+            <motion.h2
+              className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-2"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              viewport={{ once: true }}
+            >
+              Experience
+            </motion.h2>
+            <motion.p
+              className="text-gray-400 max-w-xl text-sm sm:text-base"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              My professional journey and roles.
+            </motion.p>
+          </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Sticky header that stays visible while scrolling through cards */}
-        <div className="sticky top-16 z-20 bg-black/80 backdrop-blur-sm pb-8 pt-4 -mx-4 px-4">
-          <motion.h2
-            className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-4"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            viewport={{ once: true }}
-          >
-            Experience
-          </motion.h2>
-          <motion.p
-            className="text-gray-400 max-w-xl text-sm sm:text-base"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            My professional journey and roles.
-          </motion.p>
+          {/* Counter + dots */}
+          <div className="flex items-center justify-between mb-4 shrink-0">
+            <span className="text-white/30 font-mono text-sm">
+              {String(activeIndex + 1).padStart(2, '0')} / {String(experiences.length).padStart(2, '0')}
+            </span>
+            <ProgressDots total={experiences.length} active={activeIndex} />
+          </div>
+
+          {/* Two-container layout */}
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 flex-1 min-h-0 pb-12">
+            {/* Left: Info */}
+            <div className="w-full lg:w-1/2 flex items-center overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeExperience.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -40 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className="w-full"
+                >
+                  <ExperienceInfo experience={activeExperience} formatDate={formatDate} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Right: Image / Logo */}
+            <div className="w-full lg:w-1/2 flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeExperience.id + '-img'}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className="w-full"
+                >
+                  <ExperienceImage experience={activeExperience} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
-
-        {/* Scroll Stack Experience Cards */}
-        <ScrollStack
-          style={{ minHeight: dynamicMinHeight }}
-          itemDistance={200}
-          itemScale={0.02}
-          itemStackDistance={50}
-          stackPosition="25%"
-          scaleEndPosition="10%"
-          baseScale={0.94}
-          blurAmount={0}
-          useWindowScroll={true}
-        >
-          {experiences.map((experience) => (
-            <ScrollStackItem key={experience.id} itemClassName="">
-              <ExperienceCard experience={experience} />
-            </ScrollStackItem>
-          ))}
-        </ScrollStack>
       </div>
     </section>
   );

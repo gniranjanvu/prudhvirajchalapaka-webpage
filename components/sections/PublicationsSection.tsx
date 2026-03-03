@@ -1,173 +1,295 @@
 "use client";
 
-import { useRef } from "react";
-import { StickyScroll } from "@/components/ui/StickyScrollReveal";
-import { ParallaxScrollCards } from "@/components/ui/ParallaxScrollCards";
-import { Button } from "@/components/ui/Button";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Quote, ExternalLink, BookOpen, Calendar, Users } from "lucide-react";
-import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
+import { ExternalLink, BookOpen, Calendar, Users } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { PUBLICATIONS } from "@/lib/constants";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { cn } from "@/lib/utils/cn";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-export default function PublicationsSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "start start"],
-  });
+gsap.registerPlugin(ScrollTrigger);
 
-  const headerY = useTransform(scrollYProgress, [0, 1], [100, 0]);
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-  const headerScale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+/* ──────────────── Info Panel (left) ──────────────── */
+function PublicationInfo({ pub }: { pub: typeof PUBLICATIONS[number] }) {
+  return (
+    <div className="flex flex-col justify-center h-full">
+      {/* Type Badge */}
+      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide mb-5 w-fit bg-blue-500/15 text-blue-400 border border-blue-500/25">
+        <BookOpen size={14} />
+        {pub.type}
+      </span>
 
-  const content = PUBLICATIONS.map((pub) => ({
-    title: pub.title,
-    description: pub.abstract,
-    content: (
-      <div className="h-full w-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden">
-        {/* Header with gradient */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-          <div className="flex items-center gap-3 mb-3">
-            <BookOpen className="w-6 h-6" />
-            <span className="px-3 py-1 rounded-md bg-white/20 backdrop-blur-sm text-xs font-mono uppercase font-bold">
-              {pub.type}
-            </span>
+      {/* Title */}
+      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">{pub.title}</h3>
+
+      {/* Journal */}
+      <div className="flex items-center gap-2 text-white/80 text-lg mb-3">
+        <BookOpen size={20} className="text-white/50" />
+        {pub.journal}
+      </div>
+
+      {/* Meta */}
+      <div className="flex flex-wrap gap-4 text-white/50 text-sm mb-5">
+        <span className="flex items-center gap-1.5">
+          <Calendar size={14} />
+          {pub.year}
+        </span>
+        {pub.citations > 0 && (
+          <span className="flex items-center gap-1.5">
+            {pub.citations} citation{pub.citations !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
+      {/* Abstract */}
+      <p className="text-white/40 text-sm leading-relaxed mb-5">{pub.abstract}</p>
+
+      {/* Authors */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {pub.authors.map((author, i) => (
+          <span
+            key={i}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+              author.includes("Prudhvi")
+                ? "bg-blue-500/20 border border-blue-500/30 text-blue-300"
+                : "bg-white/[0.06] border border-white/[0.08] text-white/70"
+            }`}
+          >
+            {author}
+          </span>
+        ))}
+      </div>
+
+      {/* DOI */}
+      {pub.doi && (
+        <p className="text-white/30 text-xs font-mono mb-5">DOI: {pub.doi}</p>
+      )}
+
+      {/* View Details */}
+      {pub.link ? (
+        <Link href={pub.link} target="_blank">
+          <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30">
+            View Publication
+            <ExternalLink size={16} />
+          </span>
+        </Link>
+      ) : (
+        <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/[0.06] border border-white/[0.08] text-white/50 text-sm font-semibold rounded-xl cursor-default">
+          Coming Soon
+        </span>
+      )}
+    </div>
+  );
+}
+
+/* ──────────────── Card Panel (right) ──────────────── */
+function PublicationCard({ pub }: { pub: typeof PUBLICATIONS[number] }) {
+  return (
+    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden h-full min-h-[280px] lg:min-h-[420px] flex flex-col">
+      {/* Header gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white shrink-0">
+        <div className="flex items-center gap-3 mb-3">
+          <BookOpen className="w-6 h-6" />
+          <span className="px-3 py-1 rounded-md bg-white/20 backdrop-blur-sm text-xs font-mono uppercase font-bold">
+            {pub.type}
+          </span>
+        </div>
+        <h4 className="text-lg font-bold line-clamp-2">{pub.title}</h4>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 p-6 space-y-4">
+        <div className="flex items-start gap-3 text-sm">
+          <BookOpen className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-white">Published in</p>
+            <p className="text-white/60">{pub.journal}</p>
           </div>
-          <h4 className="text-lg font-bold line-clamp-2">{pub.title}</h4>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-          {/* Published Info */}
-          <div className="space-y-3">
-            <div className="flex items-start gap-3 text-sm">
-              <BookOpen className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-gray-900 dark:text-white">Published in</p>
-                <p className="text-gray-600 dark:text-gray-400">{pub.journal}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 text-sm">
-              <Calendar className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-gray-900 dark:text-white">Published Date</p>
-                <p className="text-gray-600 dark:text-gray-400">{pub.year}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 text-sm">
-              <Users className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900 dark:text-white mb-2">Co-Authors</p>
-                <div className="flex flex-wrap gap-2">
-                  {pub.authors.map((author: string, i: number) => (
-                    <span
-                      key={i}
-                      className={cn(
-                        "px-2 py-1 rounded-md text-xs",
-                        author.includes("Prudhvi")
-                          ? "bg-blue-500 text-white font-bold"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                      )}
-                    >
-                      {author}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="flex items-start gap-3 text-sm">
+          <Calendar className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-white">Year</p>
+            <p className="text-white/60">{pub.year}</p>
           </div>
-
-          {/* DOI if available */}
-          {pub.doi && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-mono bg-gray-50 dark:bg-gray-800 p-2 rounded">
-              DOI: {pub.doi}
-            </div>
-          )}
         </div>
 
-        {/* Footer */}
-        <div className="p-6 pt-0">
-          {pub.link ? (
-            <Link href={pub.link} target="_blank" className="block">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                View Details <ExternalLink className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-          ) : (
-            <Button className="w-full" disabled>
-              Coming Soon
-            </Button>
-          )}
+        <div className="flex items-start gap-3 text-sm">
+          <Users className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-white mb-2">Authors</p>
+            <div className="flex flex-wrap gap-2">
+              {pub.authors.map((author, i) => (
+                <span
+                  key={i}
+                  className={`px-2 py-1 rounded-md text-xs ${
+                    author.includes("Prudhvi")
+                      ? "bg-blue-500 text-white font-bold"
+                      : "bg-white/10 text-white/70"
+                  }`}
+                >
+                  {author}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    ),
-  }));
+    </div>
+  );
+}
+
+/* ──────────────── Progress Dots ──────────────── */
+function ProgressDots({ total, active }: { total: number; active: number }) {
+  return (
+    <div className="flex gap-2 items-center">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`rounded-full transition-all duration-500 ${
+            i === active ? 'w-8 h-2 bg-blue-500' : 'w-2 h-2 bg-white/20'
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   Main Component — Experience-like pinned scroll
+   ══════════════════════════════════════════════════════ */
+export default function PublicationsSection() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const lastSnapRef = useRef(0);
+
+  const publications = PUBLICATIONS;
+  const count = publications.length;
+
+  // GSAP ScrollTrigger: pin the section, scrub through publications
+  useEffect(() => {
+    if (!triggerRef.current || !sectionRef.current || count === 0) return;
+
+    lastSnapRef.current = 0;
+
+    const ctx = gsap.context(() => {
+      const step = 1 / count;
+
+      ScrollTrigger.create({
+        trigger: triggerRef.current,
+        start: 'top top',
+        end: `+=${count * 150}vh`,
+        pin: true,
+        scrub: 0.8,
+        anticipatePin: 1,
+        snap: {
+          snapTo: (value: number) => {
+            const rawTarget = Math.round(value / step);
+            const clamped = Math.max(0, Math.min(count - 1,
+              Math.max(lastSnapRef.current - 1, Math.min(lastSnapRef.current + 1, rawTarget))
+            ));
+            lastSnapRef.current = clamped;
+            return clamped * step;
+          },
+          duration: { min: 0.25, max: 0.5 },
+          ease: 'power1.inOut',
+          inertia: false,
+        },
+        onUpdate: (self) => {
+          const raw = self.progress * count;
+          const idx = Math.min(Math.floor(raw), count - 1);
+          setActiveIndex(idx);
+        },
+      });
+    }, sectionRef.current);
+
+    return () => ctx.revert();
+  }, [count]);
+
+  const activePub = publications[activeIndex] || publications[0];
 
   return (
-    <section id="publications" ref={sectionRef} className="py-20 bg-black dark:bg-black border-t border-gray-800 relative overflow-hidden">
-      {/* Parallax Background Gradient */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.4, 0.2]),
-        }}
-      >
-        <div className="absolute top-1/4 left-0 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-full blur-3xl" />
-      </motion.div>
+    <section id="publications" ref={sectionRef} style={{ backgroundColor: '#000000' }}>
+      <div ref={triggerRef} className="relative h-screen overflow-hidden">
+        <div className="container mx-auto px-4 h-full flex flex-col">
+          {/* Heading */}
+          <div className="pt-16 pb-6 shrink-0">
+            <motion.span
+              className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold mb-4 uppercase tracking-wider border border-blue-500/20"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              Research & Analysis
+            </motion.span>
+            <motion.h2
+              className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-2"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              viewport={{ once: true }}
+            >
+              Publications
+            </motion.h2>
+            <motion.p
+              className="text-gray-400 max-w-xl text-sm sm:text-base"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              Advancing knowledge through research.
+            </motion.p>
+          </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <motion.div
-          className="mb-20 text-center"
-          style={{ y: headerY, opacity: headerOpacity, scale: headerScale }}
-        >
-          <motion.span
-            className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 text-xs font-bold mb-4 uppercase tracking-wider border border-blue-500/20"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-          >
-            Research & Analysis
-          </motion.span>
-          <motion.h2
-            className="text-4xl md:text-5xl font-bold font-display mb-6 text-gray-900 dark:text-white"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            Publications
-          </motion.h2>
-          <motion.div
-            className="flex justify-center h-12 items-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <TypewriterEffect
-              words={[
-                { text: "Advancing", className: "text-gray-500" },
-                { text: "Knowledge", className: "text-gray-500" },
-                { text: "Through", className: "text-gray-500" },
-                { text: "Research", className: "text-blue-500" },
-              ]}
-              className="text-xl md:text-2xl"
-              cursorClassName="bg-blue-500"
-            />
-          </motion.div>
-        </motion.div>
+          {/* Counter + dots */}
+          <div className="flex items-center justify-between mb-4 shrink-0">
+            <span className="text-white/30 font-mono text-sm">
+              {String(activeIndex + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
+            </span>
+            <ProgressDots total={count} active={activeIndex} />
+          </div>
 
-        <StickyScroll content={content} />
+          {/* Two-panel layout */}
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 flex-1 min-h-0 pb-12">
+            {/* Left: Info */}
+            <div className="w-full lg:w-1/2 flex items-center overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activePub.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -40 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className="w-full"
+                >
+                  <PublicationInfo pub={activePub} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Right: Card */}
+            <div className="w-full lg:w-1/2 flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activePub.id + '-card'}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className="w-full"
+                >
+                  <PublicationCard pub={activePub} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* Parallax Cards */}
-      <ParallaxScrollCards content={content} />
     </section>
   );
 }

@@ -8,16 +8,32 @@ export default function AchievementsSection() {
   return (
     <section id="achievements" className="py-20 bg-white dark:bg-black overflow-hidden border-t border-gray-100 dark:border-white/5">
       <div className="container mx-auto px-4 mb-12">
-        <h2 className="text-4xl md:text-6xl font-bold font-display mb-4">Achievements</h2>
-        <p className="text-gray-500 max-w-xl">Recognition for my work in robotics and engineering.</p>
+        <motion.h2
+          className="text-4xl md:text-6xl font-bold font-display mb-4"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          viewport={{ once: true }}
+        >
+          Achievements
+        </motion.h2>
+        <motion.p
+          className="text-gray-500 max-w-xl"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          viewport={{ once: true }}
+        >
+          Recognition for my work in robotics and engineering.
+        </motion.p>
       </div>
 
       <div className="flex overflow-hidden relative pause-on-hover group/container">
         <div className="flex animate-marquee-seamless-reverse hover:[animation-play-state:paused]">
-          {/* First set of achievements */}
-          {ACHIEVEMENTS.map((item, i) => (
+          {/* Repeat items 3x per half for seamless infinite loop on wide screens */}
+          {[...ACHIEVEMENTS, ...ACHIEVEMENTS, ...ACHIEVEMENTS].map((item, i) => (
             <div
-              key={`${item.id}-a-${i}`}
+              key={`ach-a-${i}`}
               className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"
             >
               <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -45,10 +61,10 @@ export default function AchievementsSection() {
               </div>
             </div>
           ))}
-          {/* Duplicate for seamless loop */}
-          {ACHIEVEMENTS.map((item, i) => (
+          {/* Duplicate half for seamless loop */}
+          {[...ACHIEVEMENTS, ...ACHIEVEMENTS, ...ACHIEVEMENTS].map((item, i) => (
             <div
-              key={`${item.id}-b-${i}`}
+              key={`ach-b-${i}`}
               className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"
             >
               <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">

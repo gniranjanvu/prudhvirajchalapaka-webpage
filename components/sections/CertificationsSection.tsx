@@ -33,7 +33,7 @@ export default function CertificationsSection() {
             <div className="flex overflow-hidden relative pause-on-hover group/container">
                 <div className="flex animate-marquee-seamless hover:[animation-play-state:paused]">
                     {/* Repeat items 4x per half for seamless infinite loop on wide screens */}
-                    {[...CERTIFICATIONS, ...CERTIFICATIONS, ...CERTIFICATIONS, ...CERTIFICATIONS].map((cert, i) => (
+                    {Array.from({ length: 4 }, () => CERTIFICATIONS).flat().map((cert, i) => (
                         <div
                             key={`cert-a-${i}`}
                             className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"
@@ -61,7 +61,7 @@ export default function CertificationsSection() {
                         </div>
                     ))}
                     {/* Duplicate half for seamless loop */}
-                    {[...CERTIFICATIONS, ...CERTIFICATIONS, ...CERTIFICATIONS, ...CERTIFICATIONS].map((cert, i) => (
+                    {Array.from({ length: 4 }, () => CERTIFICATIONS).flat().map((cert, i) => (
                         <div
                             key={`cert-b-${i}`}
                             className="shrink-0 w-[300px] p-6 mx-3 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-black/5 dark:border-white/10 hover:border-purple-500/50 transition-colors group"

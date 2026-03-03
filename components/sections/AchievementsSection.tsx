@@ -31,7 +31,7 @@ export default function AchievementsSection() {
       <div className="flex overflow-hidden relative pause-on-hover group/container">
         <div className="flex animate-marquee-seamless-reverse hover:[animation-play-state:paused]">
           {/* Repeat items 3x per half for seamless infinite loop on wide screens */}
-          {[...ACHIEVEMENTS, ...ACHIEVEMENTS, ...ACHIEVEMENTS].map((item, i) => (
+          {Array.from({ length: 3 }, () => ACHIEVEMENTS).flat().map((item, i) => (
             <div
               key={`ach-a-${i}`}
               className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"
@@ -62,7 +62,7 @@ export default function AchievementsSection() {
             </div>
           ))}
           {/* Duplicate half for seamless loop */}
-          {[...ACHIEVEMENTS, ...ACHIEVEMENTS, ...ACHIEVEMENTS].map((item, i) => (
+          {Array.from({ length: 3 }, () => ACHIEVEMENTS).flat().map((item, i) => (
             <div
               key={`ach-b-${i}`}
               className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"

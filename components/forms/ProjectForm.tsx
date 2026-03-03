@@ -53,9 +53,34 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
     const onSubmit = async (data: any) => {
         setIsLoading(true);
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            console.log('Form Data:', data);
+            const url = initialData?.id
+                ? `/api/projects/${initialData.id}`
+                : '/api/projects';
+            const method = initialData?.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: data.title,
+                    slug: data.slug,
+                    short_description: data.description,
+                    full_description: data.content,
+                    tech_stack: data.technologies,
+                    gallery_urls: data.images,
+                    github_url: data.githubUrl,
+                    demo_url: data.demoUrl,
+                    is_featured: data.featured,
+                    status: data.status,
+                    development_date: data.startDate || null,
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to save project');
+            }
 
             toast({
                 title: initialData ? "Project Updated" : "Project Created",
@@ -68,7 +93,7 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Something went wrong. Please try again.",
+                description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
                 type: "error"
             });
         } finally {

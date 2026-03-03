@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, Briefcase, MapPin, Calendar, Building2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { format } from "date-fns";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Experience type for database records
 interface DBExperience {
@@ -70,22 +74,146 @@ const FALLBACK_EXPERIENCES: DBExperience[] = [
   },
 ];
 
-// Maximum number of technologies to display on the card
 const MAX_DISPLAYED_TECHNOLOGIES = 4;
 
+/* ──────────────── Info Panel (left) ──────────────── */
+function ExperienceInfo({ experience, formatDate }: { experience: DBExperience; formatDate: (d: string) => string }) {
+  return (
+    <div className="flex flex-col justify-center h-full">
+      {/* Status Badge */}
+      <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide mb-5 w-fit ${
+        experience.is_current
+          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+          : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/25'
+      }`}>
+        <span className={`w-2 h-2 rounded-full ${experience.is_current ? 'bg-emerald-400 animate-pulse' : 'bg-indigo-400'}`} />
+        {experience.is_current ? 'Current Role' : 'Completed'}
+      </span>
+
+      {/* Role */}
+      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">{experience.role}</h3>
+
+      {/* Company */}
+      <div className="flex items-center gap-2 text-white/80 text-lg mb-4">
+        <Building2 size={20} className="text-white/50" />
+        {experience.company_name}
+      </div>
+
+      {/* Meta */}
+      <div className="flex flex-wrap gap-4 text-white/50 text-sm mb-5">
+        {experience.location && (
+          <span className="flex items-center gap-1.5">
+            <MapPin size={14} />
+            {experience.location}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5">
+          <Calendar size={14} />
+          {formatDate(experience.start_date)} -{' '}
+          {experience.is_current ? 'Present' : experience.end_date ? formatDate(experience.end_date) : 'N/A'}
+        </span>
+      </div>
+
+      {/* Description */}
+      {experience.description && (
+        <p className="text-white/40 text-sm leading-relaxed mb-5">{experience.description}</p>
+      )}
+
+      {/* Tech Stack */}
+      {experience.tech_stack && experience.tech_stack.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {experience.tech_stack.slice(0, MAX_DISPLAYED_TECHNOLOGIES).map((tech) => (
+            <span key={tech} className="px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs font-medium text-white/70">
+              {tech}
+            </span>
+          ))}
+          {experience.tech_stack.length > MAX_DISPLAYED_TECHNOLOGIES && (
+            <span className="px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs font-medium text-white/50">
+              +{experience.tech_stack.length - MAX_DISPLAYED_TECHNOLOGIES}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* View Details */}
+      <Link href={`/experience/${experience.id}`}>
+        <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30">
+          View More Details
+          <ArrowRight size={16} />
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/* ──────────────── Image Panel (right) ──────────────── */
+function ExperienceImage({ experience }: { experience: DBExperience }) {
+  const hasImage = experience.hero_image_url || experience.company_logo_url;
+  return (
+    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden h-full min-h-[280px] lg:min-h-[420px] flex items-center justify-center">
+      {hasImage ? (
+        <div className="relative w-full h-full min-h-[280px] lg:min-h-[420px]">
+          <Image
+            src={(experience.company_logo_url || experience.hero_image_url) as string}
+            alt={`${experience.company_name} logo`}
+            fill
+            className="object-contain p-8"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-5 p-10 text-center">
+          <div className="w-24 h-24 rounded-3xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
+            <Briefcase className="w-12 h-12 text-white/20" />
+          </div>
+          <div>
+            <p className="text-white/80 text-xl font-bold mb-1">{experience.company_name}</p>
+            <p className="text-white/40 text-sm">{experience.role}</p>
+          </div>
+          {experience.location && (
+            <p className="text-white/30 text-xs flex items-center gap-1.5">
+              <MapPin size={12} />
+              {experience.location}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ──────────────── Progress Dots ──────────────── */
+function ProgressDots({ total, active }: { total: number; active: number }) {
+  return (
+    <div className="flex gap-2 items-center">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`rounded-full transition-all duration-500 ${
+            i === active ? 'w-8 h-2 bg-violet-500' : 'w-2 h-2 bg-white/20'
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   Main Component
+   ══════════════════════════════════════════════════════ */
 export default function ExperienceSection() {
   const [experiences, setExperiences] = useState<DBExperience[]>(FALLBACK_EXPERIENCES);
   const [activeIndex, setActiveIndex] = useState(0);
-  const sectionRef = useRef<HTMLElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     try {
       return format(new Date(dateString), 'MMM yyyy');
     } catch {
       return dateString;
     }
-  };
+  }, []);
 
   // Fetch experiences from API
   useEffect(() => {
@@ -93,207 +221,112 @@ export default function ExperienceSection() {
       try {
         const response = await fetch('/api/experiences');
         const result = await response.json();
-
         if (result.success && result.data && result.data.length > 0) {
-          const publishedExperiences = result.data.filter((exp: DBExperience) => exp.is_published !== false);
-          if (publishedExperiences.length > 0) {
-            setExperiences(publishedExperiences);
-          }
+          const published = result.data.filter((exp: DBExperience) => exp.is_published !== false);
+          if (published.length > 0) setExperiences(published);
         }
       } catch {
         console.log('Using fallback experiences');
       }
     };
-
     fetchExperiences();
   }, []);
 
-  // IntersectionObserver to detect which card is in view
+  // GSAP ScrollTrigger: pin the section, scrub through experiences
   useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setActiveIndex(index);
-          }
+    if (!triggerRef.current || !sectionRef.current) return;
+    const count = experiences.length;
+    if (count === 0) return;
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: triggerRef.current,
+        start: 'top top',
+        // Each experience gets 100vh of scroll distance
+        end: `+=${count * 100}vh`,
+        pin: true,
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const raw = self.progress * count;
+          const idx = Math.min(Math.floor(raw), count - 1);
+          setActiveIndex(idx);
         },
-        { threshold: 0.5, rootMargin: '-20% 0px -20% 0px' }
-      );
-      observer.observe(card);
-      observers.push(observer);
-    });
-    return () => observers.forEach(o => o.disconnect());
+      });
+    }, sectionRef.current);
+
+    return () => ctx.revert();
   }, [experiences]);
 
   const activeExperience = experiences[activeIndex] || experiences[0];
 
   return (
-    <section id="experience" ref={sectionRef} className="py-20 relative" style={{ backgroundColor: '#000000' }}>
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header */}
-        <div className="mb-16">
-          <motion.h2
-            className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-4"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            viewport={{ once: true }}
-          >
-            Experience
-          </motion.h2>
-          <motion.p
-            className="text-gray-400 max-w-xl text-sm sm:text-base"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            My professional journey and roles.
-          </motion.p>
-        </div>
+    <section id="experience" ref={sectionRef} style={{ backgroundColor: '#000000' }}>
+      {/* Heading – scrolls away naturally before pinned area */}
+      <div className="py-20 container mx-auto px-4">
+        <motion.h2
+          className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-4"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          viewport={{ once: true }}
+        >
+          Experience
+        </motion.h2>
+        <motion.p
+          className="text-gray-400 max-w-xl text-sm sm:text-base"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          viewport={{ once: true }}
+        >
+          My professional journey and roles.
+        </motion.p>
+      </div>
 
-        {/* Sticky Selection Layout - Two Containers */}
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Left: Scrollable experience info cards */}
-          <div className="w-full lg:w-1/2 space-y-6">
-            {experiences.map((experience, index) => (
-              <div
-                key={experience.id}
-                ref={(el) => { cardRefs.current[index] = el; }}
-                className={`rounded-2xl p-6 sm:p-8 border transition-all duration-500 cursor-pointer ${
-                  activeIndex === index
-                    ? 'border-white/20 bg-white/[0.04]'
-                    : 'border-white/[0.06] bg-white/[0.02] hover:border-white/10'
-                }`}
-                onClick={() => setActiveIndex(index)}
-              >
-                {/* Status Badge */}
-                <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide mb-4 ${
-                  experience.is_current
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
-                    : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/25'
-                }`}>
-                  <span className={`w-2 h-2 rounded-full ${experience.is_current ? 'bg-emerald-400 animate-pulse' : 'bg-indigo-400'}`} />
-                  {experience.is_current ? 'Current Role' : 'Completed'}
-                </span>
-
-                {/* Role Title */}
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 leading-tight">{experience.role}</h3>
-
-                {/* Company */}
-                <div className="flex items-center gap-2 text-white/80 text-base mb-3">
-                  <Building2 size={18} className="text-white/50" />
-                  {experience.company_name}
-                </div>
-
-                {/* Meta Information */}
-                <div className="flex flex-wrap gap-4 text-white/50 text-sm mb-4">
-                  {experience.location && (
-                    <span className="flex items-center gap-1.5">
-                      <MapPin size={14} />
-                      {experience.location}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5">
-                    <Calendar size={14} />
-                    {formatDate(experience.start_date)} - {experience.is_current ? 'Present' : experience.end_date ? formatDate(experience.end_date) : 'N/A'}
-                  </span>
-                </div>
-
-                {/* Description */}
-                {experience.description && (
-                  <p className="text-white/40 text-sm leading-relaxed mb-4 line-clamp-2" title={experience.description}>{experience.description}</p>
-                )}
-
-                {/* Tech Stack */}
-                {experience.tech_stack && experience.tech_stack.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-5">
-                    {experience.tech_stack.slice(0, MAX_DISPLAYED_TECHNOLOGIES).map((tech) => (
-                      <span key={tech} className="px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs font-medium text-white/70">
-                        {tech}
-                      </span>
-                    ))}
-                    {experience.tech_stack.length > MAX_DISPLAYED_TECHNOLOGIES && (
-                      <span className="px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs font-medium text-white/50">
-                        +{experience.tech_stack.length - MAX_DISPLAYED_TECHNOLOGIES}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* View More Details Button */}
-                <Link href={`/experience/${experience.id}`}>
-                  <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30">
-                    View More Details
-                    <ArrowRight size={16} />
-                  </span>
-                </Link>
-              </div>
-            ))}
+      {/* Pinned viewport-height container */}
+      <div ref={triggerRef} className="relative h-screen overflow-hidden">
+        <div className="container mx-auto px-4 h-full flex flex-col justify-center">
+          {/* Counter + dots */}
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-white/30 font-mono text-sm">
+              {String(activeIndex + 1).padStart(2, '0')} / {String(experiences.length).padStart(2, '0')}
+            </span>
+            <ProgressDots total={experiences.length} active={activeIndex} />
           </div>
 
-          {/* Right: Sticky company image/logo container */}
-          <div className="hidden lg:block w-full lg:w-1/2">
-            <div className="sticky top-28">
-              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden aspect-square max-h-[520px] flex items-center justify-center transition-all duration-500">
-                {activeExperience.hero_image_url || activeExperience.company_logo_url ? (
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={activeExperience.company_logo_url || activeExperience.hero_image_url || ''}
-                      alt={`${activeExperience.company_name} logo`}
-                      fill
-                      className="object-contain p-8"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-6 p-12 text-center">
-                    <div className="w-28 h-28 rounded-3xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-                      <Briefcase className="w-14 h-14 text-white/20" />
-                    </div>
-                    <div>
-                      <p className="text-white/80 text-xl font-bold mb-1">{activeExperience.company_name}</p>
-                      <p className="text-white/40 text-sm">{activeExperience.role}</p>
-                    </div>
-                    {activeExperience.location && (
-                      <p className="text-white/30 text-xs flex items-center gap-1.5">
-                        <MapPin size={12} />
-                        {activeExperience.location}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+          {/* Two-container layout */}
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 flex-1 min-h-0 pb-12">
+            {/* Left: Info */}
+            <div className="w-full lg:w-1/2 flex items-center overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeExperience.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -40 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className="w-full"
+                >
+                  <ExperienceInfo experience={activeExperience} formatDate={formatDate} />
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </div>
-        </div>
 
-        {/* Mobile: Show active company image below cards */}
-        <div className="lg:hidden mt-8">
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden p-8 flex items-center justify-center min-h-[200px] transition-all duration-500">
-            {activeExperience.hero_image_url || activeExperience.company_logo_url ? (
-              <div className="relative w-full h-48">
-                <Image
-                  src={activeExperience.company_logo_url || activeExperience.hero_image_url || ''}
-                  alt={`${activeExperience.company_name} logo`}
-                  fill
-                  className="object-contain"
-                  sizes="100vw"
-                />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4 text-center">
-                <div className="w-20 h-20 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-                  <Briefcase className="w-10 h-10 text-white/20" />
-                </div>
-                <div>
-                  <p className="text-white/80 text-lg font-bold">{activeExperience.company_name}</p>
-                  <p className="text-white/40 text-sm">{activeExperience.role}</p>
-                </div>
-              </div>
-            )}
+            {/* Right: Image / Logo */}
+            <div className="w-full lg:w-1/2 flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeExperience.id + '-img'}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className="w-full"
+                >
+                  <ExperienceImage experience={activeExperience} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>

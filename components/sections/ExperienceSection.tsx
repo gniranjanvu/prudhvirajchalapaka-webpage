@@ -246,6 +246,13 @@ export default function ExperienceSection() {
         end: `+=${count * 100}vh`,
         pin: true,
         scrub: 0.5,
+        anticipatePin: 1,
+        // Snap to each experience for haptic-like feedback
+        snap: {
+          snapTo: 1 / count,
+          duration: { min: 0.2, max: 0.4 },
+          ease: 'power1.inOut',
+        },
         onUpdate: (self) => {
           const raw = self.progress * count;
           const idx = Math.min(Math.floor(raw), count - 1);
@@ -261,33 +268,33 @@ export default function ExperienceSection() {
 
   return (
     <section id="experience" ref={sectionRef} style={{ backgroundColor: '#000000' }}>
-      {/* Heading – scrolls away naturally before pinned area */}
-      <div className="py-20 container mx-auto px-4">
-        <motion.h2
-          className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-4"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          viewport={{ once: true }}
-        >
-          Experience
-        </motion.h2>
-        <motion.p
-          className="text-gray-400 max-w-xl text-sm sm:text-base"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-          viewport={{ once: true }}
-        >
-          My professional journey and roles.
-        </motion.p>
-      </div>
-
-      {/* Pinned viewport-height container */}
+      {/* Entire section pins: heading + content stay visible throughout */}
       <div ref={triggerRef} className="relative h-screen overflow-hidden">
-        <div className="container mx-auto px-4 h-full flex flex-col justify-center">
+        <div className="container mx-auto px-4 h-full flex flex-col">
+          {/* Heading – stays visible throughout sticky scroll */}
+          <div className="pt-16 pb-6 shrink-0">
+            <motion.h2
+              className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-white mb-2"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              viewport={{ once: true }}
+            >
+              Experience
+            </motion.h2>
+            <motion.p
+              className="text-gray-400 max-w-xl text-sm sm:text-base"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              My professional journey and roles.
+            </motion.p>
+          </div>
+
           {/* Counter + dots */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 shrink-0">
             <span className="text-white/30 font-mono text-sm">
               {String(activeIndex + 1).padStart(2, '0')} / {String(experiences.length).padStart(2, '0')}
             </span>

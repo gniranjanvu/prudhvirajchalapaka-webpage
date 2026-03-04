@@ -41,6 +41,11 @@ const GRADE_COLORS = [
   "text-orange-500",
 ];
 
+// Sticky card layout constants
+const STICKY_TOP_BASE_PX = 80;        // first card sticks at 80px from top
+const STICKY_OFFSET_PER_CARD_PX = 24; // each subsequent card 24px lower
+const MAX_INSTITUTION_CHARS = 45;      // truncate institution names beyond this
+
 // Fallback education data
 const FALLBACK_EDUCATION: DBEducation[] = [
   {
@@ -135,7 +140,7 @@ export default function EducationSection() {
                 key={edu.id}
                 className="sticky"
                 style={{
-                  top: `${80 + index * 24}px`,
+                  top: `${STICKY_TOP_BASE_PX + index * STICKY_OFFSET_PER_CARD_PX}px`,
                   paddingBottom: index < count - 1 ? '10vh' : '2rem',
                 }}
               >
@@ -173,7 +178,9 @@ export default function EducationSection() {
                     <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground mb-5">
                       <span className="flex items-center gap-1.5 font-medium text-foreground">
                         <GraduationCap className="w-4 h-4 text-blue-500 shrink-0" />
-                        {edu.institution_name.length > 45 ? edu.institution_name.substring(0, 42) + '…' : edu.institution_name}
+                        {edu.institution_name.length > MAX_INSTITUTION_CHARS
+                          ? edu.institution_name.substring(0, MAX_INSTITUTION_CHARS - 3) + '…'
+                          : edu.institution_name}
                       </span>
                       {edu.location && (
                         <span className="flex items-center gap-1.5">

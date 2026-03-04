@@ -10,8 +10,33 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface PublicationItem {
+  id: number | string;
+  title: string;
+  authors: string[];
+  journal: string;
+  year: number;
+  doi: string;
+  abstract: string;
+  type: string;
+  link: string;
+  citations: number;
+}
+
+interface DBPublication {
+  id: string;
+  title: string;
+  publication_type: string;
+  authors: string[] | { name: string }[];
+  venue: string;
+  publication_date: string;
+  doi_url?: string;
+  abstract?: string;
+  pdf_url?: string;
+}
+
 /* ──────────────── Info Panel (left) ──────────────── */
-function PublicationInfo({ pub }: { pub: typeof PUBLICATIONS[number] }) {
+function PublicationInfo({ pub }: { pub: PublicationItem }) {
   return (
     <div className="flex flex-col justify-center h-full">
       {/* Type Badge */}
@@ -84,7 +109,7 @@ function PublicationInfo({ pub }: { pub: typeof PUBLICATIONS[number] }) {
 }
 
 /* ──────────────── Card Panel (right) ──────────────── */
-function PublicationCard({ pub }: { pub: typeof PUBLICATIONS[number] }) {
+function PublicationCard({ pub }: { pub: PublicationItem }) {
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden h-full min-h-[280px] lg:min-h-[420px] flex flex-col">
       {/* Header gradient */}
@@ -162,12 +187,41 @@ function ProgressDots({ total, active }: { total: number; active: number }) {
    ══════════════════════════════════════════════════════ */
 export default function PublicationsSection() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [publications, setPublications] = useState<PublicationItem[]>(PUBLICATIONS);
   const sectionRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const lastSnapRef = useRef(0);
 
-  const publications = PUBLICATIONS;
   const count = publications.length;
+
+  useEffect(() => {
+    const fetchPublications = async () => {
+      try {
+        const response = await fetch('/api/publications');
+        const result = await response.json();
+        if (result.success && result.data && result.data.length > 0) {
+          const mapped = result.data.map((p: DBPublication) => ({
+            id: p.id,
+            title: p.title,
+            authors: Array.isArray(p.authors)
+              ? p.authors.map((a: string | { name: string }) => typeof a === 'string' ? a : a.name)
+              : [],
+            journal: p.venue,
+            year: new Date(p.publication_date).getFullYear(),
+            doi: p.doi_url || '',
+            abstract: p.abstract || '',
+            type: p.publication_type,
+            link: p.pdf_url || p.doi_url || '',
+            citations: 0,
+          }));
+          setPublications(mapped);
+        }
+      } catch {
+        console.log('Using fallback publications');
+      }
+    };
+    fetchPublications();
+  }, []);
 
   // GSAP ScrollTrigger: pin the section, scrub through publications
   useEffect(() => {

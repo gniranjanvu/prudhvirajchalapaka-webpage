@@ -1,10 +1,45 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ACHIEVEMENTS } from "@/lib/constants";
 import { Trophy } from "lucide-react";
 
+interface DBAchievement {
+  id: string;
+  title: string;
+  category?: string;
+  date_achieved: string;
+  description?: string;
+  issuer?: string;
+}
+
 export default function AchievementsSection() {
+  const [achievements, setAchievements] = useState(ACHIEVEMENTS);
+
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      try {
+        const response = await fetch('/api/achievements');
+        const result = await response.json();
+        if (result.success && result.data && result.data.length > 0) {
+          const mapped = result.data.map((a: DBAchievement) => ({
+            id: a.id,
+            title: a.title,
+            type: a.category || 'other',
+            date: new Date(a.date_achieved).getFullYear().toString(),
+            description: a.description || '',
+            organization: a.issuer || '',
+            icon: 'trophy',
+          }));
+          setAchievements(mapped);
+        }
+      } catch {
+        console.log('Using fallback achievements');
+      }
+    };
+    fetchAchievements();
+  }, []);
   return (
     <section id="achievements" className="py-20 bg-white dark:bg-black overflow-hidden border-t border-gray-100 dark:border-white/5">
       <div className="container mx-auto px-4 mb-12">
@@ -31,7 +66,7 @@ export default function AchievementsSection() {
       <div className="flex overflow-hidden relative pause-on-hover group/container">
         <div className="flex animate-marquee-seamless-reverse hover:[animation-play-state:paused]">
           {/* Repeat items 3x per half for seamless infinite loop on wide screens */}
-          {Array.from({ length: 3 }, () => ACHIEVEMENTS).flat().map((item, i) => (
+          {Array.from({ length: 3 }, () => achievements).flat().map((item, i) => (
             <div
               key={`ach-a-${i}`}
               className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"
@@ -62,7 +97,7 @@ export default function AchievementsSection() {
             </div>
           ))}
           {/* Duplicate half for seamless loop */}
-          {Array.from({ length: 3 }, () => ACHIEVEMENTS).flat().map((item, i) => (
+          {Array.from({ length: 3 }, () => achievements).flat().map((item, i) => (
             <div
               key={`ach-b-${i}`}
               className="shrink-0 w-[350px] md:w-[400px] p-8 mx-4 rounded-3xl bg-gradient-to-br from-gray-50 to-white dark:from-zinc-900 dark:to-black border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all"

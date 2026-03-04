@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -11,9 +11,99 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface DBEducation {
+  id: string;
+  institution_name: string;
+  degree: string;
+  major: string;
+  start_year: number;
+  end_year?: number;
+  is_current: boolean;
+  grade?: string;
+  location?: string;
+  description?: string;
+  slug?: string;
+  is_published?: boolean;
+}
+
+const CARD_GRADIENTS = [
+  "from-blue-600 to-cyan-500",
+  "from-purple-600 to-pink-500",
+  "from-emerald-600 to-teal-500",
+  "from-orange-600 to-red-500",
+];
+
+const CARD_IMAGES = [
+  "https://images.unsplash.com/photo-1523580846011-d3a5bc2549c1?q=80&w=2070&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1544531838-3dc52c41624b?q=80&w=2070&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2070&auto=format&fit=crop",
+];
+
+const SHADOW_COLORS = [
+  "dark:hover:shadow-blue-500/[0.1]",
+  "dark:hover:shadow-purple-500/[0.1]",
+  "dark:hover:shadow-emerald-500/[0.1]",
+  "dark:hover:shadow-orange-500/[0.1]",
+];
+
+const GRADE_COLORS = [
+  "text-blue-500",
+  "text-purple-500",
+  "text-emerald-500",
+  "text-orange-500",
+];
+
+// Fallback education data
+const FALLBACK_EDUCATION: DBEducation[] = [
+  {
+    id: '1',
+    institution_name: "Vignan's Foundation for Science, Technology & Research",
+    degree: "Bachelor of Technology",
+    major: "Electronics and Communication Engineering",
+    start_year: 2021,
+    end_year: 2025,
+    is_current: false,
+    grade: "8.5/10 CGPA",
+    location: "Guntur, India",
+    description: "Specialization in Robotics & Embedded Systems. Active member of Robotics Club.",
+    slug: "vfstr-btech-ece",
+  },
+  {
+    id: '2',
+    institution_name: "Narayana Junior College",
+    degree: "Intermediate (12th)",
+    major: "MPC - Mathematics, Physics, Chemistry",
+    start_year: 2019,
+    end_year: 2021,
+    is_current: false,
+    grade: "95%",
+    location: "Guntur, India",
+    description: "Focus on advanced mathematics and physical sciences.",
+    slug: "narayana-intermediate-mpc",
+  },
+];
+
 export default function EducationSection() {
+  const [educationData, setEducationData] = useState<DBEducation[]>(FALLBACK_EDUCATION);
   const sectionRef = useRef<HTMLElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const fetchEducation = async () => {
+      try {
+        const response = await fetch('/api/education');
+        const result = await response.json();
+        if (result.success && result.data && result.data.length > 0) {
+          const published = result.data.filter((e: DBEducation) => e.is_published !== false);
+          if (published.length > 0) setEducationData(published);
+        }
+      } catch {
+        console.log('Using fallback education');
+      }
+    };
+    fetchEducation();
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -65,7 +155,7 @@ export default function EducationSection() {
     }, section);
 
     return () => ctx.revert();
-  }, []);
+  }, [educationData]);
 
   return (
     <section id="education" ref={sectionRef} className="pt-20 pb-10 bg-gray-50 dark:bg-zinc-950 relative overflow-hidden">
@@ -96,117 +186,66 @@ export default function EducationSection() {
 
         {/* GSAP Stacked Cards – original 3D tilt cards with scroll animation */}
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Degree 1 */}
-          <div ref={(el) => { cardRefs.current[0] = el; }}>
-            <CardContainer className="inter-var">
-              <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-blue-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border">
-                <CardItem translateZ="100" className="w-full mt-4 mb-6">
-                  <div className="relative w-full h-48 rounded-xl overflow-hidden group-hover/card:shadow-xl">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-cyan-500 opacity-80 z-10 mix-blend-multiply" />
-                    <Image
-                      src="https://images.unsplash.com/photo-1523580846011-d3a5bc2549c1?q=80&w=2070&auto=format&fit=crop"
-                      height={1000}
-                      width={1000}
-                      className="h-full w-full object-cover rounded-xl group-hover/card:scale-110 transition-transform duration-500"
-                      alt="University"
-                    />
-                    <div className="absolute bottom-4 left-4 z-20">
-                      <GraduationCap className="w-8 h-8 text-white mb-2" />
-                      <h3 className="text-white font-bold text-lg">B.Tech</h3>
+          {educationData.map((edu, index) => (
+            <div key={edu.id} ref={(el) => { cardRefs.current[index] = el; }}>
+              <CardContainer className="inter-var">
+                <CardBody className={`bg-gray-50 relative group/card dark:hover:shadow-2xl ${SHADOW_COLORS[index % SHADOW_COLORS.length]} dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border`}>
+                  <CardItem translateZ="100" className="w-full mt-4 mb-6">
+                    <div className="relative w-full h-48 rounded-xl overflow-hidden group-hover/card:shadow-xl">
+                      <div className={`absolute inset-0 bg-gradient-to-tr ${CARD_GRADIENTS[index % CARD_GRADIENTS.length]} opacity-80 z-10 mix-blend-multiply`} />
+                      <Image
+                        src={CARD_IMAGES[index % CARD_IMAGES.length]}
+                        height={1000}
+                        width={1000}
+                        className="h-full w-full object-cover rounded-xl group-hover/card:scale-110 transition-transform duration-500"
+                        alt={edu.institution_name}
+                      />
+                      <div className="absolute bottom-4 left-4 z-20">
+                        <GraduationCap className="w-8 h-8 text-white mb-2" />
+                        <h3 className="text-white font-bold text-lg">{edu.degree.split(' ')[0]}</h3>
+                      </div>
                     </div>
-                  </div>
-                </CardItem>
-                <CardItem translateZ="50" className="text-xl font-bold text-neutral-600 dark:text-white">
-                  Bachelor of Technology
-                </CardItem>
-                <CardItem as="p" translateZ="60" className="text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300">
-                  Electronics and Communication Engineering
-                </CardItem>
-                <CardItem as="p" translateZ="40" className="text-neutral-500 text-xs mt-2 dark:text-neutral-400 font-mono">
-                  Vignan&apos;s Foundation (2021 - 2025)
-                </CardItem>
-                <CardItem translateZ="80" className="w-full mt-4">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex justify-between items-center bg-gray-100 dark:bg-zinc-900 p-3 rounded-lg">
-                      <span className="text-sm font-semibold">CGPA</span>
-                      <span className="text-lg font-bold text-blue-500">8.5/10</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground leading-relaxed">
-                      Specialization in Robotics & Embedded Systems. Active member of Robotics Club.
-                    </div>
-                  </div>
-                </CardItem>
-                <div className="flex justify-between items-center mt-8">
-                  <CardItem translateZ={20} className="px-4 py-2 rounded-xl text-xs font-normal dark:text-white">
-                    2021-2025
                   </CardItem>
-                  <CardItem translateZ={20}>
-                    <Link href="/education/btech">
-                      <Button size="sm" className="bg-black dark:bg-white dark:text-black text-white text-xs font-bold px-4 py-2 rounded-xl">
-                        Know More
-                      </Button>
-                    </Link>
+                  <CardItem translateZ="50" className="text-xl font-bold text-neutral-600 dark:text-white">
+                    {edu.degree}
                   </CardItem>
-                </div>
-              </CardBody>
-            </CardContainer>
-          </div>
-
-          {/* Degree 2 */}
-          <div ref={(el) => { cardRefs.current[1] = el; }}>
-            <CardContainer className="inter-var">
-              <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-purple-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border">
-                <CardItem translateZ="100" className="w-full mt-4 mb-6">
-                  <div className="relative w-full h-48 rounded-xl overflow-hidden group-hover/card:shadow-xl">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-pink-500 opacity-80 z-10 mix-blend-multiply" />
-                    <Image
-                      src="https://images.unsplash.com/photo-1544531838-3dc52c41624b?q=80&w=2070&auto=format&fit=crop"
-                      height={1000}
-                      width={1000}
-                      className="h-full w-full object-cover rounded-xl group-hover/card:scale-110 transition-transform duration-500"
-                      alt="College"
-                    />
-                    <div className="absolute bottom-4 left-4 z-20">
-                      <GraduationCap className="w-8 h-8 text-white mb-2" />
-                      <h3 className="text-white font-bold text-lg">Intermediate</h3>
+                  <CardItem as="p" translateZ="60" className="text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300">
+                    {edu.major}
+                  </CardItem>
+                  <CardItem as="p" translateZ="40" className="text-neutral-500 text-xs mt-2 dark:text-neutral-400 font-mono">
+                    {edu.institution_name.length > 30 ? edu.institution_name.split(',')[0].split('for')[0].trim() : edu.institution_name} ({edu.start_year} - {edu.end_year || 'Present'})
+                  </CardItem>
+                  <CardItem translateZ="80" className="w-full mt-4">
+                    <div className="flex flex-col gap-4">
+                      {edu.grade && (
+                        <div className="flex justify-between items-center bg-gray-100 dark:bg-zinc-900 p-3 rounded-lg">
+                          <span className="text-sm font-semibold">{edu.grade.includes('CGPA') || edu.grade.includes('/10') ? 'CGPA' : 'Grade'}</span>
+                          <span className={`text-lg font-bold ${GRADE_COLORS[index % GRADE_COLORS.length]}`}>{edu.grade}</span>
+                        </div>
+                      )}
+                      {edu.description && (
+                        <div className="text-xs text-muted-foreground leading-relaxed">
+                          {edu.description}
+                        </div>
+                      )}
                     </div>
+                  </CardItem>
+                  <div className="flex justify-between items-center mt-8">
+                    <CardItem translateZ={20} className="px-4 py-2 rounded-xl text-xs font-normal dark:text-white">
+                      {edu.start_year}-{edu.end_year || 'Present'}
+                    </CardItem>
+                    <CardItem translateZ={20}>
+                      <Link href={`/education/${edu.slug || edu.id}`}>
+                        <Button size="sm" className="bg-black dark:bg-white dark:text-black text-white text-xs font-bold px-4 py-2 rounded-xl">
+                          Know More
+                        </Button>
+                      </Link>
+                    </CardItem>
                   </div>
-                </CardItem>
-                <CardItem translateZ="50" className="text-xl font-bold text-neutral-600 dark:text-white">
-                  Intermediate (12th)
-                </CardItem>
-                <CardItem as="p" translateZ="60" className="text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300">
-                  MPC - Mathematics, Physics, Chemistry
-                </CardItem>
-                <CardItem as="p" translateZ="40" className="text-neutral-500 text-xs mt-2 dark:text-neutral-400 font-mono">
-                  Narayana Junior College (2019 - 2021)
-                </CardItem>
-                <CardItem translateZ="80" className="w-full mt-4">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex justify-between items-center bg-gray-100 dark:bg-zinc-900 p-3 rounded-lg">
-                      <span className="text-sm font-semibold">Grade</span>
-                      <span className="text-lg font-bold text-purple-500">96%</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground leading-relaxed">
-                      Focus on advanced mathematics and physical sciences.
-                    </div>
-                  </div>
-                </CardItem>
-                <div className="flex justify-between items-center mt-8">
-                  <CardItem translateZ={20} className="px-4 py-2 rounded-xl text-xs font-normal dark:text-white">
-                    2019-2021
-                  </CardItem>
-                  <CardItem translateZ={20}>
-                    <Link href="/education/intermediate">
-                      <Button size="sm" className="bg-black dark:bg-white dark:text-black text-white text-xs font-bold px-4 py-2 rounded-xl">
-                        Know More
-                      </Button>
-                    </Link>
-                  </CardItem>
-                </div>
-              </CardBody>
-            </CardContainer>
-          </div>
+                </CardBody>
+              </CardContainer>
+            </div>
+          ))}
         </div>
       </div>
     </section>

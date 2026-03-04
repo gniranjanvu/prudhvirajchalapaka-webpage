@@ -32,9 +32,13 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
             content: '', // Full description (Rich Text)
             technologies: [],
             images: [],
+            heroImage: '', // Hero image URL
             githubUrl: '',
             demoUrl: '',
+            documentationUrl: '',
             featured: false,
+            enableComments: true,
+            enableLikes: true,
             status: 'draft',
             startDate: '',
             endDate: ''
@@ -68,9 +72,13 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
                     full_description: data.content,
                     tech_stack: data.technologies,
                     gallery_urls: data.images,
+                    hero_image_url: data.heroImage || null,
                     github_url: data.githubUrl,
                     demo_url: data.demoUrl,
+                    documentation_url: data.documentationUrl || null,
                     is_featured: data.featured,
+                    enable_comments: data.enableComments,
+                    enable_likes: data.enableLikes,
                     status: data.status,
                     development_date: data.startDate || null,
                 })
@@ -157,6 +165,26 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
 
                     <Card>
                         <CardContent className="p-6">
+                            <label className="block text-sm font-medium mb-4">Hero Image</label>
+                            <Controller
+                                name="heroImage"
+                                control={control}
+                                render={({ field }) => (
+                                    <ImageUpload
+                                        value={field.value ? [field.value] : []}
+                                        onChange={(urls: string | string[]) => {
+                                            const arr = Array.isArray(urls) ? urls : [urls];
+                                            field.onChange(arr[0] || '');
+                                        }}
+                                    />
+                                )}
+                            />
+                            <p className="text-xs text-gray-400 mt-2">Main image displayed on the project card and detail page.</p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="p-6">
                             <label className="block text-sm font-medium mb-2">Full Case Study</label>
                             <Controller
                                 name="content"
@@ -230,6 +258,26 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
                                 />
                                 <label htmlFor="featured" className="text-sm font-medium">Feature on Homepage</label>
                             </div>
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    {...register('enableComments')}
+                                    id="enableComments"
+                                    className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
+                                />
+                                <label htmlFor="enableComments" className="text-sm font-medium">Enable Comments</label>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    {...register('enableLikes')}
+                                    id="enableLikes"
+                                    className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
+                                />
+                                <label htmlFor="enableLikes" className="text-sm font-medium">Enable Likes</label>
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -258,6 +306,11 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
                             <div>
                                 <label className="block text-sm font-medium mb-1">Demo/Live URL</label>
                                 <Input {...register('demoUrl')} placeholder="https://..." />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Documentation URL</label>
+                                <Input {...register('documentationUrl')} placeholder="https://docs...." />
                             </div>
                         </CardContent>
                     </Card>

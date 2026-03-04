@@ -11,6 +11,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Scroll height per experience card (100vh scroll distance each)
+const VH_PER_CARD = 100;
+
 // Experience type for database records
 interface DBExperience {
   id: string;
@@ -206,6 +209,8 @@ export default function ExperienceSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  // Track last snap position to enforce directional snap (±1 step max)
+  const lastSnapRef = useRef(0);
 
   const formatDate = useCallback((dateString: string) => {
     try {
@@ -223,7 +228,10 @@ export default function ExperienceSection() {
         const result = await response.json();
         if (result.success && result.data && result.data.length > 0) {
           const published = result.data.filter((exp: DBExperience) => exp.is_published !== false);
-          if (published.length > 0) setExperiences(published);
+          if (published.length > 0) {
+            setExperiences(published);
+            lastSnapRef.current = 0; // Reset snap position on data change
+          }
         }
       } catch {
         console.log('Using fallback experiences');
@@ -244,16 +252,35 @@ export default function ExperienceSection() {
       ScrollTrigger.create({
         trigger: triggerRef.current,
         start: 'top top',
-        // Each experience gets 100vh of scroll distance
-        end: `+=${count * 100}vh`,
+        // Each experience gets VH_PER_CARD vh of scroll distance
+        end: `+=${count * VH_PER_CARD}vh`,
         pin: true,
-        scrub: true,
+        scrub: 0.8, // Smoother scrubbing
         anticipatePin: 1,
-        // Simple even snap — each card gets an equal portion
+        // Directional snap — only allows ±1 step to prevent skipping
         snap: {
-          snapTo: step,
-          duration: { min: 0.2, max: 0.4 },
-          ease: 'power1.inOut',
+          snapTo: (progress: number) => {
+            const rawIndex = progress * count;
+            const currentStep = Math.round(rawIndex);
+            const lastStep = Math.round(lastSnapRef.current * count);
+            
+            // Clamp to ±1 from last position to prevent fast scroll skipping
+            let targetStep = currentStep;
+            if (currentStep > lastStep + 1) {
+              targetStep = lastStep + 1;
+            } else if (currentStep < lastStep - 1) {
+              targetStep = lastStep - 1;
+            }
+            
+            // Clamp to valid range
+            targetStep = Math.max(0, Math.min(count - 1, targetStep));
+            const targetProgress = targetStep / count;
+            lastSnapRef.current = targetProgress;
+            return targetProgress;
+          },
+          duration: { min: 0.3, max: 0.5 },
+          ease: 'power2.inOut',
+          inertia: false, // Disable inertia to prevent momentum-based skipping
         },
         onUpdate: (self) => {
           const raw = self.progress * count;

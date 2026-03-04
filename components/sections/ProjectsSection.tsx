@@ -126,9 +126,20 @@ export default function ProjectsSection() {
     // Only apply GSAP horizontal scroll on larger screens (>= 768px)
     if (window.innerWidth < 768) return;
 
-    // Calculate the exact amount of horizontal scroll needed
+    // Calculate the scroll amount with extra buffer for smoother start/end
     const getScrollAmount = () => {
-      return -(container.scrollWidth - window.innerWidth);
+      const scrollWidth = container.scrollWidth;
+      const viewportWidth = window.innerWidth;
+      // Add padding to ensure first card starts fully visible
+      return -(scrollWidth - viewportWidth);
+    };
+
+    // Get the total scroll distance
+    const getScrollDistance = () => {
+      const scrollWidth = container.scrollWidth;
+      const viewportWidth = window.innerWidth;
+      // Add extra buffer (200px) for smoother end transition
+      return scrollWidth - viewportWidth + 200;
     };
 
     // Horizontal scroll animation — pinned and scrubbed
@@ -138,10 +149,10 @@ export default function ProjectsSection() {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: () => `+=${container.scrollWidth - window.innerWidth}`,
+        end: () => `+=${getScrollDistance()}`,
         pin: true,
         pinSpacing: true,
-        scrub: 0.5,
+        scrub: 1, // Smoother scrubbing (1 second delay)
         invalidateOnRefresh: true,
         anticipatePin: 1,
       },
@@ -162,7 +173,7 @@ export default function ProjectsSection() {
       });
     }
 
-  }, { scope: sectionRef });
+  }, { scope: sectionRef, dependencies: [projects] });
 
   return (
     <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white" style={{ zIndex: 1 }}>

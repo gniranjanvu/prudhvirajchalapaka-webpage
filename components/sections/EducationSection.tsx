@@ -42,9 +42,9 @@ const GRADE_COLORS = [
 ];
 
 // Sticky card layout constants
-const STICKY_TOP_BASE_PX = 80;        // first card sticks at 80px from top
-const STICKY_OFFSET_PER_CARD_PX = 24; // each subsequent card 24px lower
-const MAX_INSTITUTION_CHARS = 45;      // truncate institution names beyond this
+const STICKY_TOP_BASE_PX = 100;        // first card sticks at 100px from top (more space for header)
+const STICKY_OFFSET_PER_CARD_PX = 20; // each subsequent card offset for stacking effect
+const SCROLL_HEIGHT_PER_CARD_VH = 100; // each card gets 100vh of scroll distance
 
 // Fallback education data
 const FALLBACK_EDUCATION: DBEducation[] = [
@@ -108,28 +108,35 @@ export default function EducationSection() {
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Heading */}
-        <div className="text-center pt-20 pb-10 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-500 text-sm font-semibold mb-6 border border-blue-500/20">
-            <GraduationCap className="w-4 h-4" />
-            Academic Journey
+        {/* Heading - Sticky at top */}
+        <div 
+          className="sticky top-0 bg-gray-50/95 dark:bg-zinc-950/95 backdrop-blur-sm pt-16 pb-8 z-30"
+        >
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-500 text-sm font-semibold mb-6 border border-blue-500/20">
+              <GraduationCap className="w-4 h-4" />
+              Academic Journey
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold font-display text-foreground mb-4 leading-[1.1] tracking-tight">
+              Forging Knowledge into{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500">
+                Innovation
+              </span>
+            </h2>
+            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
+              A strong educational foundation in Electronics, Mathematics & Physics.
+            </p>
           </div>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-display text-foreground mb-6 leading-[1.1] tracking-tight">
-            Forging Knowledge into{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500">
-              Innovation
-            </span>
-          </h2>
-          <p className="text-muted-foreground text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
-            A strong educational foundation in Electronics, Mathematics & Physics — powering expertise in{" "}
-            <span className="text-foreground font-medium">Robotics</span>,{" "}
-            <span className="text-foreground font-medium">Embedded Systems</span>, and{" "}
-            <span className="text-foreground font-medium">Autonomous Navigation</span>.
-          </p>
         </div>
 
-        {/* Sticky Stacking Cards — one card visible at a time, previous cards slide up */}
-        <div className="relative" style={{ minHeight: `${count * 60 + 30}vh` }}>
+        {/* Sticky Stacking Cards — CSS-Tricks inspired approach */}
+        <div 
+          className="relative"
+          style={{ 
+            // Total scroll height: enough for each card to have its own scroll section
+            minHeight: `${count * SCROLL_HEIGHT_PER_CARD_VH}vh` 
+          }}
+        >
           {educationData.map((edu, index) => {
             const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length];
             const heroImg = edu.hero_image_url || DEFAULT_IMAGES[index % DEFAULT_IMAGES.length];
@@ -140,21 +147,34 @@ export default function EducationSection() {
                 key={edu.id}
                 className="sticky"
                 style={{
+                  // Each card sticks slightly lower than the previous, creating stack effect
                   top: `${STICKY_TOP_BASE_PX + index * STICKY_OFFSET_PER_CARD_PX}px`,
-                  paddingBottom: index < count - 1 ? '10vh' : '2rem',
+                  // Z-index ensures later cards appear on top of earlier ones
+                  zIndex: 10 + index,
+                  // Add bottom padding for scroll space (except last card)
+                  paddingBottom: index < count - 1 ? `${SCROLL_HEIGHT_PER_CARD_VH - 20}vh` : '4rem',
                 }}
               >
-                <div className="w-full max-w-4xl mx-auto rounded-3xl overflow-hidden border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-xl dark:shadow-2xl backdrop-blur-lg transition-shadow duration-300">
-                  {/* Hero Image */}
-                  <div className="relative w-full h-52 sm:h-60 md:h-72 overflow-hidden">
-                    <div className={`absolute inset-0 bg-gradient-to-tr ${gradient} opacity-60 z-10`} />
+                {/* Card with glassmorphism effect */}
+                <div 
+                  className="w-full max-w-4xl mx-auto rounded-3xl overflow-hidden border border-black/5 dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-2xl transition-all duration-500"
+                  style={{
+                    // Subtle shadow that intensifies for cards on top
+                    boxShadow: `0 ${20 + index * 5}px ${40 + index * 10}px -15px rgba(0, 0, 0, 0.2)`,
+                  }}
+                >
+                  {/* Hero Image with gradient overlay */}
+                  <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden">
+                    <div className={`absolute inset-0 bg-gradient-to-tr ${gradient} opacity-70 z-10`} />
                     <Image
                       src={heroImg}
                       fill
                       className="object-cover"
                       alt={edu.institution_name}
                       sizes="(max-width: 768px) 100vw, 896px"
+                      priority={index === 0}
                     />
+                    {/* Card index badge */}
                     <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
                       <div className="p-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30">
                         <GraduationCap className="w-6 h-6 text-white" />
@@ -168,20 +188,24 @@ export default function EducationSection() {
                         {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
                       </span>
                     </div>
+                    {/* Degree title overlay on image */}
+                    <div className="absolute bottom-0 left-0 right-0 z-20 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-white mb-1">{edu.degree}</h3>
+                      <p className="text-white/80 text-base">{edu.major}</p>
+                    </div>
                   </div>
 
                   {/* Card Content */}
                   <div className="p-6 sm:p-8">
-                    <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-1">{edu.degree}</h3>
-                    <p className="text-muted-foreground text-base mb-4">{edu.major}</p>
-
+                    {/* Institution and meta info */}
                     <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground mb-5">
-                      <span className="flex items-center gap-1.5 font-medium text-foreground">
-                        <GraduationCap className="w-4 h-4 text-blue-500 shrink-0" />
-                        {edu.institution_name.length > MAX_INSTITUTION_CHARS
-                          ? edu.institution_name.substring(0, MAX_INSTITUTION_CHARS - 3) + '…'
-                          : edu.institution_name}
+                      <span className="flex items-center gap-1.5 font-semibold text-foreground text-base">
+                        <GraduationCap className="w-5 h-5 text-blue-500 shrink-0" />
+                        {edu.institution_name}
                       </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-5">
                       {edu.location && (
                         <span className="flex items-center gap-1.5">
                           <MapPin className="w-4 h-4 shrink-0" />

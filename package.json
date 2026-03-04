@@ -19,6 +19,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.94.1",
     "@tiptap/extension-placeholder": "^3.19.0",
+    "@tiptap/extension-underline": "^3.20.0",
     "@types/node": "^25.2.0",
     "@types/react": "^19.2.11",
     "@types/react-dom": "^19.2.3",

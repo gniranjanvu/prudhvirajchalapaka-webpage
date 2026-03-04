@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Plus, Edit, Trash, FolderOpen, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash, FolderOpen, Loader2, AlertCircle, MessageSquare, Heart } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import { format } from 'date-fns';
 
@@ -15,7 +15,10 @@ interface Project {
     slug: string;
     status: string;
     views_count: number;
+    likes_count: number;
     is_featured: boolean;
+    enable_comments: boolean;
+    enable_likes: boolean;
     created_at: string;
     development_date?: string;
 }
@@ -152,6 +155,7 @@ export default function ProjectsPage() {
                                         <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Project Name</th>
                                         <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Status</th>
                                         <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Views</th>
+                                        <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Likes</th>
                                         <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Date</th>
                                         <th className="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-right">Actions</th>
                                     </tr>
@@ -177,10 +181,21 @@ export default function ProjectsPage() {
                                             </td>
                                             <td className="px-4 py-3 text-gray-500">{project.views_count ?? 0}</td>
                                             <td className="px-4 py-3 text-gray-500">
+                                                <div className="flex items-center gap-1">
+                                                    <Heart size={14} className="text-pink-500" />
+                                                    {project.likes_count ?? 0}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-500">
                                                 {project.development_date ? formatDate(project.development_date) : formatDate(project.created_at)}
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    <Link href={`/admin/projects/${project.id}/comments`}>
+                                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Manage Comments">
+                                                            <MessageSquare size={16} />
+                                                        </Button>
+                                                    </Link>
                                                     <Link href={`/admin/projects/${project.id}`}>
                                                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                                             <Edit size={16} />

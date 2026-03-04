@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -10,7 +10,31 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const projects = [
+const GRADIENT_COLORS = [
+  "from-orange-500 to-red-500",
+  "from-blue-500 to-cyan-500",
+  "from-emerald-500 to-green-500",
+  "from-purple-500 to-pink-500",
+  "from-yellow-500 to-orange-500",
+  "from-rose-500 to-fuchsia-500",
+  "from-teal-500 to-lime-500",
+];
+
+interface DBProject {
+  id: string;
+  title: string;
+  slug: string;
+  short_description?: string;
+  tech_stack?: string[];
+  hero_image_url?: string;
+  is_featured?: boolean;
+  status?: string;
+  category_id?: string;
+  project_categories?: { name: string } | null;
+}
+
+// Fallback projects for when DB is not set up
+const FALLBACK_PROJECTS = [
   {
     title: "IRAVATH",
     category: "Autonomous Navigation",
@@ -64,6 +88,31 @@ const projects = [
 ];
 
 export default function ProjectsSection() {
+  const [projects, setProjects] = useState(FALLBACK_PROJECTS);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects?featured=true&status=published');
+        const result = await response.json();
+        if (result.success && result.data && result.data.length > 0) {
+          const mapped = result.data.map((p: DBProject, i: number) => ({
+            title: p.title,
+            category: p.project_categories?.name || '',
+            description: p.short_description || '',
+            tech: p.tech_stack || [],
+            image: p.hero_image_url || '',
+            link: `/projects/${p.slug}`,
+            color: GRADIENT_COLORS[i % GRADIENT_COLORS.length],
+          }));
+          setProjects(mapped);
+        }
+      } catch {
+        console.log('Using fallback projects');
+      }
+    };
+    fetchProjects();
+  }, []);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -89,11 +138,10 @@ export default function ProjectsSection() {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        // End distance = horizontal overflow + extra buffer for smooth exit
-        end: () => `+=${container.scrollWidth - window.innerWidth + 200}`,
+        end: () => `+=${container.scrollWidth - window.innerWidth}`,
         pin: true,
         pinSpacing: true,
-        scrub: true,
+        scrub: 0.5,
         invalidateOnRefresh: true,
         anticipatePin: 1,
       },
@@ -117,7 +165,7 @@ export default function ProjectsSection() {
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white">
+    <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white" style={{ zIndex: 1 }}>
 
       {/* Section Header — visible at the top before you scroll horizontally */}
       <div ref={headerRef} className="pt-20 pb-8 px-4 sm:px-6 md:px-20">

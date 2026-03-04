@@ -11,8 +11,11 @@ export interface ProjectPayload {
   tech_stack?: string[];
   github_url?: string;
   demo_url?: string;
+  documentation_url?: string;
   hero_image_url?: string;
   gallery_urls?: string[];
+  enable_comments?: boolean;
+  enable_likes?: boolean;
   status?: string;
   development_date?: string;
   display_order?: number;
@@ -30,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('projects')
-      .select('*')
+      .select('*, project_categories(name)')
       .order('display_order', { ascending: true });
 
     if (slug) {

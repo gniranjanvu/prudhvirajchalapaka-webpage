@@ -31,6 +31,7 @@ export default function EducationForm({ initialData }: EducationFormProps) {
             endDate: '',
             isCurrent: false,
             grade: '', // CGPA/Percentage
+            heroImageUrl: '', // Hero image URL
             description: '',
             keyCourses: [] // Tags
         }
@@ -41,8 +42,34 @@ export default function EducationForm({ initialData }: EducationFormProps) {
     const onSubmit = async (data: any) => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Education Data:', data);
+            const url = initialData?.id
+                ? `/api/education/${initialData.id}`
+                : '/api/education';
+            const method = initialData?.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    institution_name: data.institution,
+                    degree: data.degree,
+                    major: data.major,
+                    start_year: parseInt(data.startDate),
+                    end_year: data.isCurrent ? null : (data.endDate ? parseInt(data.endDate) : null),
+                    is_current: data.isCurrent,
+                    grade: data.grade || null,
+                    location: data.location || null,
+                    hero_image_url: data.heroImageUrl || null,
+                    description: data.description || null,
+                    key_courses: data.keyCourses || [],
+                    is_published: true,
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to save education');
+            }
 
             toast({
                 title: initialData ? "Education Updated" : "Education Added",
@@ -55,7 +82,7 @@ export default function EducationForm({ initialData }: EducationFormProps) {
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to save details.",
+                description: error instanceof Error ? error.message : "Failed to save details.",
                 type: "error"
             });
         } finally {
@@ -154,6 +181,14 @@ export default function EducationForm({ initialData }: EducationFormProps) {
                 <div className="space-y-6">
                     <Card>
                         <CardContent className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Hero Image URL</label>
+                                <Input
+                                    {...register('heroImageUrl')}
+                                    placeholder="https://images.unsplash.com/..."
+                                />
+                                <p className="text-xs text-gray-400 mt-1">Image displayed on the education card</p>
+                            </div>
                             <div>
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="block text-sm font-medium">Timeline</label>

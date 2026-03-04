@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star } from "lucide-react";
 import Image from "next/image";
@@ -17,12 +17,21 @@ const iconSlugMap: Record<string, string | null> = {
   "YOLO": null, // Not available on Simple Icons
   "STM32": "stmicroelectronics",
   "Jetson Nano": "nvidia",
+  "NVIDIA Jetson": "nvidia",
   "Gazebo": null, // Not available on Simple Icons
   "SolidWorks": "dassaultsystemes",
   "Fusion 360": "autodesk",
   "3D Printing": null, // Not available on Simple Icons
   "Raspberry Pi": "raspberrypi",
   "C++": "cplusplus",
+  "Nav2": null,
+  "MoveIt": null,
+  "PLC (Siemens)": null,
+  "URDF Modeling": null,
+  "Sensor Fusion": null,
+  "Autonomous Navigation": null,
+  "Path Planning": null,
+  "Industrial Automation": null,
 };
 
 // Helper to get icon URL
@@ -41,7 +50,14 @@ const getIconUrl = (name: string): string | null => {
   return `https://cdn.simpleicons.org/${slug}`;
 };
 
-const allSkills = [
+interface DBSkill {
+  id: string;
+  name: string;
+  proficiency: number;
+  skill_categories?: { id: string; name: string };
+}
+
+const FALLBACK_SKILLS = [
   { category: "Programming Languages", name: "Python", rating: 5 },
   { category: "Programming Languages", name: "C", rating: 5 },
   { category: "Programming Languages", name: "C++", rating: 4 },
@@ -62,8 +78,6 @@ const allSkills = [
   { category: "CAD/CAM", name: "Fusion 360", rating: 5 },
   { category: "Technologies", name: "3D Printing", rating: 5 },
 ];
-
-const categories = ["All", ...Array.from(new Set(allSkills.map((s) => s.category)))];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -95,7 +109,30 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 export default function SkillsSection() {
+  const [allSkills, setAllSkills] = useState(FALLBACK_SKILLS);
   const [activeCategory, setActiveCategory] = useState("All");
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const response = await fetch('/api/skills');
+        const result = await response.json();
+        if (result.success && result.data && result.data.length > 0) {
+          const mapped = result.data.map((s: DBSkill) => ({
+            category: s.skill_categories?.name || 'Other',
+            name: s.name,
+            rating: s.proficiency || 3,
+          }));
+          setAllSkills(mapped);
+        }
+      } catch {
+        console.log('Using fallback skills');
+      }
+    };
+    fetchSkills();
+  }, []);
+
+  const categories = ["All", ...Array.from(new Set(allSkills.map((s) => s.category)))];
 
   const filteredSkills =
     activeCategory === "All"
@@ -103,7 +140,7 @@ export default function SkillsSection() {
       : allSkills.filter((s) => s.category === activeCategory);
 
   return (
-    <section id="skills" className="py-20 bg-dot-pattern relative overflow-hidden transition-colors duration-300">
+    <section id="skills" className="py-20 bg-dot-pattern relative overflow-hidden transition-colors duration-300" style={{ zIndex: 2 }}>
 
       {/* Background Particles */}
       <div className="absolute inset-0 pointer-events-none">

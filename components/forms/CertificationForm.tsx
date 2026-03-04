@@ -42,8 +42,33 @@ export default function CertificationForm({ initialData }: CertificationFormProp
     const onSubmit = async (data: any) => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Certification Data:', data);
+            const url = initialData?.id
+                ? `/api/certifications/${initialData.id}`
+                : '/api/certifications';
+            const method = initialData?.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: data.name,
+                    issuer: data.issuer,
+                    issue_date: data.issueDate,
+                    expiry_date: data.noExpiry ? null : (data.expiryDate || null),
+                    no_expiry: data.noExpiry,
+                    credential_id: data.credentialId || null,
+                    credential_url: data.credentialUrl || null,
+                    certificate_file_url: data.certificateFile || null,
+                    description: data.description || null,
+                    related_skills: data.relatedSkills || [],
+                    is_published: true,
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to save certification');
+            }
 
             toast({
                 title: initialData ? "Certification Updated" : "Certification Added",
@@ -56,7 +81,7 @@ export default function CertificationForm({ initialData }: CertificationFormProp
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to save certification.",
+                description: error instanceof Error ? error.message : "Failed to save certification.",
                 type: "error"
             });
         } finally {

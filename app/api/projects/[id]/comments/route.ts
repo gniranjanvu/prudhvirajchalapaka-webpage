@@ -14,7 +14,7 @@ export async function GET(
       .from('project_comments')
       .select('*')
       .eq('project_id', id)
-      .eq('is_approved', true)
+      .eq('status', 'approved')
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -64,7 +64,9 @@ export async function POST(
         author_name: author_name.trim(),
         author_email: author_email.trim().toLowerCase(),
         content: content.trim(),
-        is_approved: false,
+        parent_id: body.parent_id || null,
+        is_admin_reply: body.is_admin_reply || false,
+        status: body.is_admin_reply ? 'approved' : 'pending',
         created_at: new Date().toISOString(),
       }])
       .select()

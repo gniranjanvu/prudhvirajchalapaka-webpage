@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -9,6 +9,67 @@ import {
   Loader2, AlertCircle, Send, Star, Calendar, Tag
 } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
+
+/* ── Scroll-triggered text reveal component ── */
+function ScrollTextReveal({ html }: { html: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const windowH = window.innerHeight;
+    // Start revealing when element enters viewport, finish when top reaches 20% from top
+    const start = windowH;
+    const end = windowH * 0.2;
+    const rawProgress = (start - rect.top) / (start - end);
+    setProgress(Math.max(0, Math.min(1, rawProgress)));
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // Decode HTML to plain text safely
+  const decodeHTML = (htmlStr: string) => {
+    if (typeof DOMParser === 'undefined') return htmlStr.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const doc = new DOMParser().parseFromString(htmlStr, 'text/html');
+    return doc.body.textContent || '';
+  };
+
+  const plainText = decodeHTML(html);
+  const words = plainText.split(/\s+/).filter(Boolean);
+  const totalWords = words.length;
+
+  return (
+    <div ref={containerRef}>
+      {/* Progress bar */}
+      <div className="w-full h-1 bg-gray-200 dark:bg-zinc-800 rounded-full mb-6 overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full transition-all duration-100"
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
+      <div className="text-lg leading-relaxed text-gray-900 dark:text-white">
+        {words.map((word, i) => {
+          const wordProgress = i / totalWords;
+          const isRevealed = progress > wordProgress;
+          return (
+            <span
+              key={i}
+              className={`inline transition-colors duration-300 ${isRevealed ? '' : 'text-gray-300/30 dark:text-gray-600/30'}`}
+            >
+              {word}{' '}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 interface Project {
   id: string;
@@ -23,6 +84,7 @@ interface Project {
   github_url?: string;
   demo_url?: string;
   documentation_url?: string;
+  action_buttons?: { type: string; label: string; url: string }[];
   is_featured?: boolean;
   status?: string;
   views_count?: number;
@@ -37,6 +99,8 @@ interface Comment {
   author_name: string;
   content: string;
   created_at: string;
+  parent_id?: string;
+  is_admin_reply?: boolean;
 }
 
 export default function ProjectDetailPage() {
@@ -289,6 +353,18 @@ export default function ProjectDetailPage() {
                 <ExternalLink className="w-4 h-4" /> Documentation
               </a>
             )}
+            {/* Dynamic action buttons from DB */}
+            {project.action_buttons && project.action_buttons.length > 0 && project.action_buttons.map((btn, i) => (
+              <a
+                key={i}
+                href={btn.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium"
+              >
+                <ExternalLink className="w-4 h-4" /> {btn.label || btn.type}
+              </a>
+            ))}
           </div>
         </div>
       </div>
@@ -302,10 +378,7 @@ export default function ProjectDetailPage() {
             {project.full_description && (
               <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
                 <h2 className="text-xl font-bold font-display mb-4">About this project</h2>
-                <div
-                  className="prose dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: project.full_description }}
-                />
+                <ScrollTextReveal html={project.full_description} />
               </div>
             )}
 
@@ -371,26 +444,60 @@ export default function ProjectDetailPage() {
               {/* Existing Comments */}
               {comments.length > 0 ? (
                 <div className="space-y-4 mb-8">
-                  {comments.map((comment) => (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 bg-gray-50 dark:bg-zinc-800 rounded-xl"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-sm">{comment.author_name}</span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(comment.created_at).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
+                  {comments.filter(c => !c.parent_id).map((comment) => {
+                    const replies = comments.filter(c => c.parent_id === comment.id);
+                    return (
+                      <div key={comment.id}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 bg-gray-50 dark:bg-zinc-800 rounded-xl"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-sm">{comment.author_name}</span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(comment.created_at).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
+                        </motion.div>
+                        {/* Admin replies */}
+                        {replies.length > 0 && (
+                          <div className="ml-8 mt-2 space-y-2">
+                            {replies.map((reply) => (
+                              <motion.div
+                                key={reply.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-4 bg-accent/5 dark:bg-accent/10 rounded-xl border-l-2 border-accent"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-sm">{reply.author_name}</span>
+                                    {reply.is_admin_reply && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent font-bold uppercase">Admin</span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(reply.created_at).toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })}
+                                  </span>
+                                </div>
+                                <p className="text-gray-700 dark:text-gray-300 text-sm">{reply.content}</p>
+                              </motion.div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
-                    </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm mb-8">

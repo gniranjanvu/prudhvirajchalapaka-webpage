@@ -5,6 +5,7 @@ export interface EducationPayload {
   institution_name: string;
   university_board?: string;
   institution_logo_url?: string;
+  hero_image_url?: string;
   degree: string;
   major: string;
   start_year: number;

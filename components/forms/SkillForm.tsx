@@ -55,7 +55,7 @@ export default function SkillForm({ initialData }: SkillFormProps) {
                     if (cats.length > 0) setCategories(cats);
                 }
             } catch {
-                // use default categories
+                // fallback to default categories
             }
         };
         fetchCategories();

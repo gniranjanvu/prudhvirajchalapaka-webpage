@@ -33,9 +33,16 @@ function ScrollTextReveal({ html }: { html: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Strip HTML tags to get plain text, split into words
-  const plainText = html.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
-  const words = plainText.split(' ').filter(Boolean);
+  // Decode HTML to plain text using a temporary element
+  const decodeHTML = (htmlStr: string) => {
+    if (typeof document === 'undefined') return htmlStr.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const tmp = document.createElement('div');
+    tmp.innerHTML = htmlStr;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
+  const plainText = decodeHTML(html);
+  const words = plainText.split(/\s+/).filter(Boolean);
   const totalWords = words.length;
 
   return (
@@ -47,17 +54,14 @@ function ScrollTextReveal({ html }: { html: string }) {
           style={{ width: `${progress * 100}%` }}
         />
       </div>
-      <div className="text-lg leading-relaxed">
+      <div className="text-lg leading-relaxed text-gray-900 dark:text-white">
         {words.map((word, i) => {
           const wordProgress = i / totalWords;
           const isRevealed = progress > wordProgress;
           return (
             <span
               key={i}
-              className="inline transition-colors duration-300"
-              style={{
-                color: isRevealed ? undefined : 'rgba(156, 163, 175, 0.3)',
-              }}
+              className={`inline transition-colors duration-300 ${isRevealed ? '' : 'text-gray-300/30 dark:text-gray-600/30'}`}
             >
               {word}{' '}
             </span>

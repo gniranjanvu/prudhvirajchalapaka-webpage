@@ -45,6 +45,8 @@ const GRADE_COLORS = [
 const STICKY_TOP_BASE_PX = 100;        // first card sticks at 100px from top (more space for header)
 const STICKY_OFFSET_PER_CARD_PX = 20; // each subsequent card offset for stacking effect
 const SCROLL_HEIGHT_PER_CARD_VH = 100; // each card gets 100vh of scroll distance
+const HEADER_Z_INDEX = 50;             // z-index for sticky header (well above card range)
+const CARD_Z_INDEX_BASE = 10;          // base z-index for cards (cards use 10 + index)
 
 // Fallback education data
 const FALLBACK_EDUCATION: DBEducation[] = [
@@ -110,7 +112,8 @@ export default function EducationSection() {
       <div className="container mx-auto px-4 relative z-10">
         {/* Heading - Sticky at top */}
         <div 
-          className="sticky top-0 bg-gray-50/95 dark:bg-zinc-950/95 backdrop-blur-sm pt-16 pb-8 z-30"
+          className="sticky top-0 bg-gray-50/95 dark:bg-zinc-950/95 backdrop-blur-sm pt-16 pb-8"
+          style={{ zIndex: HEADER_Z_INDEX }}
         >
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-500 text-sm font-semibold mb-6 border border-blue-500/20">
@@ -124,7 +127,10 @@ export default function EducationSection() {
               </span>
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              A strong educational foundation in Electronics, Mathematics & Physics.
+              A strong educational foundation in Electronics, Mathematics & Physics — powering expertise in{" "}
+              <span className="text-foreground font-medium">Robotics</span>,{" "}
+              <span className="text-foreground font-medium">Embedded Systems</span>, and{" "}
+              <span className="text-foreground font-medium">Autonomous Navigation</span>.
             </p>
           </div>
         </div>
@@ -150,7 +156,7 @@ export default function EducationSection() {
                   // Each card sticks slightly lower than the previous, creating stack effect
                   top: `${STICKY_TOP_BASE_PX + index * STICKY_OFFSET_PER_CARD_PX}px`,
                   // Z-index ensures later cards appear on top of earlier ones
-                  zIndex: 10 + index,
+                  zIndex: CARD_Z_INDEX_BASE + index,
                   // Add bottom padding for scroll space (except last card)
                   paddingBottom: index < count - 1 ? `${SCROLL_HEIGHT_PER_CARD_VH - 20}vh` : '4rem',
                 }}

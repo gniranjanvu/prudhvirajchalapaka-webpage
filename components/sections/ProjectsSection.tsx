@@ -173,7 +173,7 @@ export default function ProjectsSection() {
       });
     }
 
-  }, { scope: sectionRef, dependencies: [projects] });
+  }, { scope: sectionRef, revertOnUpdate: true });
 
   return (
     <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white" style={{ zIndex: 1 }}>

@@ -41,7 +41,7 @@ export default function AchievementsSection() {
     fetchAchievements();
   }, []);
   return (
-    <section id="achievements" className="py-20 bg-white dark:bg-black overflow-hidden border-t border-gray-100 dark:border-white/5">
+    <section id="achievements" className="py-20 bg-white dark:bg-black overflow-hidden border-t border-gray-100 dark:border-white/5 relative" style={{ zIndex: 2 }}>
       <div className="container mx-auto px-4 mb-12">
         <motion.h2
           className="text-4xl md:text-6xl font-bold font-display mb-4"

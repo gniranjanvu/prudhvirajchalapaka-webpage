@@ -266,7 +266,7 @@ export default function PublicationsSection() {
   const activePub = publications[activeIndex] || publications[0];
 
   return (
-    <section id="publications" ref={sectionRef} style={{ backgroundColor: '#000000' }}>
+    <section id="publications" ref={sectionRef} style={{ backgroundColor: '#000000', zIndex: 1 }}>
       <div ref={triggerRef} className="relative h-screen overflow-hidden">
         <div className="container mx-auto px-4 h-full flex flex-col">
           {/* Heading */}

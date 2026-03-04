@@ -166,7 +166,7 @@ export default function ProjectsSection() {
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white">
+    <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white" style={{ zIndex: 1 }}>
 
       {/* Section Header — visible at the top before you scroll horizontally */}
       <div ref={headerRef} className="pt-20 pb-8 px-4 sm:px-6 md:px-20">

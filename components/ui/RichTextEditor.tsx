@@ -3,8 +3,14 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import ImageExtension from '@tiptap/extension-image';
+import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Heading2, Quote, Undo, Redo } from 'lucide-react';
+import {
+    Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered,
+    Link as LinkIcon, Heading1, Heading2, Heading3, Quote, Code, Image as ImageIcon,
+    Minus, Undo, Redo
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 interface RichTextEditorProps {
@@ -17,10 +23,18 @@ interface RichTextEditorProps {
 export default function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                heading: { levels: [1, 2, 3] },
+            }),
             Link.configure({
                 openOnClick: false,
             }),
+            ImageExtension.configure({
+                HTMLAttributes: {
+                    class: 'rounded-lg max-w-full',
+                },
+            }),
+            Underline,
             Placeholder.configure({
                 placeholder: placeholder || 'Start typing...',
             }),
@@ -28,7 +42,7 @@ export default function RichTextEditor({ value, onChange, placeholder, className
         content: value,
         editorProps: {
             attributes: {
-                class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[150px] px-4 py-3',
+                class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[200px] px-4 py-3',
             },
         },
         onUpdate: ({ editor }) => {
@@ -43,15 +57,18 @@ export default function RichTextEditor({ value, onChange, placeholder, className
     const ToolbarButton = ({
         isActive,
         onClick,
-        children
+        children,
+        title
     }: {
         isActive?: boolean;
         onClick: () => void;
-        children: React.ReactNode
+        children: React.ReactNode;
+        title?: string;
     }) => (
         <button
             type="button"
             onClick={onClick}
+            title={title}
             className={cn(
                 "p-2 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors",
                 isActive ? "bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
@@ -67,33 +84,81 @@ export default function RichTextEditor({ value, onChange, placeholder, className
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     isActive={editor.isActive('bold')}
+                    title="Bold"
                 >
                     <Bold size={18} />
                 </ToolbarButton>
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleItalic().run()}
                     isActive={editor.isActive('italic')}
+                    title="Italic"
                 >
                     <Italic size={18} />
                 </ToolbarButton>
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().toggleUnderline().run()}
+                    isActive={editor.isActive('underline')}
+                    title="Underline"
+                >
+                    <UnderlineIcon size={18} />
+                </ToolbarButton>
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().toggleStrike().run()}
+                    isActive={editor.isActive('strike')}
+                    title="Strikethrough"
+                >
+                    <Strikethrough size={18} />
+                </ToolbarButton>
                 <div className="w-px h-6 bg-gray-200 dark:bg-zinc-700 mx-1" />
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                    isActive={editor.isActive('heading', { level: 1 })}
+                    title="Heading 1"
+                >
+                    <Heading1 size={18} />
+                </ToolbarButton>
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                     isActive={editor.isActive('heading', { level: 2 })}
+                    title="Heading 2"
                 >
                     <Heading2 size={18} />
                 </ToolbarButton>
                 <ToolbarButton
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                    isActive={editor.isActive('heading', { level: 3 })}
+                    title="Heading 3"
+                >
+                    <Heading3 size={18} />
+                </ToolbarButton>
+                <div className="w-px h-6 bg-gray-200 dark:bg-zinc-700 mx-1" />
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBulletList().run()}
                     isActive={editor.isActive('bulletList')}
+                    title="Bullet List"
                 >
                     <List size={18} />
                 </ToolbarButton>
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleOrderedList().run()}
                     isActive={editor.isActive('orderedList')}
+                    title="Ordered List"
                 >
                     <ListOrdered size={18} />
+                </ToolbarButton>
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                    isActive={editor.isActive('blockquote')}
+                    title="Blockquote"
+                >
+                    <Quote size={18} />
+                </ToolbarButton>
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+                    isActive={editor.isActive('codeBlock')}
+                    title="Code Block"
+                >
+                    <Code size={18} />
                 </ToolbarButton>
                 <div className="w-px h-6 bg-gray-200 dark:bg-zinc-700 mx-1" />
                 <ToolbarButton
@@ -108,20 +173,32 @@ export default function RichTextEditor({ value, onChange, placeholder, className
                         editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
                     }}
                     isActive={editor.isActive('link')}
+                    title="Insert Link"
                 >
                     <LinkIcon size={18} />
                 </ToolbarButton>
                 <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                    isActive={editor.isActive('blockquote')}
+                    onClick={() => {
+                        const url = window.prompt('Image URL');
+                        if (url) {
+                            editor.chain().focus().setImage({ src: url }).run();
+                        }
+                    }}
+                    title="Insert Image"
                 >
-                    <Quote size={18} />
+                    <ImageIcon size={18} />
+                </ToolbarButton>
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().setHorizontalRule().run()}
+                    title="Horizontal Rule"
+                >
+                    <Minus size={18} />
                 </ToolbarButton>
                 <div className="flex-1" />
-                <ToolbarButton onClick={() => editor.chain().focus().undo().run()}>
+                <ToolbarButton onClick={() => editor.chain().focus().undo().run()} title="Undo">
                     <Undo size={18} />
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.chain().focus().redo().run()}>
+                <ToolbarButton onClick={() => editor.chain().focus().redo().run()} title="Redo">
                     <Redo size={18} />
                 </ToolbarButton>
             </div>

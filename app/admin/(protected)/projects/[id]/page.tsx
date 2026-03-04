@@ -41,6 +41,7 @@ export default function EditProjectPage({ params }: EditProjectPageProps) {
                     featured: p.is_featured || false,
                     enableComments: p.enable_comments !== false,
                     enableLikes: p.enable_likes !== false,
+                    actionButtons: p.action_buttons || [],
                     status: p.status || 'draft',
                     startDate: p.development_date || '',
                     endDate: '',

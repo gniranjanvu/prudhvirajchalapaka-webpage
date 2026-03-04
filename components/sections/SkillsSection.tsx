@@ -140,7 +140,7 @@ export default function SkillsSection() {
       : allSkills.filter((s) => s.category === activeCategory);
 
   return (
-    <section id="skills" className="py-20 bg-dot-pattern relative overflow-hidden transition-colors duration-300">
+    <section id="skills" className="py-20 bg-dot-pattern relative overflow-hidden transition-colors duration-300" style={{ zIndex: 2 }}>
 
       {/* Background Particles */}
       <div className="absolute inset-0 pointer-events-none">

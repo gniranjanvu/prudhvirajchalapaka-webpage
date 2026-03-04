@@ -158,7 +158,7 @@ export default function EducationSection() {
   }, [educationData]);
 
   return (
-    <section id="education" ref={sectionRef} className="pt-20 pb-10 bg-gray-50 dark:bg-zinc-950 relative overflow-hidden">
+    <section id="education" ref={sectionRef} className="pt-20 pb-10 bg-gray-50 dark:bg-zinc-950 relative overflow-hidden" style={{ zIndex: 2 }}>
       {/* Decorative Background */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />

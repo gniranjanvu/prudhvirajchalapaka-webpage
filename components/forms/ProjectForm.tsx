@@ -10,16 +10,35 @@ import RichTextEditor from '@/components/ui/RichTextEditor';
 import ImageUpload from '@/components/ui/ImageUpload';
 import TagsInput from '@/components/ui/TagsInput';
 import { useToast } from '@/components/ui/toast';
-import { Loader2, Save, ArrowLeft } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { slugify } from '@/lib/utils/helpers';
 import Link from 'next/link';
 
+const LINK_TYPES = [
+    { value: 'github', label: 'GitHub' },
+    { value: 'source_code', label: 'Source Code' },
+    { value: 'documentation', label: 'Documentation' },
+    { value: 'video', label: 'Video' },
+    { value: 'demo', label: 'Live Demo' },
+    { value: 'images', label: 'Images/Gallery' },
+    { value: 'other', label: 'Other' },
+];
+
+interface ActionButton {
+    type: string;
+    label: string;
+    url: string;
+}
+
 interface ProjectFormProps {
-    initialData?: any; // Replace with proper type
+    initialData?: any;
 }
 
 export default function ProjectForm({ initialData }: ProjectFormProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [actionButtons, setActionButtons] = useState<ActionButton[]>(
+        initialData?.actionButtons || []
+    );
     const router = useRouter();
     const { toast } = useToast();
 
@@ -79,6 +98,7 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
                     is_featured: data.featured,
                     enable_comments: data.enableComments,
                     enable_likes: data.enableLikes,
+                    action_buttons: actionButtons.filter(b => b.url.trim()),
                     status: data.status,
                     development_date: data.startDate || null,
                 })
@@ -312,6 +332,78 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
                                 <label className="block text-sm font-medium mb-1">Documentation URL</label>
                                 <Input {...register('documentationUrl')} placeholder="https://docs...." />
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="p-6 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="block text-sm font-medium">Project Links / Action Buttons</label>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setActionButtons([...actionButtons, { type: 'github', label: '', url: '' }])}
+                                >
+                                    <Plus size={14} className="mr-1" /> Add Link
+                                </Button>
+                            </div>
+                            <p className="text-xs text-gray-400">Add custom buttons that will appear on the project page.</p>
+                            {actionButtons.map((btn, index) => (
+                                <div key={index} className="flex gap-2 items-start p-3 rounded-lg border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
+                                    <div className="flex-1 space-y-2">
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <select
+                                                value={btn.type}
+                                                onChange={(e) => {
+                                                    const updated = [...actionButtons];
+                                                    updated[index].type = e.target.value;
+                                                    if (e.target.value !== 'other') {
+                                                        updated[index].label = LINK_TYPES.find(t => t.value === e.target.value)?.label || '';
+                                                    }
+                                                    setActionButtons(updated);
+                                                }}
+                                                className="h-9 px-2 text-sm rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            >
+                                                {LINK_TYPES.map(t => (
+                                                    <option key={t.value} value={t.value}>{t.label}</option>
+                                                ))}
+                                            </select>
+                                            {btn.type === 'other' && (
+                                                <Input
+                                                    value={btn.label}
+                                                    onChange={(e) => {
+                                                        const updated = [...actionButtons];
+                                                        updated[index].label = e.target.value;
+                                                        setActionButtons(updated);
+                                                    }}
+                                                    placeholder="Button label..."
+                                                    className="h-9 text-sm"
+                                                />
+                                            )}
+                                        </div>
+                                        <Input
+                                            value={btn.url}
+                                            onChange={(e) => {
+                                                const updated = [...actionButtons];
+                                                updated[index].url = e.target.value;
+                                                setActionButtons(updated);
+                                            }}
+                                            placeholder="https://..."
+                                            className="h-9 text-sm"
+                                        />
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-9 w-9 p-0 text-red-500 hover:text-red-700 shrink-0"
+                                        onClick={() => setActionButtons(actionButtons.filter((_, i) => i !== index))}
+                                    >
+                                        <Trash2 size={14} />
+                                    </Button>
+                                </div>
+                            ))}
                         </CardContent>
                     </Card>
 

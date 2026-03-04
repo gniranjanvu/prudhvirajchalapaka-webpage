@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { ArrowLeft, Loader2, AlertCircle, MessageSquare, Check, X, Trash } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, MessageSquare, Check, X, Trash, Reply } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import { format } from 'date-fns';
 
@@ -32,6 +32,8 @@ export default function ProjectCommentsPage({ params }: ProjectCommentsPageProps
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [replyContent, setReplyContent] = useState('');
     const { toast } = useToast();
 
     const fetchComments = async () => {
@@ -138,6 +140,48 @@ export default function ProjectCommentsPage({ params }: ProjectCommentsPageProps
         }
     };
 
+    const handleReply = async (parentId: string) => {
+        if (!replyContent.trim()) return;
+        setActionLoading(parentId);
+        try {
+            const response = await fetch(`/api/projects/${resolvedParams.id}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    author_name: 'Admin',
+                    author_email: 'admin@portfolio.com',
+                    content: replyContent,
+                    parent_id: parentId,
+                    is_admin_reply: true,
+                    status: 'approved',
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to post reply');
+            }
+
+            toast({
+                title: "Reply Posted",
+                description: "Your reply has been published.",
+                type: "success"
+            });
+
+            setReplyingTo(null);
+            setReplyContent('');
+            fetchComments();
+        } catch (err) {
+            toast({
+                title: "Error",
+                description: err instanceof Error ? err.message : "Failed to post reply.",
+                type: "error"
+            });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'approved': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
@@ -216,8 +260,49 @@ export default function ProjectCommentsPage({ params }: ProjectCommentsPageProps
                                         <span className="text-xs text-gray-400">
                                             {format(new Date(comment.created_at), 'MMM dd, yyyy HH:mm')}
                                         </span>
+                                        {/* Reply form */}
+                                        {replyingTo === comment.id && (
+                                            <div className="mt-3 space-y-2">
+                                                <textarea
+                                                    value={replyContent}
+                                                    onChange={(e) => setReplyContent(e.target.value)}
+                                                    placeholder="Write your reply..."
+                                                    className="w-full p-2 text-sm rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 resize-none"
+                                                    rows={3}
+                                                />
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="accent"
+                                                        onClick={() => handleReply(comment.id)}
+                                                        disabled={actionLoading === comment.id || !replyContent.trim()}
+                                                    >
+                                                        {actionLoading === comment.id ? <Loader2 size={14} className="animate-spin mr-1" /> : null}
+                                                        Post Reply
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => { setReplyingTo(null); setReplyContent(''); }}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
+                                        {!comment.is_admin_reply && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); }}
+                                                title="Reply"
+                                            >
+                                                <Reply size={16} />
+                                            </Button>
+                                        )}
                                         {comment.status !== 'approved' && (
                                             <Button
                                                 variant="ghost"

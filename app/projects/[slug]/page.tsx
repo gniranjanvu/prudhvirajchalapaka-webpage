@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -9,6 +9,64 @@ import {
   Loader2, AlertCircle, Send, Star, Calendar, Tag
 } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
+
+/* ── Scroll-triggered text reveal component ── */
+function ScrollTextReveal({ html }: { html: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const windowH = window.innerHeight;
+    // Start revealing when element enters viewport, finish when top reaches 20% from top
+    const start = windowH;
+    const end = windowH * 0.2;
+    const rawProgress = (start - rect.top) / (start - end);
+    setProgress(Math.max(0, Math.min(1, rawProgress)));
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // Strip HTML tags to get plain text, split into words
+  const plainText = html.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = plainText.split(' ').filter(Boolean);
+  const totalWords = words.length;
+
+  return (
+    <div ref={containerRef}>
+      {/* Progress bar */}
+      <div className="w-full h-1 bg-gray-200 dark:bg-zinc-800 rounded-full mb-6 overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full transition-all duration-100"
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
+      <div className="text-lg leading-relaxed">
+        {words.map((word, i) => {
+          const wordProgress = i / totalWords;
+          const isRevealed = progress > wordProgress;
+          return (
+            <span
+              key={i}
+              className="inline transition-colors duration-300"
+              style={{
+                color: isRevealed ? undefined : 'rgba(156, 163, 175, 0.3)',
+              }}
+            >
+              {word}{' '}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 interface Project {
   id: string;
@@ -23,6 +81,7 @@ interface Project {
   github_url?: string;
   demo_url?: string;
   documentation_url?: string;
+  action_buttons?: { type: string; label: string; url: string }[];
   is_featured?: boolean;
   status?: string;
   views_count?: number;
@@ -289,6 +348,18 @@ export default function ProjectDetailPage() {
                 <ExternalLink className="w-4 h-4" /> Documentation
               </a>
             )}
+            {/* Dynamic action buttons from DB */}
+            {project.action_buttons && project.action_buttons.length > 0 && project.action_buttons.map((btn, i) => (
+              <a
+                key={i}
+                href={btn.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium"
+              >
+                <ExternalLink className="w-4 h-4" /> {btn.label || btn.type}
+              </a>
+            ))}
           </div>
         </div>
       </div>
@@ -302,10 +373,7 @@ export default function ProjectDetailPage() {
             {project.full_description && (
               <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
                 <h2 className="text-xl font-bold font-display mb-4">About this project</h2>
-                <div
-                  className="prose dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: project.full_description }}
-                />
+                <ScrollTextReveal html={project.full_description} />
               </div>
             )}
 

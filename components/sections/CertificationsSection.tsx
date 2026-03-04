@@ -41,7 +41,7 @@ export default function CertificationsSection() {
         fetchCertifications();
     }, []);
     return (
-        <section id="certifications" className="py-10 bg-white dark:bg-black overflow-hidden">
+        <section id="certifications" className="py-10 bg-white dark:bg-black overflow-hidden relative" style={{ zIndex: 2 }}>
             <div className="mb-8 container mx-auto px-4">
                 <motion.div
                     className="flex items-center gap-2 mb-2"

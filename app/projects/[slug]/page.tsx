@@ -96,6 +96,8 @@ interface Comment {
   author_name: string;
   content: string;
   created_at: string;
+  parent_id?: string;
+  is_admin_reply?: boolean;
 }
 
 export default function ProjectDetailPage() {
@@ -439,26 +441,60 @@ export default function ProjectDetailPage() {
               {/* Existing Comments */}
               {comments.length > 0 ? (
                 <div className="space-y-4 mb-8">
-                  {comments.map((comment) => (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 bg-gray-50 dark:bg-zinc-800 rounded-xl"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-sm">{comment.author_name}</span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(comment.created_at).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
+                  {comments.filter(c => !c.parent_id).map((comment) => {
+                    const replies = comments.filter(c => c.parent_id === comment.id);
+                    return (
+                      <div key={comment.id}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 bg-gray-50 dark:bg-zinc-800 rounded-xl"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-sm">{comment.author_name}</span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(comment.created_at).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
+                        </motion.div>
+                        {/* Admin replies */}
+                        {replies.length > 0 && (
+                          <div className="ml-8 mt-2 space-y-2">
+                            {replies.map((reply) => (
+                              <motion.div
+                                key={reply.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-4 bg-accent/5 dark:bg-accent/10 rounded-xl border-l-2 border-accent"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-sm">{reply.author_name}</span>
+                                    {reply.is_admin_reply && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent font-bold uppercase">Admin</span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(reply.created_at).toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })}
+                                  </span>
+                                </div>
+                                <p className="text-gray-700 dark:text-gray-300 text-sm">{reply.content}</p>
+                              </motion.div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
-                    </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm mb-8">

@@ -414,6 +414,7 @@ export default function ContactSection() {
     <section
       id="contact"
       className="py-12 sm:py-16 md:py-20 lg:py-32 bg-white dark:bg-black relative overflow-hidden"
+      style={{ zIndex: 2 }}
     >
       <style>{marqueeCSS}</style>
 

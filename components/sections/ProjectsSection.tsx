@@ -138,11 +138,10 @@ export default function ProjectsSection() {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        // End distance = horizontal overflow + extra buffer for smooth exit
-        end: () => `+=${container.scrollWidth - window.innerWidth + 200}`,
+        end: () => `+=${container.scrollWidth - window.innerWidth}`,
         pin: true,
         pinSpacing: true,
-        scrub: true,
+        scrub: 0.5,
         invalidateOnRefresh: true,
         anticipatePin: 1,
       },

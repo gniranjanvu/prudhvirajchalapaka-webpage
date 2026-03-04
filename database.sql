@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS education (
   institution_name TEXT NOT NULL,
   university_board TEXT,
   institution_logo_url TEXT,
+  hero_image_url TEXT,
   degree TEXT NOT NULL,
   major TEXT NOT NULL,
   start_year INTEGER NOT NULL,

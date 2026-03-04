@@ -31,6 +31,7 @@ export default function EducationForm({ initialData }: EducationFormProps) {
             endDate: '',
             isCurrent: false,
             grade: '', // CGPA/Percentage
+            heroImageUrl: '', // Hero image URL
             description: '',
             keyCourses: [] // Tags
         }
@@ -58,6 +59,7 @@ export default function EducationForm({ initialData }: EducationFormProps) {
                     is_current: data.isCurrent,
                     grade: data.grade || null,
                     location: data.location || null,
+                    hero_image_url: data.heroImageUrl || null,
                     description: data.description || null,
                     key_courses: data.keyCourses || [],
                     is_published: true,
@@ -179,6 +181,14 @@ export default function EducationForm({ initialData }: EducationFormProps) {
                 <div className="space-y-6">
                     <Card>
                         <CardContent className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Hero Image URL</label>
+                                <Input
+                                    {...register('heroImageUrl')}
+                                    placeholder="https://images.unsplash.com/..."
+                                />
+                                <p className="text-xs text-gray-400 mt-1">Image displayed on the education card</p>
+                            </div>
                             <div>
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="block text-sm font-medium">Timeline</label>

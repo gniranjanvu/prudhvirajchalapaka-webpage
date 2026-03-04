@@ -206,7 +206,6 @@ export default function ExperienceSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
-  const lastSnapRef = useRef(0);
 
   const formatDate = useCallback((dateString: string) => {
     try {
@@ -239,33 +238,22 @@ export default function ExperienceSection() {
     const count = experiences.length;
     if (count === 0) return;
 
-    lastSnapRef.current = 0;
-
     const ctx = gsap.context(() => {
       const step = 1 / count;
 
       ScrollTrigger.create({
         trigger: triggerRef.current,
         start: 'top top',
-        // Each experience gets 150vh of scroll distance for comfortable pacing
-        end: `+=${count * 150}vh`,
+        // Each experience gets 100vh of scroll distance
+        end: `+=${count * 100}vh`,
         pin: true,
-        scrub: 0.8,
+        scrub: true,
         anticipatePin: 1,
-        // Directional snap — only allows ±1 step, preventing skipping
+        // Simple even snap — each card gets an equal portion
         snap: {
-          snapTo: (value: number) => {
-            const rawTarget = Math.round(value / step);
-            // Clamp to at most ±1 step from the last snapped position
-            const clamped = Math.max(0, Math.min(count - 1,
-              Math.max(lastSnapRef.current - 1, Math.min(lastSnapRef.current + 1, rawTarget))
-            ));
-            lastSnapRef.current = clamped;
-            return clamped * step;
-          },
-          duration: { min: 0.25, max: 0.5 },
+          snapTo: step,
+          duration: { min: 0.2, max: 0.4 },
           ease: 'power1.inOut',
-          inertia: false,
         },
         onUpdate: (self) => {
           const raw = self.progress * count;

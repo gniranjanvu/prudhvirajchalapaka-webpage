@@ -31,6 +31,7 @@ export default function EditEducationPage({ params }: EditEducationPageProps) {
                     endDate: e.end_year?.toString() || '',
                     isCurrent: e.is_current || false,
                     grade: e.grade || '',
+                    heroImageUrl: e.hero_image_url || '',
                     description: e.description || '',
                     keyCourses: e.key_courses || [],
                 });

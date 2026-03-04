@@ -213,7 +213,7 @@ export default function EducationSection() {
                     {edu.major}
                   </CardItem>
                   <CardItem as="p" translateZ="40" className="text-neutral-500 text-xs mt-2 dark:text-neutral-400 font-mono">
-                    {edu.institution_name.length > 30 ? edu.institution_name.split(',')[0].split('for')[0].trim() : edu.institution_name} ({edu.start_year} - {edu.end_year || 'Present'})
+                    {edu.institution_name.length > 40 ? edu.institution_name.substring(0, 37) + '...' : edu.institution_name} ({edu.start_year} - {edu.end_year || 'Present'})
                   </CardItem>
                   <CardItem translateZ="80" className="w-full mt-4">
                     <div className="flex flex-col gap-4">

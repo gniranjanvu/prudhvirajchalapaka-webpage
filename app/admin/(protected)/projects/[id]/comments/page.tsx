@@ -55,21 +55,21 @@ export default function ProjectCommentsPage({ params }: ProjectCommentsPageProps
         }
     };
 
-    const fetchProject = async () => {
-        try {
-            const response = await fetch(`/api/projects/${resolvedParams.id}`);
-            const result = await response.json();
-            if (result.success && result.data) {
-                setProjectTitle(result.data.title);
-            }
-        } catch {
-            // ignore
-        }
-    };
-
     useEffect(() => {
         fetchComments();
+        const fetchProject = async () => {
+            try {
+                const response = await fetch(`/api/projects/${resolvedParams.id}`);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    setProjectTitle(result.data.title);
+                }
+            } catch {
+                // ignore
+            }
+        };
         fetchProject();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resolvedParams.id]);
 
     const handleUpdateStatus = async (commentId: string, newStatus: string) => {

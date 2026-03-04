@@ -33,12 +33,11 @@ function ScrollTextReveal({ html }: { html: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Decode HTML to plain text using a temporary element
+  // Decode HTML to plain text safely
   const decodeHTML = (htmlStr: string) => {
-    if (typeof document === 'undefined') return htmlStr.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    const tmp = document.createElement('div');
-    tmp.innerHTML = htmlStr;
-    return tmp.textContent || tmp.innerText || '';
+    if (typeof DOMParser === 'undefined') return htmlStr.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const doc = new DOMParser().parseFromString(htmlStr, 'text/html');
+    return doc.body.textContent || '';
   };
 
   const plainText = decodeHTML(html);

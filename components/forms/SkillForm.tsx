@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
@@ -10,12 +10,18 @@ import { useToast } from '@/components/ui/toast';
 import { Loader2, ArrowLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 
+interface SkillCategory {
+    id: string;
+    name: string;
+}
+
 interface SkillFormProps {
     initialData?: any;
 }
 
 export default function SkillForm({ initialData }: SkillFormProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [categories, setCategories] = useState<SkillCategory[]>([]);
     const router = useRouter();
     const { toast } = useToast();
 
@@ -32,11 +38,54 @@ export default function SkillForm({ initialData }: SkillFormProps) {
 
     const proficiency = watch('proficiency');
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('/api/skills');
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const cats: SkillCategory[] = [];
+                    const seen = new Set<string>();
+                    result.data.forEach((s: any) => {
+                        if (s.skill_categories && !seen.has(s.skill_categories.id)) {
+                            seen.add(s.skill_categories.id);
+                            cats.push({ id: s.skill_categories.id, name: s.skill_categories.name });
+                        }
+                    });
+                    if (cats.length > 0) setCategories(cats);
+                }
+            } catch {
+                // use default categories
+            }
+        };
+        fetchCategories();
+    }, []);
+
     const onSubmit = async (data: any) => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Skill Data:', data);
+            const url = initialData?.id
+                ? `/api/skills/${initialData.id}`
+                : '/api/skills';
+            const method = initialData?.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: data.name,
+                    category_id: data.category,
+                    proficiency: data.proficiency,
+                    years_experience: data.yearsExperience || null,
+                    icon_url: data.icon || null,
+                    is_visible: data.isVisible,
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to save skill');
+            }
 
             toast({
                 title: initialData ? "Skill Updated" : "Skill Added",
@@ -49,7 +98,7 @@ export default function SkillForm({ initialData }: SkillFormProps) {
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to save skill.",
+                description: error instanceof Error ? error.message : "Failed to save skill.",
                 type: "error"
             });
         } finally {
@@ -93,12 +142,20 @@ export default function SkillForm({ initialData }: SkillFormProps) {
                                 {...register('category')}
                                 className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
                             >
-                                <option value="programming">Programming Languages</option>
-                                <option value="frameworks">Frameworks & Libraries</option>
-                                <option value="hardware">Hardware</option>
-                                <option value="tools">Tools & Software</option>
-                                <option value="ml">Machine Learning</option>
-                                <option value="other">Other</option>
+                                {categories.length > 0 ? (
+                                    categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))
+                                ) : (
+                                    <>
+                                        <option value="programming">Programming Languages</option>
+                                        <option value="frameworks">Frameworks & Libraries</option>
+                                        <option value="hardware">Hardware</option>
+                                        <option value="tools">Tools & Software</option>
+                                        <option value="ml">Machine Learning</option>
+                                        <option value="other">Other</option>
+                                    </>
+                                )}
                             </select>
                         </div>
                         <div>

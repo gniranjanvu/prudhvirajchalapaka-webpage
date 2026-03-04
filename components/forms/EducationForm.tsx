@@ -41,8 +41,33 @@ export default function EducationForm({ initialData }: EducationFormProps) {
     const onSubmit = async (data: any) => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Education Data:', data);
+            const url = initialData?.id
+                ? `/api/education/${initialData.id}`
+                : '/api/education';
+            const method = initialData?.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    institution_name: data.institution,
+                    degree: data.degree,
+                    major: data.major,
+                    start_year: parseInt(data.startDate),
+                    end_year: data.isCurrent ? null : (data.endDate ? parseInt(data.endDate) : null),
+                    is_current: data.isCurrent,
+                    grade: data.grade || null,
+                    location: data.location || null,
+                    description: data.description || null,
+                    key_courses: data.keyCourses || [],
+                    is_published: true,
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to save education');
+            }
 
             toast({
                 title: initialData ? "Education Updated" : "Education Added",
@@ -55,7 +80,7 @@ export default function EducationForm({ initialData }: EducationFormProps) {
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to save details.",
+                description: error instanceof Error ? error.message : "Failed to save details.",
                 type: "error"
             });
         } finally {

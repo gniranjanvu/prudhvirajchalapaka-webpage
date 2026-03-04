@@ -36,8 +36,29 @@ export default function AchievementForm({ initialData }: AchievementFormProps) {
     const onSubmit = async (data: any) => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Achievement Data:', data);
+            const url = initialData?.id
+                ? `/api/achievements/${initialData.id}`
+                : '/api/achievements';
+            const method = initialData?.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: data.title,
+                    date_achieved: data.dateAchieved,
+                    issuer: data.issuer || null,
+                    description: data.description || null,
+                    category: data.category,
+                    certificate_url: data.certificateUrl || null,
+                    is_published: true,
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to save achievement');
+            }
 
             toast({
                 title: initialData ? "Achievement Updated" : "Achievement Added",
@@ -50,7 +71,7 @@ export default function AchievementForm({ initialData }: AchievementFormProps) {
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to save achievement.",
+                description: error instanceof Error ? error.message : "Failed to save achievement.",
                 type: "error"
             });
         } finally {

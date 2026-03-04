@@ -38,8 +38,32 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
     const onSubmit = async (data: any) => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Publication Data:', data);
+            const url = initialData?.id
+                ? `/api/publications/${initialData.id}`
+                : '/api/publications';
+            const method = initialData?.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: data.title,
+                    venue: data.publishedIn,
+                    publication_type: data.publisher || 'journal',
+                    publication_date: data.date,
+                    doi_url: data.doi || null,
+                    pdf_url: data.url || null,
+                    abstract: data.abstract || null,
+                    authors: (data.authors || []).map((a: string) => ({ name: a })),
+                    keywords: data.tags || [],
+                    is_published: true,
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to save publication');
+            }
 
             toast({
                 title: initialData ? "Publication Updated" : "Publication Added",
@@ -52,7 +76,7 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to save publication.",
+                description: error instanceof Error ? error.message : "Failed to save publication.",
                 type: "error"
             });
         } finally {
@@ -98,7 +122,18 @@ export default function PublicationForm({ initialData }: PublicationFormProps) {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Publisher</label>
-                                    <Input {...register('publisher')} placeholder="e.g. IEEE, Springer" />
+                                    <select
+                                        {...register('publisher')}
+                                        className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                                    >
+                                        <option value="journal">Journal</option>
+                                        <option value="conference">Conference</option>
+                                        <option value="book_chapter">Book Chapter</option>
+                                        <option value="patent">Patent</option>
+                                        <option value="thesis">Thesis</option>
+                                        <option value="technical_report">Technical Report</option>
+                                        <option value="other">Other</option>
+                                    </select>
                                 </div>
                             </div>
 

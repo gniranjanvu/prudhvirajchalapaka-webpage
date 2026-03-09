@@ -10,8 +10,15 @@ import dynamic from "next/dynamic";
 import { ArrowRight, Download } from "lucide-react";
 import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
 
-const Lanyard = dynamic(() => import('@/components/ui/Lanyard'), { ssr: false });
-
+const Lanyard = dynamic(() => import('@/components/ui/Lanyard'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex flex-col items-center justify-center opacity-50">
+      <div className="w-10 h-10 border-4 border-black/10 dark:border-white/10 border-t-[#D71921] rounded-full animate-spin mb-4" />
+      <span className="text-sm font-mono text-gray-500">Initializing Physics...</span>
+    </div>
+  )
+});
 const stickers = [
   { text: "#ROS2 🤖", x: "10%", y: "20%", rotate: -10, delay: 0 },
   { text: "#AI 🧠", x: "85%", y: "15%", rotate: 15, delay: 0.5 },
@@ -68,16 +75,16 @@ export default function HeroSection() {
 
       <motion.div style={{ y, opacity }} className="container relative z-10 px-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full max-w-7xl mx-auto">
-          
+
           {/* Left: Lanyard */}
           <div className="h-[500px] lg:h-[600px] relative">
             <Lanyard position={[0, 0, 20]} gravity={[0, -40, 0]} />
           </div>
-          
+
           {/* Right: Text content */}
           <div className="flex flex-col items-start gap-6">
             <TextReveal text="PRUDHVI RAJ" className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-foreground" delay={0.3} />
-            
+
             {/* Availability Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-md text-xs font-mono animate-fade-in opacity-0" style={{ animationDelay: '0.2s' }}>
               <span className="w-2 h-2 rounded-full bg-[#D71921] animate-pulse" />
@@ -111,7 +118,7 @@ export default function HeroSection() {
               </Link>
             </div>
           </div>
-          
+
         </div>
       </motion.div>
 

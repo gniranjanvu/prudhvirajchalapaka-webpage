@@ -41,16 +41,28 @@ export default function ImageUpload({ value, onChange, disabled, multiple = fals
         // Simulate upload - In real app, upload to Supabase Storage here
         setIsLoading(true);
         try {
-            // Mock upload delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const uploadedUrls = [];
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
 
-            // Mock result URLs (using placeholders for now)
-            const newUrls = files.map(file => URL.createObjectURL(file));
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const data = await response.json();
+                uploadedUrls.push(data.url);
+            }
 
             if (multiple) {
-                onChange([...values, ...newUrls]);
+                onChange([...values, ...uploadedUrls]);
             } else {
-                onChange(newUrls[0]);
+                onChange(uploadedUrls[0]);
             }
         } catch (error) {
             console.error('Upload failed', error);
@@ -124,9 +136,40 @@ export default function ImageUpload({ value, onChange, disabled, multiple = fals
                     <input
                         type="file"
                         className="hidden"
-                        onChange={(e) => {
-                            // Handle file input logic similar to drop
-                            // Simplified for this artifact
+                        onChange={async (e) => {
+                            const files = Array.from(e.target.files || []);
+                            if (files.length === 0) return;
+
+                            setIsLoading(true);
+                            try {
+                                const uploadedUrls = [];
+                                for (const file of files) {
+                                    const formData = new FormData();
+                                    formData.append('file', file);
+
+                                    const response = await fetch('/api/upload', {
+                                        method: 'POST',
+                                        body: formData,
+                                    });
+
+                                    if (!response.ok) {
+                                        throw new Error('Upload failed');
+                                    }
+
+                                    const data = await response.json();
+                                    uploadedUrls.push(data.url);
+                                }
+
+                                if (multiple) {
+                                    onChange([...values, ...uploadedUrls]);
+                                } else {
+                                    onChange(uploadedUrls[0]);
+                                }
+                            } catch (error) {
+                                console.error('Upload failed', error);
+                            } finally {
+                                setIsLoading(false);
+                            }
                         }}
                         accept="image/*"
                         multiple={multiple}

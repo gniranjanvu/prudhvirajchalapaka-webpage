@@ -22,6 +22,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.simpleicons.org',
       },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn0.gstatic.com',
+      },
     ],
   },
   experimental: {

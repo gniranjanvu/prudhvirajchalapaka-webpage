@@ -4,9 +4,6 @@ import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Canvas } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
-import { AMRModel } from "@/components/3d/AMRModel";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -120,7 +117,6 @@ export default function ProjectsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const amrWrapperRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     const section = sectionRef.current;
@@ -150,21 +146,6 @@ export default function ProjectsSection() {
         invalidateOnRefresh: true,
       },
     });
-
-    // AMR Animation - Drives massively across the screen while projects scroll
-    if (amrWrapperRef.current) {
-      gsap.to(amrWrapperRef.current, {
-        x: () => window.innerWidth + 1200, // Move fully across screen
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => `+=${container.scrollWidth - window.innerWidth + 300}`,
-          scrub: 1, // slight smoothing
-          invalidateOnRefresh: true,
-        },
-      });
-    }
 
     // Fade-in and slide-up the section header
     if (headerRef.current) {
@@ -312,19 +293,6 @@ export default function ProjectsSection() {
             </div>
           </Link>
         </div>
-      </div>
-
-      {/* 3D AMR Overlay - Driving across the screen on Desktop */}
-      <div
-        ref={amrWrapperRef}
-        className="hidden md:block pointer-events-none absolute bottom-5 -left-[600px] w-[600px] h-[600px] z-[100] drop-shadow-[0_25px_35px_rgba(0,0,0,0.5)]"
-      >
-        <Canvas camera={{ position: [6, 4, 6], fov: 40 }} gl={{ alpha: true }} className="w-full h-full">
-          <ambientLight intensity={1.5} />
-          <directionalLight position={[10, 10, 5]} intensity={2} />
-          <Environment preset="city" />
-          <AMRModel />
-        </Canvas>
       </div>
     </section>
   );

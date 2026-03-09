@@ -32,6 +32,7 @@ const navItems = [
     { label: 'Achievements', icon: Award, href: '/admin/achievements' },
     { label: 'Publications', icon: BookOpen, href: '/admin/publications' },
     { label: 'Messages', icon: MessageSquare, href: '/admin/messages' },
+    { label: 'Recommendations', icon: Award, href: '/admin/recommendations' },
     { label: 'Subscribers', icon: Users, href: '/admin/subscribers' },
     { label: 'Resume', icon: FileText, href: '/admin/resume' },
     { label: 'Gallery', icon: ImageIcon, href: '/admin/gallery' },

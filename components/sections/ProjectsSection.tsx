@@ -4,6 +4,9 @@ import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Canvas } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
+import { AMRModel } from "@/components/3d/AMRModel";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -106,6 +109,7 @@ export default function ProjectsSection() {
             color: GRADIENT_COLORS[i % GRADIENT_COLORS.length],
           }));
           setProjects(mapped);
+          setTimeout(() => ScrollTrigger.refresh(), 100);
         }
       } catch {
         console.log('Using fallback projects');
@@ -116,6 +120,7 @@ export default function ProjectsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const amrWrapperRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     const section = sectionRef.current;
@@ -138,14 +143,28 @@ export default function ProjectsSection() {
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: () => `+=${container.scrollWidth - window.innerWidth}`,
+        end: () => `+=${container.scrollWidth - window.innerWidth + 300}`,
         pin: true,
         pinSpacing: true,
-        scrub: 0.5,
+        scrub: true,
         invalidateOnRefresh: true,
-        anticipatePin: 1,
       },
     });
+
+    // AMR Animation - Drives massively across the screen while projects scroll
+    if (amrWrapperRef.current) {
+      gsap.to(amrWrapperRef.current, {
+        x: () => window.innerWidth + 1200, // Move fully across screen
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: () => `+=${container.scrollWidth - window.innerWidth + 300}`,
+          scrub: 1, // slight smoothing
+          invalidateOnRefresh: true,
+        },
+      });
+    }
 
     // Fade-in and slide-up the section header
     if (headerRef.current) {
@@ -165,61 +184,63 @@ export default function ProjectsSection() {
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} id="projects" className="relative w-full overflow-hidden bg-black text-white" style={{ zIndex: 1 }}>
+    <section ref={sectionRef} id="projects" className="relative w-full min-h-screen flex flex-col justify-center overflow-hidden transition-colors duration-500 bg-gradient-to-br from-[#ede7e0] via-[#f0ebe5] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#0e0e0e] dark:to-[#0a0a0a] text-gray-900 dark:text-white" style={{ zIndex: 1 }}>
 
       {/* Section Header — visible at the top before you scroll horizontally */}
       <div ref={headerRef} className="pt-20 pb-8 px-4 sm:px-6 md:px-20">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 dark:bg-white/5 border border-black/10 dark:border-white/10 text-xs font-mono mb-4 text-gray-600 dark:text-gray-300">
           <Rocket className="w-4 h-4 text-[#D71921]" />
           <span>Featured Work</span>
         </div>
         <h2 className="text-4xl md:text-7xl font-bold font-display leading-tight">
           PROJECTS
         </h2>
-        <p className="text-gray-400 text-lg mt-4 max-w-xl">
+        <p className="text-gray-500 dark:text-gray-400 text-lg mt-4 max-w-xl">
           A curated selection of my robotics and engineering projects — from autonomous rovers to industrial automation.
         </p>
       </div>
 
       {/* Horizontal Scroll Container — desktop */}
-      <div ref={containerRef} className="hidden md:flex h-[60vh] md:h-[65vh] lg:h-[70vh] min-h-[400px] w-fit items-center px-10 md:px-20 gap-8 pb-10">
+      <div ref={containerRef} className="hidden md:flex overflow-hidden h-[60vh] md:h-[65vh] lg:h-[70vh] min-h-[400px] w-fit items-center px-10 md:px-20 gap-8 pb-10">
 
         {projects.map((project, index) => (
           <div
             key={index}
-            className="group relative h-[50vh] sm:h-[55vh] md:h-[55vh] lg:h-[60vh] min-h-[350px] w-[85vw] sm:w-[70vw] md:w-[50vw] lg:w-[35vw] xl:w-[30vw] shrink-0 bg-gray-900 rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 shadow-2xl"
+            className="group relative h-[50vh] sm:h-[55vh] md:h-[55vh] lg:h-[60vh] min-h-[350px] w-[85vw] sm:w-[70vw] md:w-[50vw] lg:w-[35vw] xl:w-[30vw] shrink-0 bg-white/5 backdrop-blur-2xl rounded-[2rem] overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-500 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] hover:shadow-[0_16px_48px_0_rgba(0,0,0,0.5)]"
           >
             {/* Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
+            <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500`} />
+            {/* Frosted Glass Inner Highlight */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/20 pointer-events-none" />
 
             {/* Content Container */}
             <div className="absolute inset-0 p-5 sm:p-6 md:p-8 lg:p-10 flex flex-col justify-end z-10">
               <div className="mb-auto">
-                <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md text-xs font-mono mb-4 sm:mb-6 border border-white/10 text-white/80">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-white/40 dark:bg-white/5 backdrop-blur-md text-xs font-mono mb-4 sm:mb-6 border border-black/10 dark:border-white/10 text-gray-600 dark:text-white/80">
                   {project.category}
                 </span>
                 <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-display leading-tight">{project.title}</h3>
               </div>
 
-              <p className="text-gray-300 leading-relaxed mb-4 sm:mb-6 md:mb-8 line-clamp-4 text-sm md:text-base">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 sm:mb-6 md:mb-8 line-clamp-4 text-sm md:text-base">
                 {project.description}
               </p>
 
               <div className="flex flex-wrap gap-2 mb-4 sm:mb-6 md:mb-8">
                 {project.tech.map((t, i) => (
-                  <span key={i} className="px-2 py-1 bg-black/50 rounded text-xs text-gray-400 font-mono border border-white/5">#{t}</span>
+                  <span key={i} className="px-2.5 py-1 bg-white/5 backdrop-blur-md rounded-lg text-xs text-gray-300 font-mono border border-white/10">#{t}</span>
                 ))}
               </div>
 
               <div className="flex items-center gap-4">
                 <Link href={project.link}>
-                  <Button className="rounded-full bg-white text-black hover:bg-gray-200 border-none px-6">View Project <ArrowRight className="ml-2 w-4 h-4" /></Button>
+                  <Button className="rounded-full bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-700 dark:hover:bg-gray-200 border-none px-6">View Project <ArrowRight className="ml-2 w-4 h-4" /></Button>
                 </Link>
               </div>
             </div>
 
             {/* Big Number Decoration */}
-            <div className="absolute top-4 right-6 text-white/5 font-black text-8xl md:text-9xl select-none font-display">
+            <div className="absolute top-4 right-6 text-gray-900/5 dark:text-white/5 font-black text-8xl md:text-9xl select-none font-display">
               0{index + 1}
             </div>
           </div>
@@ -228,10 +249,10 @@ export default function ProjectsSection() {
         {/* View All CTA */}
         <div className="h-[50vh] md:h-[55vh] lg:h-[60vh] min-h-[350px] w-[50vw] sm:w-[40vw] md:w-[35vw] shrink-0 flex items-center justify-center">
           <Link href="/projects">
-            <div className="w-44 h-44 md:w-56 md:h-56 rounded-full border border-white/20 flex flex-col items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer group relative overflow-hidden backdrop-blur-sm bg-white/5">
-              <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
+            <div className="w-44 h-44 md:w-56 md:h-56 rounded-full border border-gray-300/50 dark:border-white/20 flex flex-col items-center justify-center hover:bg-gray-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all cursor-pointer group relative overflow-hidden backdrop-blur-sm bg-white/40 dark:bg-white/5">
+              <div className="absolute inset-0 bg-gray-900 dark:bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
               <span className="text-2xl font-bold group-hover:scale-110 transition-transform relative z-10">View All</span>
-              <span className="text-sm text-gray-400 group-hover:text-black mt-2 relative z-10">See Archive</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-200 dark:group-hover:text-black mt-2 relative z-10">See Archive</span>
             </div>
           </Link>
         </div>
@@ -242,27 +263,28 @@ export default function ProjectsSection() {
         {projects.map((project, index) => (
           <div
             key={index}
-            className="group relative min-h-[350px] w-full bg-gray-900 rounded-3xl overflow-hidden border border-white/10"
+            className="group relative min-h-[350px] w-full bg-white/5 backdrop-blur-2xl rounded-[2rem] overflow-hidden border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]"
           >
             {/* Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-20`} />
+            <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-[0.08]`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/20 pointer-events-none" />
 
             {/* Content Container */}
             <div className="absolute inset-0 p-5 flex flex-col justify-end z-10">
               <div className="mb-auto">
-                <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md text-xs font-mono mb-4 border border-white/10 text-white/80">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-white/40 dark:bg-white/5 backdrop-blur-md text-xs font-mono mb-4 border border-black/10 dark:border-white/10 text-gray-600 dark:text-white/80">
                   {project.category}
                 </span>
                 <h3 className="text-2xl font-bold font-display leading-tight">{project.title}</h3>
               </div>
 
-              <p className="text-gray-300 leading-relaxed mb-4 line-clamp-4 text-sm">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 line-clamp-4 text-sm">
                 {project.description}
               </p>
 
               <div className="flex flex-wrap gap-2 mb-4">
                 {project.tech.map((t, i) => (
-                  <span key={i} className="px-2 py-1 bg-black/50 rounded text-xs text-gray-400 font-mono border border-white/5">#{t}</span>
+                  <span key={i} className="px-2.5 py-1 bg-white/5 backdrop-blur-md rounded-lg text-xs text-gray-300 font-mono border border-white/10">#{t}</span>
                 ))}
               </div>
 
@@ -274,7 +296,7 @@ export default function ProjectsSection() {
             </div>
 
             {/* Big Number Decoration */}
-            <div className="absolute top-4 right-6 text-white/5 font-black text-8xl select-none font-display">
+            <div className="absolute top-4 right-6 text-gray-900/5 dark:text-white/5 font-black text-8xl select-none font-display">
               0{index + 1}
             </div>
           </div>
@@ -283,13 +305,26 @@ export default function ProjectsSection() {
         {/* View All CTA — mobile */}
         <div className="flex items-center justify-center py-8">
           <Link href="/projects">
-            <div className="w-36 h-36 rounded-full border border-white/20 flex flex-col items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer group relative overflow-hidden backdrop-blur-sm bg-white/5">
-              <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
+            <div className="w-36 h-36 rounded-full border border-gray-300/50 dark:border-white/20 flex flex-col items-center justify-center hover:bg-gray-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all cursor-pointer group relative overflow-hidden backdrop-blur-sm bg-white/40 dark:bg-white/5">
+              <div className="absolute inset-0 bg-gray-900 dark:bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
               <span className="text-xl font-bold group-hover:scale-110 transition-transform relative z-10">View All</span>
-              <span className="text-xs text-gray-400 group-hover:text-black mt-1 relative z-10">See Archive</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-200 dark:group-hover:text-black mt-1 relative z-10">See Archive</span>
             </div>
           </Link>
         </div>
+      </div>
+
+      {/* 3D AMR Overlay - Driving across the screen on Desktop */}
+      <div
+        ref={amrWrapperRef}
+        className="hidden md:block pointer-events-none absolute bottom-5 -left-[600px] w-[600px] h-[600px] z-[100] drop-shadow-[0_25px_35px_rgba(0,0,0,0.5)]"
+      >
+        <Canvas camera={{ position: [6, 4, 6], fov: 40 }} gl={{ alpha: true }} className="w-full h-full">
+          <ambientLight intensity={1.5} />
+          <directionalLight position={[10, 10, 5]} intensity={2} />
+          <Environment preset="city" />
+          <AMRModel />
+        </Canvas>
       </div>
     </section>
   );

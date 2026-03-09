@@ -22,6 +22,9 @@ interface SkillFormProps {
 export default function SkillForm({ initialData }: SkillFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [categories, setCategories] = useState<SkillCategory[]>([]);
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [isCreatingCategory, setIsCreatingCategory] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
 
@@ -41,25 +44,48 @@ export default function SkillForm({ initialData }: SkillFormProps) {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('/api/skills');
+                const response = await fetch('/api/skill-categories');
                 const result = await response.json();
                 if (result.success && result.data) {
-                    const cats: SkillCategory[] = [];
-                    const seen = new Set<string>();
-                    result.data.forEach((s: any) => {
-                        if (s.skill_categories && !seen.has(s.skill_categories.id)) {
-                            seen.add(s.skill_categories.id);
-                            cats.push({ id: s.skill_categories.id, name: s.skill_categories.name });
-                        }
-                    });
-                    if (cats.length > 0) setCategories(cats);
+                    setCategories(result.data);
+
+                    // If no default value and categories exist, set the first one
+                    if (!initialData && result.data.length > 0) {
+                        setValue('category', result.data[0].id);
+                    }
                 }
             } catch {
-                // fallback to default categories
+                console.error("Failed to fetch categories");
             }
         };
         fetchCategories();
-    }, []);
+    }, [initialData, setValue]);
+
+    const handleCreateCategory = async () => {
+        if (!newCategoryName.trim()) return;
+        setIsCreatingCategory(true);
+        try {
+            const res = await fetch('/api/skill-categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newCategoryName.trim() })
+            });
+            const result = await res.json();
+            if (result.success && result.data) {
+                setCategories(prev => [...prev, result.data]);
+                setValue('category', result.data.id);
+                setIsAddingCategory(false);
+                setNewCategoryName('');
+                toast({ title: 'Success', description: 'Category created', type: 'success' });
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message || 'Failed to create category', type: 'error' });
+        } finally {
+            setIsCreatingCategory(false);
+        }
+    };
 
     const onSubmit = async (data: any) => {
         setIsLoading(true);
@@ -138,25 +164,55 @@ export default function SkillForm({ initialData }: SkillFormProps) {
                     <div className="grid md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium mb-1">Category</label>
-                            <select
-                                {...register('category')}
-                                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
-                            >
-                                {categories.length > 0 ? (
-                                    categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))
-                                ) : (
-                                    <>
-                                        <option value="programming">Programming Languages</option>
-                                        <option value="frameworks">Frameworks & Libraries</option>
-                                        <option value="hardware">Hardware</option>
-                                        <option value="tools">Tools & Software</option>
-                                        <option value="ml">Machine Learning</option>
-                                        <option value="other">Other</option>
-                                    </>
-                                )}
-                            </select>
+                            {!isAddingCategory ? (
+                                <div className="flex gap-2">
+                                    <select
+                                        {...register('category')}
+                                        className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                                    >
+                                        {categories.length > 0 ? (
+                                            categories.map((cat) => (
+                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                            ))
+                                        ) : (
+                                            <option value="">Loading categories...</option>
+                                        )}
+                                    </select>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="shrink-0"
+                                        onClick={() => setIsAddingCategory(true)}
+                                    >
+                                        New
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="New category name"
+                                        value={newCategoryName}
+                                        onChange={(e) => setNewCategoryName(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreateCategory(); } }}
+                                        autoFocus
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="accent"
+                                        onClick={handleCreateCategory}
+                                        disabled={isCreatingCategory || !newCategoryName.trim()}
+                                    >
+                                        {isCreatingCategory ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={() => setIsAddingCategory(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Years of Experience</label>
@@ -178,8 +234,8 @@ export default function SkillForm({ initialData }: SkillFormProps) {
                                     type="button"
                                     onClick={() => setValue('proficiency', level)}
                                     className={`p-2 rounded-lg transition-colors ${level <= proficiency
-                                            ? 'text-yellow-400 bg-yellow-400/10'
-                                            : 'text-gray-300 hover:text-gray-400'
+                                        ? 'text-yellow-400 bg-yellow-400/10'
+                                        : 'text-gray-300 hover:text-gray-400'
                                         }`}
                                 >
                                     <Star size={24} fill={level <= proficiency ? "currentColor" : "none"} />

@@ -20,9 +20,10 @@ function ScrollTextReveal({ html }: { html: string }) {
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const windowH = window.innerHeight;
-    // Start revealing when element enters viewport, finish when top reaches 20% from top
-    const start = windowH;
-    const end = windowH * 0.2;
+    const elH = el.offsetHeight;
+    // Reveal starts when element enters viewport, finishes when its bottom reaches center
+    const start = windowH * 0.85;
+    const end = -(elH - windowH * 0.5);
     const rawProgress = (start - rect.top) / (start - end);
     setProgress(Math.max(0, Math.min(1, rawProgress)));
   }, []);
@@ -46,23 +47,37 @@ function ScrollTextReveal({ html }: { html: string }) {
 
   return (
     <div ref={containerRef}>
-      {/* Progress bar */}
+      {/* Reading progress bar */}
       <div className="w-full h-1 bg-gray-200 dark:bg-zinc-800 rounded-full mb-6 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full transition-all duration-100"
-          style={{ width: `${progress * 100}%` }}
+          className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full transition-[width] duration-150 ease-out"
+          style={{
+            width: `${progress * 100}%`,
+            boxShadow: progress > 0 ? '0 0 8px rgba(215, 25, 33, 0.5)' : 'none',
+          }}
         />
       </div>
-      <div className="text-lg leading-relaxed text-gray-900 dark:text-white">
+      <div className="text-lg leading-[1.9] text-gray-900 dark:text-white">
         {words.map((word, i) => {
-          const wordProgress = i / totalWords;
-          const isRevealed = progress > wordProgress;
+          const wordPos = i / totalWords;
+          // Smooth reveal with a 3-word lookahead window
+          const revealPoint = wordPos;
+          const fadeRange = 3 / totalWords; // fade over 3 words
+          const wordOpacity = Math.max(0, Math.min(1, (progress - revealPoint) / fadeRange));
+          const yOffset = (1 - wordOpacity) * 12; // slide up 12px
+          const blur = (1 - wordOpacity) * 4; // blur 4px
+
           return (
             <span
               key={i}
-              className={`inline transition-colors duration-300 ${isRevealed ? '' : 'text-gray-300/30 dark:text-gray-600/30'}`}
+              className="inline-block mr-[0.3em] transition-none"
+              style={{
+                opacity: 0.1 + wordOpacity * 0.9,
+                transform: `translateY(${yOffset}px)`,
+                filter: blur > 0.5 ? `blur(${blur}px)` : 'none',
+              }}
             >
-              {word}{' '}
+              {word}
             </span>
           );
         })}
@@ -417,8 +432,8 @@ export default function ProjectDetailPage() {
                     const embedUrl = url.includes("youtube.com/watch")
                       ? url.replace("watch?v=", "embed/")
                       : url.includes("youtu.be/")
-                      ? url.replace("youtu.be/", "www.youtube.com/embed/")
-                      : url;
+                        ? url.replace("youtu.be/", "www.youtube.com/embed/")
+                        : url;
                     return (
                       <div key={i} className="relative aspect-video rounded-lg overflow-hidden">
                         <iframe
@@ -589,11 +604,10 @@ export default function ProjectDetailPage() {
             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800 text-center">
               <button
                 onClick={handleLike}
-                className={`inline-flex flex-col items-center gap-2 px-6 py-4 rounded-xl transition-all ${
-                  hasLiked
+                className={`inline-flex flex-col items-center gap-2 px-6 py-4 rounded-xl transition-all ${hasLiked
                     ? "bg-red-50 dark:bg-red-900/20 text-red-500 border-2 border-red-200 dark:border-red-800"
                     : "bg-gray-50 dark:bg-zinc-800 text-gray-500 border-2 border-gray-200 dark:border-zinc-700 hover:border-red-200 hover:text-red-500"
-                }`}
+                  }`}
               >
                 <Heart
                   className="w-8 h-8"

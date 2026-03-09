@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ThemeProvider, AuthProvider, ToastProvider } from '@/components/providers';
 import { ConditionalNavbar } from '@/components/layout/ConditionalNavbar';
+import NavigationDock from '@/components/layout/NavigationDock';
 import '@fontsource/space-grotesk/300.css';
 import '@fontsource/space-grotesk/400.css';
 import '@fontsource/space-grotesk/500.css';
@@ -38,11 +39,12 @@ export default function RootLayout({
       <head>
         {/* Preconnect for other assets if needed */}
       </head>
-      <body className="font-sans antialiased bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 selection:bg-red-500/30 selection:text-red-500 overflow-x-hidden">
+      <body className="font-sans antialiased bg-[#f5f0eb] dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 selection:bg-red-500/30 selection:text-red-500 transition-colors duration-500">
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
               <ConditionalNavbar />
+              <NavigationDock />
               {children}
             </ToastProvider>
           </AuthProvider>

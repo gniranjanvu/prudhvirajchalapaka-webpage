@@ -46,12 +46,12 @@ export function Footer() {
   }
 
   return (
-    <footer ref={footerRef} className="bg-gray-900 dark:bg-black text-white relative overflow-hidden">
+    <footer ref={footerRef} className="bg-gradient-to-br from-[#e8e0d8] via-[#ede7e0] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#060606] dark:to-[#0a0a0a] text-gray-900 dark:text-white relative overflow-hidden transition-colors duration-500">
       {/* Large Marquee Strip */}
-      <div className="border-y border-gray-800 py-4 bg-gradient-to-r from-gray-900 via-accent/20 to-gray-900 overflow-hidden pause-on-hover group">
+      <div className="border-y border-gray-300/50 dark:border-gray-800 py-4 bg-gradient-to-r from-transparent via-accent/20 to-transparent overflow-hidden pause-on-hover group">
         <div className="flex whitespace-nowrap animate-marquee-seamless group-hover:[animation-play-state:paused]">
           {[...Array(4)].map((_, i) => (
-            <span key={i} className="text-2xl md:text-4xl font-display font-bold px-8 text-white">
+            <span key={i} className="text-2xl md:text-4xl font-display font-bold px-8 text-gray-900 dark:text-white">
               CONNECT WITH ME @ {OWNER_INFO.email} • PRUDHVI RAJ CHALAPAKA •
             </span>
           ))}

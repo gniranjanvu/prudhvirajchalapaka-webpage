@@ -77,8 +77,11 @@ export default function ResumeManagerPage() {
 
         try {
             // Get current user
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Not authenticated');
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) {
+                setError('Authentication failed. Please log in again.');
+                return;
+            }
 
             // Generate unique file name
             const timestamp = Date.now();
@@ -87,17 +90,27 @@ export default function ResumeManagerPage() {
 
             // Upload to Supabase Storage
             const { error: uploadError } = await supabase.storage
-                .from('documents')
+                .from('portfolio')
                 .upload(filePath, file, {
                     contentType: 'application/pdf',
                     upsert: false
                 });
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                // Provide specific error messages
+                if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('not found')) {
+                    setError('Storage bucket "documents" not found. Please create it in Supabase Dashboard → Storage → New Bucket → Name: "documents" → Make it public.');
+                } else if (uploadError.message.includes('policy') || uploadError.message.includes('Unauthorized') || uploadError.message.includes('security')) {
+                    setError('Storage permission denied. Please check RLS policies: allow INSERT for authenticated users on the "documents" bucket.');
+                } else {
+                    setError(`Upload failed: ${uploadError.message}`);
+                }
+                return;
+            }
 
             // Get public URL
             const { data: { publicUrl } } = supabase.storage
-                .from('documents')
+                .from('portfolio')
                 .getPublicUrl(filePath);
 
             // Insert into database
@@ -107,20 +120,28 @@ export default function ResumeManagerPage() {
                     file_url: publicUrl,
                     file_name: file.name,
                     file_size: file.size,
-                    version: version,
-                    is_current: resumes.length === 0, // First upload is current
-                    uploaded_by: user.id
+                    is_current: resumes.length === 0,
                 });
 
-            if (dbError) throw dbError;
+            if (dbError) {
+                // Clean up uploaded file if DB insert fails
+                await supabase.storage.from('portfolio').remove([filePath]);
+
+                if (dbError.message.includes('relation') || dbError.message.includes('does not exist')) {
+                    setError('Database table "resumes" not found. Please create it in Supabase with columns: id, file_url, file_name, file_size, version, is_current, uploaded_by, uploaded_at.');
+                } else {
+                    setError(`Database error: ${dbError.message}`);
+                }
+                return;
+            }
 
             setSuccess('Resume uploaded successfully!');
             setVersion('');
             if (fileInputRef.current) fileInputRef.current.value = '';
             fetchResumes();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Upload error:', err);
-            setError('Failed to upload resume. Make sure the storage bucket exists.');
+            setError(err?.message || 'An unexpected error occurred during upload.');
         } finally {
             setUploading(false);
         }
@@ -160,7 +181,7 @@ export default function ResumeManagerPage() {
 
             // Delete from storage
             await supabase.storage
-                .from('documents')
+                .from('portfolio')
                 .remove([filePath]);
 
             // Delete from database

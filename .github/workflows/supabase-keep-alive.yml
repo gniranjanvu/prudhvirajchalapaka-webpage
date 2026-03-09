@@ -1,0 +1,33 @@
+name: Supabase Keep Alive Cron
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  ping-database:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          echo "Executing keep-alive ping to Supabase..."
+          
+          # We use the anon key to make a simple read query to the database
+          # This counts as activity and prevents the free tier project from pausing
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$SUPABASE_URL/rest/v1/projects?select=id&limit=1" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY")
+            
+          if [ "$RESPONSE" -eq 200 ]; then
+            echo "✅ Successfully pinged Supabase (Status: 200)"
+          else
+            echo "⚠️ Ping completed with status code: $RESPONSE"
+            echo "Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in GitHub Secrets."
+          fi

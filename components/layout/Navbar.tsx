@@ -15,12 +15,9 @@ export function Navbar() {
     const { scrollY } = useScroll()
 
     useMotionValueEvent(scrollY, "change", (latest) => {
-        const previous = scrollY.getPrevious() ?? 0;
-        if (latest > previous && latest > 150) {
-            setIsHidden(true);
-        } else {
-            setIsHidden(false);
-        }
+        // Hide navbar completely once past the hero section (300px scroll)
+        // Only the dock is visible from that point
+        setIsHidden(latest > 300);
         setIsScrolled(latest > 50);
     })
 

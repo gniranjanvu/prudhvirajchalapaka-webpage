@@ -44,7 +44,7 @@ export default function HeroSection() {
       {stickers.map((sticker, i) => (
         <motion.div
           key={sticker.text}
-          className="absolute z-20 px-4 py-2 bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl text-sm font-mono font-bold text-foreground shadow-lg pointer-events-none select-none"
+          className="absolute z-20 px-4 py-2 bg-white/10 dark:bg-black/20 backdrop-blur-md border border-black/10 dark:border-white/20 dark:border-white/10 rounded-xl text-sm font-mono font-bold text-foreground shadow-lg pointer-events-none select-none"
           style={{
             left: sticker.x,
             top: sticker.y,

@@ -207,7 +207,7 @@ function TerminalContactForm() {
   const currentStepConfig = steps[getCurrentStepIndex()];
 
   return (
-    <div className="relative rounded-2xl border border-white/20 shadow-2xl overflow-hidden flex flex-col h-[380px] sm:h-[460px] bg-white/5 dark:bg-black/30 backdrop-blur-xl">
+    <div className="relative rounded-2xl border border-black/10 dark:border-white/20 shadow-2xl overflow-hidden flex flex-col h-[380px] sm:h-[460px] bg-white/5 dark:bg-black/30 backdrop-blur-xl">
       {/* Window Title Bar */}
       <div className="flex items-center justify-between px-4 py-3 bg-white/5 dark:bg-white/5 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-2">
@@ -413,7 +413,7 @@ export default function ContactSection() {
   return (
     <section
       id="contact"
-      className="py-12 sm:py-16 md:py-20 lg:py-32 bg-white dark:bg-black relative overflow-hidden"
+      className="py-12 sm:py-16 md:py-20 lg:py-32 relative overflow-hidden transition-colors duration-500 bg-gradient-to-br from-[#f0ebe5] via-[#ede7e0] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#0e0e0e] dark:to-[#0a0a0a] text-gray-900 dark:text-white"
     >
       <style>{marqueeCSS}</style>
 
@@ -465,7 +465,7 @@ export default function ContactSection() {
           </div>
 
           {/* Content Inner */}
-          <div className="bg-gray-50 dark:bg-zinc-900/50 p-4 sm:p-6 md:p-8 lg:p-12 border border-black/5 dark:border-white/5 relative z-10 m-2 sm:m-3 md:m-4">
+          <div className="bg-white/5 backdrop-blur-2xl p-4 sm:p-6 md:p-8 lg:p-12 border border-white/10 rounded-[2rem] relative z-10 m-2 sm:m-3 md:m-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]">
             <div className="grid md:grid-cols-2 gap-12">
 
               {/* Contact Info */}

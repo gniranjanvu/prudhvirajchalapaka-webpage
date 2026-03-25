@@ -21,5 +21,11 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    cookieOptions: {
+      // By explicitly setting maxAge to undefined and passing no expires,
+      // Supabase's browser client will set a true session cookie that vanishes when the browser is closed.
+      maxAge: undefined as unknown as number,
+    }
+  });
 }

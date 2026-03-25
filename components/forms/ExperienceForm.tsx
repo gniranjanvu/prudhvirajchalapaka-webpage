@@ -22,6 +22,7 @@ interface ExperienceFormData {
     is_current: boolean;
     employment_type: string;
     description: string;
+    short_description: string;
     tech_stack: string[];
     hero_image_url: string;
     certificate_url: string;
@@ -51,6 +52,7 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
             is_current: initialData?.is_current || false,
             employment_type: initialData?.employment_type || 'full-time',
             description: initialData?.description || '',
+            short_description: initialData?.short_description || '',
             tech_stack: initialData?.tech_stack || [],
             hero_image_url: initialData?.hero_image_url || '',
             certificate_url: initialData?.certificate_url || '',
@@ -67,10 +69,10 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
     const onSubmit = async (data: ExperienceFormData) => {
         setIsLoading(true);
         try {
-            const url = initialData?.id 
-                ? `/api/experiences/${initialData.id}` 
+            const url = initialData?.id
+                ? `/api/experiences/${initialData.id}`
                 : '/api/experiences';
-            
+
             const method = initialData?.id ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
@@ -110,7 +112,7 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
 
     const handleDelete = async () => {
         if (!initialData?.id) return;
-        
+
         if (!confirm('Are you sure you want to delete this experience? This action cannot be undone.')) {
             return;
         }
@@ -172,9 +174,9 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                 </Link>
                 <div className="flex gap-3">
                     {initialData?.id && (
-                        <Button 
-                            type="button" 
-                            variant="outline" 
+                        <Button
+                            type="button"
+                            variant="outline"
                             onClick={handleDelete}
                             disabled={isDeleting}
                             className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -200,7 +202,7 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                     <Card>
                         <CardContent className="p-6 space-y-4">
                             <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
-                            
+
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Role / Job Title *</label>
@@ -242,23 +244,35 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                         </CardContent>
                     </Card>
 
-                    {/* Description - Rich Text */}
                     <Card>
                         <CardContent className="p-6 space-y-4">
                             <h3 className="text-lg font-semibold mb-4">Description</h3>
-                            <Controller
-                                name="description"
-                                control={control}
-                                rules={{ required: 'Description is required' }}
-                                render={({ field }) => (
-                                    <RichTextEditor
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        placeholder="Describe your responsibilities, achievements, and key projects..."
-                                    />
-                                )}
-                            />
-                            {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>}
+
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium mb-1">Short Description (for main page cards)</label>
+                                <Input
+                                    {...register('short_description')}
+                                    placeholder="e.g. Led a team of 5 engineers to build autonomous robots..."
+                                />
+                                <p className="text-xs text-gray-500 mt-1">A brief summary shown on the main portfolio page. Keep it concise.</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Detailed Description / Responsibilities</label>
+                                <Controller
+                                    name="description"
+                                    control={control}
+                                    rules={{ required: 'Description is required' }}
+                                    render={({ field }) => (
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Describe your responsibilities, achievements, and key projects..."
+                                        />
+                                    )}
+                                />
+                                {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>}
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -289,8 +303,8 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                             </h3>
                             <div>
                                 <label className="block text-sm font-medium mb-2">Hero Image URL</label>
-                                <Input 
-                                    {...register('hero_image_url')} 
+                                <Input
+                                    {...register('hero_image_url')}
                                     placeholder="https://example.com/image.jpg or upload below"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">This image will be displayed on the experience card</p>
@@ -343,7 +357,7 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-500">Add YouTube or other video URLs</p>
-                            
+
                             {videoUrls && videoUrls.length > 0 ? (
                                 <div className="space-y-3">
                                     {videoUrls.map((url, index) => (
@@ -354,9 +368,9 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                                                 placeholder="https://youtube.com/watch?v=..."
                                                 className="flex-1"
                                             />
-                                            <Button 
-                                                type="button" 
-                                                variant="outline" 
+                                            <Button
+                                                type="button"
+                                                variant="outline"
                                                 size="sm"
                                                 onClick={() => removeVideoUrl(index)}
                                                 className="text-red-500"
@@ -379,7 +393,7 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                     <Card>
                         <CardContent className="p-6 space-y-4">
                             <h3 className="text-lg font-semibold">Timeline</h3>
-                            
+
                             <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                                 <input
                                     type="checkbox"
@@ -393,9 +407,9 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                             <div className="space-y-4">
                                 <div>
                                     <label className="text-sm text-gray-500">Start Date *</label>
-                                    <Input 
-                                        type="date" 
-                                        {...register('start_date', { required: 'Start date is required' })} 
+                                    <Input
+                                        type="date"
+                                        {...register('start_date', { required: 'Start date is required' })}
                                     />
                                     {errors.start_date && <p className="text-sm text-red-500 mt-1">{errors.start_date.message}</p>}
                                 </div>
@@ -403,9 +417,9 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                                 {!isCurrent && (
                                     <div className="animate-fade-in">
                                         <label className="text-sm text-gray-500">End Date</label>
-                                        <Input 
-                                            type="date" 
-                                            {...register('end_date')} 
+                                        <Input
+                                            type="date"
+                                            {...register('end_date')}
                                         />
                                     </div>
                                 )}
@@ -422,8 +436,8 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                             </h3>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Certificate URL</label>
-                                <Input 
-                                    {...register('certificate_url')} 
+                                <Input
+                                    {...register('certificate_url')}
                                     placeholder="https://example.com/certificate.pdf"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Link to your work certificate or letter</p>
@@ -435,12 +449,12 @@ export default function ExperienceForm({ initialData }: ExperienceFormProps) {
                     <Card>
                         <CardContent className="p-6 space-y-4">
                             <h3 className="text-lg font-semibold">Display Settings</h3>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium mb-1">Display Order</label>
-                                <Input 
-                                    type="number" 
-                                    {...register('display_order', { valueAsNumber: true })} 
+                                <Input
+                                    type="number"
+                                    {...register('display_order', { valueAsNumber: true })}
                                     placeholder="0"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>

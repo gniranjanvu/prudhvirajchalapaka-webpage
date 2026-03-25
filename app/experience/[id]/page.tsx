@@ -149,7 +149,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
   const otherExperiences = allExperiences.filter(exp => exp.id !== resolvedParams.id);
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white pt-24">
+    <main className="min-h-screen bg-gradient-to-br from-[#f0ebe5] via-[#ede7e0] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#0e0e0e] dark:to-[#0a0a0a] text-gray-900 dark:text-white pt-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Back Button */}
         <motion.div
@@ -260,11 +260,11 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
             className="lg:col-span-2 space-y-8"
           >
             {/* Description */}
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800 shadow-sm">
+            <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-black/10 dark:border-white/10 shadow-xl">
               <h2 className="text-2xl font-bold font-display mb-6">About This Role</h2>
               {experience.description ? (
                 <div 
-                  className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
+                  className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 [&_*]:!text-[inherit] [&_*]:!bg-[transparent]"
                   dangerouslySetInnerHTML={{ __html: experience.description }}
                 />
               ) : (
@@ -274,7 +274,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
 
             {/* Gallery Section */}
             {experience.gallery_urls && experience.gallery_urls.length > 0 && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800 shadow-sm">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-black/10 dark:border-white/10 shadow-xl">
                 <h2 className="text-2xl font-bold font-display mb-6 flex items-center gap-3">
                   <ImageIcon className="w-6 h-6 text-accent" />
                   Gallery
@@ -302,7 +302,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
 
             {/* Video Section */}
             {experience.video_urls && experience.video_urls.length > 0 && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800 shadow-sm">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-black/10 dark:border-white/10 shadow-xl">
                 <h2 className="text-2xl font-bold font-display mb-6 flex items-center gap-3">
                   <Play className="w-6 h-6 text-accent" />
                   Videos
@@ -333,7 +333,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
           >
             {/* Technologies Card */}
             {experience.tech_stack && experience.tech_stack.length > 0 && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800 shadow-sm">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-6 border border-black/10 dark:border-white/10 shadow-xl">
                 <h3 className="text-lg font-bold font-display mb-4">Technologies Used</h3>
                 <div className="flex flex-wrap gap-2">
                   {experience.tech_stack.map((tech) => (
@@ -349,7 +349,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
             )}
 
             {/* Quick Info Card */}
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800 shadow-sm">
+            <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-6 border border-black/10 dark:border-white/10 shadow-xl">
               <h3 className="text-lg font-bold font-display mb-4">Quick Info</h3>
               <div className="space-y-3">
                 {experience.employment_type && (
@@ -375,7 +375,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
 
             {/* Certificate Card */}
             {experience.certificate_url && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800 shadow-sm">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-6 border border-black/10 dark:border-white/10 shadow-xl">
                 <h3 className="text-lg font-bold font-display mb-4 flex items-center gap-2">
                   <Award className="w-5 h-5 text-accent" />
                   Certificate
@@ -408,7 +408,7 @@ export default function ExperiencePage({ params }: ExperiencePageProps) {
                 <Link
                   key={exp.id}
                   href={`/experience/${exp.id}`}
-                  className="group bg-white dark:bg-zinc-900 rounded-xl p-6 border border-gray-200 dark:border-zinc-800 hover:border-accent/50 transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="group bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-xl p-6 border border-black/10 dark:border-white/10 hover:border-accent/50 transition-all duration-300 shadow-xl hover:shadow-2xl"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-accent/20 to-purple-500/20 rounded-lg flex items-center justify-center group-hover:from-accent group-hover:to-purple-600 transition-all duration-300">

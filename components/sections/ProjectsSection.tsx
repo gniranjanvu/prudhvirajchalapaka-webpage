@@ -187,7 +187,7 @@ export default function ProjectsSection() {
         {projects.map((project, index) => (
           <div
             key={index}
-            className="group relative h-[50vh] sm:h-[55vh] md:h-[55vh] lg:h-[60vh] min-h-[350px] w-[85vw] sm:w-[70vw] md:w-[50vw] lg:w-[35vw] xl:w-[30vw] shrink-0 bg-white/5 backdrop-blur-2xl rounded-[2rem] overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-500 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] hover:shadow-[0_16px_48px_0_rgba(0,0,0,0.5)]"
+            className="group relative h-[50vh] sm:h-[55vh] md:h-[55vh] lg:h-[60vh] min-h-[350px] w-[85vw] sm:w-[70vw] md:w-[50vw] lg:w-[35vw] xl:w-[30vw] shrink-0 bg-white/60 dark:bg-white/5 backdrop-blur-2xl rounded-[2rem] overflow-hidden border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 transition-all duration-500 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] hover:shadow-[0_16px_48px_0_rgba(0,0,0,0.5)]"
           >
             {/* Background Gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500`} />
@@ -209,7 +209,7 @@ export default function ProjectsSection() {
 
               <div className="flex flex-wrap gap-2 mb-4 sm:mb-6 md:mb-8">
                 {project.tech.map((t, i) => (
-                  <span key={i} className="px-2.5 py-1 bg-white/5 backdrop-blur-md rounded-lg text-xs text-gray-300 font-mono border border-white/10">#{t}</span>
+                  <span key={i} className="px-2.5 py-1 bg-white/50 dark:bg-white/5 backdrop-blur-md rounded-lg text-xs text-gray-700 dark:text-gray-300 font-mono border border-black/10 dark:border-white/10">#{t}</span>
                 ))}
               </div>
 
@@ -244,7 +244,7 @@ export default function ProjectsSection() {
         {projects.map((project, index) => (
           <div
             key={index}
-            className="group relative min-h-[350px] w-full bg-white/5 backdrop-blur-2xl rounded-[2rem] overflow-hidden border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]"
+            className="group relative min-h-[350px] w-full bg-white/50 dark:bg-white/5 backdrop-blur-2xl rounded-[2rem] overflow-hidden border border-black/10 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]"
           >
             {/* Background Gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-[0.08]`} />
@@ -265,13 +265,13 @@ export default function ProjectsSection() {
 
               <div className="flex flex-wrap gap-2 mb-4">
                 {project.tech.map((t, i) => (
-                  <span key={i} className="px-2.5 py-1 bg-white/5 backdrop-blur-md rounded-lg text-xs text-gray-300 font-mono border border-white/10">#{t}</span>
+                  <span key={i} className="px-2.5 py-1 bg-white/50 dark:bg-white/5 backdrop-blur-md rounded-lg text-xs text-gray-700 dark:text-gray-300 font-mono border border-black/10 dark:border-white/10">#{t}</span>
                 ))}
               </div>
 
               <div className="flex items-center gap-4">
                 <Link href={project.link}>
-                  <Button className="rounded-full bg-white text-black hover:bg-gray-200 border-none px-6">View Project <ArrowRight className="ml-2 w-4 h-4" /></Button>
+                  <Button className="rounded-full bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-700 dark:hover:bg-gray-200 border-none px-6">View Project <ArrowRight className="ml-2 w-4 h-4" /></Button>
                 </Link>
               </div>
             </div>

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Textarea } from '@/components/ui/Textarea';
 import TagsInput from '@/components/ui/TagsInput';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import { useToast } from '@/components/ui/toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -32,6 +33,7 @@ export default function EducationForm({ initialData }: EducationFormProps) {
             isCurrent: false,
             grade: '', // CGPA/Percentage
             heroImageUrl: '', // Hero image URL
+            shortDescription: '',
             description: '',
             keyCourses: [] // Tags
         }
@@ -60,6 +62,7 @@ export default function EducationForm({ initialData }: EducationFormProps) {
                     grade: data.grade || null,
                     location: data.location || null,
                     hero_image_url: data.heroImageUrl || null,
+                    short_description: data.shortDescription || null,
                     description: data.description || null,
                     key_courses: data.keyCourses || [],
                     is_published: true,
@@ -152,11 +155,26 @@ export default function EducationForm({ initialData }: EducationFormProps) {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Description / Activities</label>
-                                <Textarea
-                                    {...register('description')}
-                                    placeholder="Describe your achievements, clubs, etc..."
-                                    className="min-h-[120px]"
+                                <label className="block text-sm font-medium mb-1">Short Description (for main page cards)</label>
+                                <Input
+                                    {...register('shortDescription')}
+                                    placeholder="e.g. Majored in Robotics with a focus on AI..."
+                                />
+                                <p className="text-xs text-gray-500 mt-1">A brief summary shown on the main portfolio page. Keep it concise.</p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Detailed Description / Activities</label>
+                                <Controller
+                                    name="description"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Describe your achievements, clubs, etc..."
+                                        />
+                                    )}
                                 />
                             </div>
 

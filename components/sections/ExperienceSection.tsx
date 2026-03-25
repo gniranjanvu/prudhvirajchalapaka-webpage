@@ -25,6 +25,7 @@ interface DBExperience {
   is_current: boolean;
   employment_type?: string;
   description?: string;
+  short_description?: string;
   tech_stack?: string[];
   is_published?: boolean;
 }
@@ -343,10 +344,10 @@ export default function ExperienceSection() {
 
                 <h4 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 text-gray-900 dark:text-white">{exp.role}</h4>
 
-                {exp.description && (
+                {(exp.short_description || exp.description) && (
                   <div
-                    className="text-gray-700 dark:text-gray-300 text-base md:text-lg leading-relaxed mb-8 prose prose-gray dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: exp.description }}
+                    className="text-gray-700 dark:text-gray-300 text-base md:text-lg leading-relaxed mb-8 prose prose-gray dark:prose-invert max-w-none line-clamp-4"
+                    dangerouslySetInnerHTML={{ __html: exp.short_description || exp.description || '' }}
                   />
                 )}
 

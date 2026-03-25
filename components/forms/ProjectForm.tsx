@@ -51,6 +51,7 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
             content: '', // Full description (Rich Text)
             technologies: [],
             images: [],
+            videos: [], // Video URLs
             heroImage: '', // Hero image URL
             githubUrl: '',
             demoUrl: '',
@@ -91,6 +92,7 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
                     full_description: data.content,
                     tech_stack: data.technologies,
                     gallery_urls: data.images,
+                    video_urls: data.videos,
                     hero_image_url: data.heroImage || null,
                     github_url: data.githubUrl,
                     demo_url: data.demoUrl,
@@ -234,6 +236,24 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
                                     />
                                 )}
                             />
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="p-6">
+                            <label className="block text-sm font-medium mb-4">Video URLs</label>
+                            <Controller
+                                name="videos"
+                                control={control}
+                                render={({ field }) => (
+                                    <TagsInput
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Add YouTube/Vimeo/MP4 link..."
+                                    />
+                                )}
+                            />
+                            <p className="text-xs text-gray-400 mt-2">Press enter to add multiple video links. Supports YouTube, Vimeo, Loom, and direct MP4/WebM files.</p>
                         </CardContent>
                     </Card>
                 </div>

@@ -15,34 +15,35 @@ export function Navbar() {
     const { scrollY } = useScroll()
 
     useMotionValueEvent(scrollY, "change", (latest) => {
-        // Hide navbar completely once past the hero section (300px scroll)
-        // Only the dock is visible from that point
-        setIsHidden(latest > 300);
-        setIsScrolled(latest > 50);
+        // Hide navbar in the hero section, show it ONLY after scrolling down a bit
+        // We use a safe value like 500px, or we can just check if we are past the hero
+        setIsHidden(latest < 300);
+        setIsScrolled(true); // Always use the pill design when visible
     })
 
-    const scrollToSection = useCallback((sectionId: string, offset: number = -100) => {
+    const handleNavClick = useCallback((href: string) => {
+        if (window.location.pathname !== '/') {
+            // If not on the main page, navigate to the main page with hash
+            window.location.href = `/${href}`;
+            return;
+        }
+
+        const sectionId = href.replace('#', '');
         const element = document.getElementById(sectionId);
+
         if (element) {
-            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({
-                top: elementPosition + offset,
-                behavior: 'smooth'
-            });
+            // For GSAP pinned sections, native scrollIntoView works better or direct hash update
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Alternatively, push state to update URL
+            window.history.pushState(null, '', href);
         }
     }, []);
 
-    const handleNavClick = useCallback((href: string, offset: number = -100) => {
-        const sectionId = href.replace('#', '');
-        scrollToSection(sectionId, offset);
-    }, [scrollToSection]);
-
     const handleMobileNavClick = useCallback((href: string) => {
         setMobileMenuOpen(false);
-        // Small delay to allow menu close animation
         setTimeout(() => {
-            handleNavClick(href, -50);
-        }, 100);
+            handleNavClick(href);
+        }, 300); // Wait for menu out animation
     }, [handleNavClick]);
 
     return (
@@ -53,17 +54,18 @@ export function Navbar() {
                     : 'py-6 bg-transparent'
                     }`}
                 variants={{
-                    visible: { y: 0 },
-                    hidden: { y: -100 },
+                    visible: { y: 0, opacity: 1 },
+                    hidden: { y: -100, opacity: 0 },
                 }}
+                initial="hidden"
                 animate={isHidden ? "hidden" : "visible"}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
             >
                 <div className="w-full px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-4">
 
-                        {/* Logo - Only visible when NOT scrolled */}
-                        <Link href="/" className={`group relative transition-all duration-300 ${isScrolled ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
+                        {/* Logo - Hide since we only show pill */}
+                        <Link href="/" className="hidden">
                             <span className="font-display font-bold text-xl tracking-wider text-gray-900 dark:text-white group-hover:text-accent transition-colors whitespace-nowrap">
                                 [PRUDHVI]
                             </span>

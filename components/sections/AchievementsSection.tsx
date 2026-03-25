@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { ACHIEVEMENTS } from "@/lib/constants";
 import { Trophy } from "lucide-react";
 
@@ -40,6 +40,38 @@ export default function AchievementsSection() {
     };
     fetchAchievements();
   }, []);
+
+    const [isHovered, setIsHovered] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const xTranslation = useMotionValue(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Constant velocity: roughly 50 pixels per second rightwards for reverse marquee
+    const velocity = 50; 
+
+    useAnimationFrame((t, delta) => {
+        if (isHovered || isDragging) return;
+        
+        if (containerRef.current) {
+            const fullWidth = containerRef.current.scrollWidth;
+            const halfWidth = fullWidth / 2;
+            
+            let moveBy = velocity * (delta / 1000);
+            let newX = xTranslation.get() + moveBy;
+            
+            // If scrolled right past 0, snap back to half
+            if (newX > 0) {
+                newX -= halfWidth;
+            } 
+            // If dragged left past half, snap back to 0
+            else if (newX <= -halfWidth) {
+                newX += halfWidth;
+            }
+            
+            xTranslation.set(newX);
+        }
+    });
+
   return (
     <section id="achievements" className="py-20 overflow-hidden border-t border-gray-200/50 dark:border-white/5 relative transition-colors duration-500 bg-gradient-to-br from-[#f0ebe5] via-[#ede7e0] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#0e0e0e] dark:to-[#0a0a0a]" style={{ zIndex: 2 }}>
       {/* Decorative Background Blobs */}
@@ -67,8 +99,17 @@ export default function AchievementsSection() {
         </motion.p>
       </div>
 
-      <div className="flex overflow-hidden relative pause-on-hover group/container">
-        <div className="flex animate-marquee-seamless-reverse hover:[animation-play-state:paused]">
+      <div className="flex overflow-hidden relative">
+        <motion.div 
+            ref={containerRef}
+            className="flex w-max cursor-grab active:cursor-grabbing"
+            style={{ x: xTranslation }}
+            drag="x"
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={() => setIsDragging(false)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
           {Array.from({ length: 3 }, () => achievements).flat().map((item, i) => (
             <div
               key={`ach-a-${i}`}
@@ -131,7 +172,7 @@ export default function AchievementsSection() {
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

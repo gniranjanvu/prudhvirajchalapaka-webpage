@@ -31,6 +31,9 @@ export default function RecommendationsAdminPage() {
 
     // Form state
     const [email, setEmail] = useState('');
+    const [reviewerName, setReviewerName] = useState('');
+    const [reviewerTitle, setReviewerTitle] = useState('');
+    const [includeSir, setIncludeSir] = useState(false);
     const [message, setMessage] = useState('');
 
     const fetchRecommendations = async () => {
@@ -76,6 +79,9 @@ export default function RecommendationsAdminPage() {
             });
 
             setEmail('');
+            setReviewerName('');
+            setReviewerTitle('');
+            setIncludeSir(false);
             setMessage('');
             fetchRecommendations();
 
@@ -147,15 +153,19 @@ export default function RecommendationsAdminPage() {
         toast({ title: 'Copied!', description: 'Link copied to clipboard', type: 'success' });
     };
 
-    const sendEmail = (email: string, token: string, customMessage: string | null) => {
-        const link = `${window.location.origin}/recommend/submit?token=${token}`;
-        const subject = encodeURIComponent("Recommendation Request for Prudhviraj Chalapaka");
-        const bodyContent = customMessage
-            ? `${customMessage}\n\nHere is the secure link to submit your recommendation:\n${link}\n\nThank you!`
-            : `Hi,\n\nI would greatly appreciate it if you could write a brief recommendation for my portfolio. You can use the secure link below to submit it:\n\n${link}\n\nThank you!`;
-
-        const body = encodeURIComponent(bodyContent);
-        window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+    const sendEmail = async (email: string, token: string, customMessage: string | null) => {
+        try {
+            const res = await fetch('/api/recommendations/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, token, customMessage, reviewerName, reviewerTitle, includeSir })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to send email');
+            toast({ title: 'Email Sent!', description: 'The recommendation request has been dispatched.', type: 'success' });
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message, type: 'error' });
+        }
     };
 
     const getStatusVariant = (status: string) => {
@@ -199,7 +209,36 @@ export default function RecommendationsAdminPage() {
                                     onChange={e => setEmail(e.target.value)}
                                 />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-4 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Reviewer's Name</label>
+                                    <Input
+                                        placeholder="e.g. John Doe, Dr. Smith"
+                                        value={reviewerName}
+                                        onChange={e => setReviewerName(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium flex items-center justify-between">
+                                        <span>Professional Title / Role</span>
+                                        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-gray-300"
+                                                checked={includeSir}
+                                                onChange={e => setIncludeSir(e.target.checked)}
+                                            />
+                                            Append "Sir/Madam"
+                                        </label>
+                                    </label>
+                                    <Input
+                                        placeholder="e.g. Professor, CEO, Senior Engineer"
+                                        value={reviewerTitle}
+                                        onChange={e => setReviewerTitle(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
                                 <label className="text-sm font-medium">Custom Message (Optional)</label>
                                 <Input
                                     placeholder="Hi! Would you mind writing a quick recommendation?"

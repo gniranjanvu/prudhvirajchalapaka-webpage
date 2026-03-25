@@ -5,6 +5,7 @@ export interface SkillPayload {
   category_id: string;
   name: string;
   icon_url?: string;
+  hero_image_url?: string;
   proficiency?: number;
   years_experience?: number;
   display_order?: number;

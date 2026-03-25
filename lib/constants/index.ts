@@ -1,7 +1,7 @@
 export const OWNER_INFO = {
   name: 'Prudhvi Raj Chalapaka',
   title: 'Robotics & Automation Engineer',
-  email: 'prudhvirajchalapaka07@gmail.com',
+  email: 'me@prudhvirajchalapaka.in',
   phone: '+91 7995511692',
   location: 'Guntur, India',
   website: 'prudhvirajchalapaka.in',
@@ -31,6 +31,7 @@ export const HERO_STICKERS = [
 
 export const NAV_LINKS = [
   { label: 'Home', href: '#home' },
+  { label: 'About', href: '#about' },
   { label: 'Experience', href: '#experience' },
   { label: 'Education', href: '#education' },
   { label: 'Projects', href: '#projects' },

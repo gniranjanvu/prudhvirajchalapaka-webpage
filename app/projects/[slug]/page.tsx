@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 import {
   ArrowLeft, Github, ExternalLink, Heart, MessageCircle, Eye,
   Loader2, AlertCircle, Send, Star, Calendar, Tag
@@ -13,76 +13,70 @@ import { Footer } from "@/components/layout/Footer";
 /* ── Scroll-triggered text reveal component ── */
 function ScrollTextReveal({ html }: { html: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
 
-  const handleScroll = useCallback(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const windowH = window.innerHeight;
-    const elH = el.offsetHeight;
-    // Reveal starts when element enters viewport, finishes when its bottom reaches center
-    const start = windowH * 0.85;
-    const end = -(elH - windowH * 0.5);
-    const rawProgress = (start - rect.top) / (start - end);
-    setProgress(Math.max(0, Math.min(1, rawProgress)));
-  }, []);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    // Start revealing when the top of the container hits 85% of the viewport.
+    // Finish revealing when the bottom of the container hits 55% of the viewport (ends earlier so text is fully visible faster).
+    offset: ["start 85%", "end 55%"]
+  });
 
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+  const { processedHtml, totalWords } = useMemo(() => {
+    let globalWordIndex = 0;
+    // Split the HTML exactly by its HTML tags so we don't break the formatting
+    const parts = html.split(/(<[^>]+>)/);
 
-  // Decode HTML to plain text safely
-  const decodeHTML = (htmlStr: string) => {
-    if (typeof DOMParser === 'undefined') return htmlStr.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    const doc = new DOMParser().parseFromString(htmlStr, 'text/html');
-    return doc.body.textContent || '';
-  };
+    const processedParts = parts.map(part => {
+      // Return HTML tags entirely untouched so the browser parses them correctly
+      if (part.startsWith('<') && part.endsWith('>')) {
+        return part;
+      }
 
-  const plainText = decodeHTML(html);
-  const words = plainText.split(/\s+/).filter(Boolean);
-  const totalWords = words.length;
+      // It's a text node. Split it cleanly by spaces while preserving the spaces.
+      const wordsAndSpaces = part.split(/(\s+)/);
+      return wordsAndSpaces.map(word => {
+        if (!word.trim()) return word; // Keep whitespace intact without wrapping
+
+        const index = globalWordIndex++;
+        // Use a perfectly optimized inline style to calculate this specific word's animation state purely via CSS calculation, driven by the parent's generic --scroll-progress. 
+        // We add a +10 buffer to total_words and divide by 5 (tighter fade window) to guarantee the last word reaches 100% before the scroll completely finishes.
+        return `<span style="--word-index: ${index}; --progress: clamp(0, (var(--scroll-progress) * (var(--total-words) + 10) - var(--word-index)) / 5, 1); opacity: calc(0.1 + 0.9 * var(--progress)); filter: blur(calc((1 - var(--progress)) * 4px)); transform: translateY(calc((1 - var(--progress)) * 6px)); display: inline-block; transition: opacity 0.1s ease-out, transform 0.1s ease-out, filter 0.1s ease-out; will-change: opacity, transform, filter;">${word}</span>`;
+      }).join('');
+    });
+
+    return {
+      processedHtml: processedParts.join(''),
+      totalWords: globalWordIndex
+    };
+  }, [html]);
+
+  const fillPct = useTransform(scrollYProgress, [0, 1], [0, 100]);
+
+  // Common typography styles for the rich text from TipTap
+  const proseClasses = "text-lg leading-[1.9] max-w-none [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-6 [&>ul>li]:mb-2 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-6 [&>ol>li]:mb-2 [&>h1]:text-4xl [&>h1]:font-bold [&>h1]:mb-4 [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:mb-4 [&>h3]:text-2xl [&>h3]:font-bold [&>h3]:mb-3 [&>p]:mb-6 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_*]:!text-[inherit] [&_*]:!bg-[transparent]";
 
   return (
-    <div ref={containerRef}>
+    <motion.div
+      ref={containerRef}
+      className="relative w-full"
+      style={{
+        "--scroll-progress": scrollYProgress,
+        "--total-words": totalWords
+      } as any}
+    >
       {/* Reading progress bar */}
-      <div className="w-full h-1 bg-gray-200 dark:bg-zinc-800 rounded-full mb-6 overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full transition-[width] duration-150 ease-out"
-          style={{
-            width: `${progress * 100}%`,
-            boxShadow: progress > 0 ? '0 0 8px rgba(215, 25, 33, 0.5)' : 'none',
-          }}
+      <div className="w-full h-1 bg-gray-200 dark:bg-zinc-800 rounded-full mb-8 overflow-hidden">
+        <motion.div
+          className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full shadow-[0_0_8px_rgba(215,25,33,0.5)]"
+          style={{ width: useMotionTemplate`${fillPct}%` }}
         />
       </div>
-      <div className="text-lg leading-[1.9] text-gray-900 dark:text-white">
-        {words.map((word, i) => {
-          const wordPos = i / totalWords;
-          // Smooth reveal with a 3-word lookahead window
-          const revealPoint = wordPos;
-          const fadeRange = 3 / totalWords; // fade over 3 words
-          const wordOpacity = Math.max(0, Math.min(1, (progress - revealPoint) / fadeRange));
-          const yOffset = (1 - wordOpacity) * 12; // slide up 12px
-          const blur = (1 - wordOpacity) * 4; // blur 4px
 
-          return (
-            <span
-              key={i}
-              className="inline-block mr-[0.3em] transition-none"
-              style={{
-                opacity: 0.1 + wordOpacity * 0.9,
-                transform: `translateY(${yOffset}px)`,
-                filter: blur > 0.5 ? `blur(${blur}px)` : 'none',
-              }}
-            >
-              {word}
-            </span>
-          );
-        })}
-      </div>
-    </div>
+      <div
+        className={`text-gray-900 dark:text-white ${proseClasses}`}
+        dangerouslySetInnerHTML={{ __html: processedHtml }}
+      />
+    </motion.div>
   );
 }
 
@@ -120,7 +114,8 @@ interface Comment {
 
 export default function ProjectDetailPage() {
   const params = useParams();
-  const slug = params?.slug as string;
+  const rawSlug = params?.slug as string;
+  const slug = rawSlug ? decodeURIComponent(rawSlug) : "";
 
   const [project, setProject] = useState<Project | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -153,18 +148,27 @@ export default function ProjectDetailPage() {
     const fetchProject = async () => {
       try {
         setIsLoading(true);
-        // Fetch by slug using the projects API
-        const response = await fetch(`/api/projects?slug=${encodeURIComponent(slug)}`);
+
+        // Fetch all projects and do the filtering client-side for absolute safety with URL encodings
+        // The API route doesn't strict-match well if there are encoding nuances, so fetch all
+        const response = await fetch(`/api/projects`);
         const result = await response.json();
 
         if (!response.ok || !result.success) {
           throw new Error(result.error || "Project not found");
         }
 
-        // API returns array, find matching slug
+        // API returns array, find matching slug with extremely robust fallback for encoded spaces, trailing spaces, and case differences
+        const targetSlug = slug.trim().toLowerCase();
         const found = Array.isArray(result.data)
-          ? result.data.find((p: Project) => p.slug === slug)
-          : result.data;
+          ? result.data.find((p: Project) => {
+            if (!p.slug) return false;
+            const pSlug = p.slug.trim().toLowerCase();
+            return pSlug === targetSlug ||
+              pSlug === rawSlug.toLowerCase() ||
+              encodeURIComponent(p.slug).toLowerCase() === rawSlug.toLowerCase();
+          })
+          : null;
 
         if (!found) {
           throw new Error("Project not found");
@@ -252,7 +256,7 @@ export default function ProjectDetailPage() {
 
   if (error || !project) {
     return (
-      <main className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white pt-24">
+      <main className="min-h-screen bg-gradient-to-br from-[#f0ebe5] via-[#ede7e0] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#0e0e0e] dark:to-[#0a0a0a] text-gray-900 dark:text-white pt-24">
         <div className="container mx-auto px-4 py-12 text-center">
           <AlertCircle className="w-12 h-12 mx-auto text-red-500 mb-4" />
           <h1 className="text-2xl font-bold mb-2">Project Not Found</h1>
@@ -270,7 +274,7 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white">
+    <main className="min-h-screen bg-gradient-to-br from-[#f0ebe5] via-[#ede7e0] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#0e0e0e] dark:to-[#0a0a0a] text-gray-900 dark:text-white">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-b from-black to-gray-900 pt-24 pb-16">
         {project.hero_image_url && (
@@ -391,7 +395,7 @@ export default function ProjectDetailPage() {
           <div className="lg:col-span-2 space-y-8">
             {/* Full Description */}
             {project.full_description && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-black/10 dark:border-white/10 shadow-xl">
                 <h2 className="text-xl font-bold font-display mb-4">About this project</h2>
                 <ScrollTextReveal html={project.full_description} />
               </div>
@@ -399,7 +403,7 @@ export default function ProjectDetailPage() {
 
             {/* Gallery */}
             {project.gallery_urls && project.gallery_urls.length > 0 && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-black/10 dark:border-white/10 shadow-xl">
                 <h2 className="text-xl font-bold font-display mb-4">Gallery</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {project.gallery_urls.map((url, i) => (
@@ -420,20 +424,44 @@ export default function ProjectDetailPage() {
 
             {/* Videos */}
             {project.video_urls && project.video_urls.length > 0 && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-black/10 dark:border-white/10 shadow-xl">
                 <h2 className="text-xl font-bold font-display mb-4">Videos</h2>
                 <div className="space-y-4">
                   {project.video_urls.map((url, i) => {
-                    // Only embed trusted video domains
-                    const TRUSTED_DOMAINS = ["youtube.com", "youtu.be", "vimeo.com", "loom.com"];
-                    const isTrusted = TRUSTED_DOMAINS.some(d => url.includes(d));
-                    if (!isTrusted) return null;
-                    // Convert YouTube watch URL to embed URL
-                    const embedUrl = url.includes("youtube.com/watch")
-                      ? url.replace("watch?v=", "embed/")
-                      : url.includes("youtu.be/")
-                        ? url.replace("youtu.be/", "www.youtube.com/embed/")
-                        : url;
+                    // Check if it's a direct HTML5 video link
+                    const isHTML5Video = url.match(/\.(mp4|webm|ogg)$/i) || url.includes('.mp4?');
+
+                    if (isHTML5Video) {
+                      return (
+                        <div key={i} className="relative aspect-video rounded-lg overflow-hidden bg-black/5 dark:bg-black/20">
+                          <video
+                            src={url}
+                            controls
+                            className="w-full h-full object-contain"
+                            preload="metadata"
+                          />
+                        </div>
+                      );
+                    }
+
+                    // Otherwise try to create an embed URL
+                    let embedUrl = url;
+                    try {
+                      // Attempt to parse out known platforms. If unknown, we still render the iframe as fallback.
+                      const urlObj = new URL(url);
+                      if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+                        const videoId = urlObj.searchParams.get('v') || urlObj.pathname.split('/').filter(Boolean).pop();
+                        if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                      } else if (urlObj.hostname.includes('vimeo.com')) {
+                        const videoId = urlObj.pathname.split('/').filter(Boolean).pop();
+                        if (videoId) embedUrl = `https://player.vimeo.com/video/${videoId}`;
+                      } else if (urlObj.hostname.includes('loom.com')) {
+                        embedUrl = url.replace('/share/', '/embed/');
+                      }
+                    } catch (e) {
+                      // Do nothing, just use original url
+                    }
+
                     return (
                       <div key={i} className="relative aspect-video rounded-lg overflow-hidden">
                         <iframe
@@ -441,6 +469,7 @@ export default function ProjectDetailPage() {
                           title={`Video ${i + 1}`}
                           className="w-full h-full"
                           allowFullScreen
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         />
                       </div>
                     );
@@ -450,7 +479,7 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Comments Section */}
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-gray-200 dark:border-zinc-800">
+            <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-8 border border-black/10 dark:border-white/10 shadow-xl">
               <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-accent" />
                 Comments ({comments.length})
@@ -583,7 +612,7 @@ export default function ProjectDetailPage() {
           <div className="space-y-6">
             {/* Tech Stack */}
             {project.tech_stack && project.tech_stack.length > 0 && (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800">
+              <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-6 border border-black/10 dark:border-white/10 shadow-xl">
                 <h3 className="font-bold mb-4 text-sm uppercase tracking-wide text-gray-500">
                   Tech Stack
                 </h3>
@@ -601,12 +630,12 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Like Button */}
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800 text-center">
+            <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-6 border border-black/10 dark:border-white/10 shadow-xl text-center">
               <button
                 onClick={handleLike}
                 className={`inline-flex flex-col items-center gap-2 px-6 py-4 rounded-xl transition-all ${hasLiked
-                    ? "bg-red-50 dark:bg-red-900/20 text-red-500 border-2 border-red-200 dark:border-red-800"
-                    : "bg-gray-50 dark:bg-zinc-800 text-gray-500 border-2 border-gray-200 dark:border-zinc-700 hover:border-red-200 hover:text-red-500"
+                  ? "bg-red-50 dark:bg-red-900/20 text-red-500 border-2 border-red-200 dark:border-red-800"
+                  : "bg-gray-50 dark:bg-zinc-800 text-gray-500 border-2 border-gray-200 dark:border-zinc-700 hover:border-red-200 hover:text-red-500"
                   }`}
               >
                 <Heart
@@ -619,7 +648,7 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Links */}
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800">
+            <div className="bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl p-6 border border-black/10 dark:border-white/10 shadow-xl">
               <h3 className="font-bold mb-4 text-sm uppercase tracking-wide text-gray-500">
                 Links
               </h3>
@@ -666,7 +695,7 @@ export default function ProjectDetailPage() {
             {/* Back to Projects */}
             <Link
               href="/projects"
-              className="flex items-center justify-center gap-2 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 hover:border-accent/50 transition-colors text-sm font-medium"
+              className="flex items-center justify-center gap-2 p-4 bg-white/40 dark:bg-white/5 backdrop-blur-2xl rounded-2xl border border-black/10 dark:border-white/10 hover:border-accent/50 transition-colors text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" /> Back to All Projects
             </Link>

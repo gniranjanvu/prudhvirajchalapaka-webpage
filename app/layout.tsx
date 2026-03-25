@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { ThemeProvider, AuthProvider, ToastProvider } from '@/components/providers';
-import { ConditionalNavbar } from '@/components/layout/ConditionalNavbar';
 import NavigationDock from '@/components/layout/NavigationDock';
 import '@fontsource/space-grotesk/300.css';
 import '@fontsource/space-grotesk/400.css';
@@ -43,7 +42,6 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
-              <ConditionalNavbar />
               <NavigationDock />
               {children}
             </ToastProvider>

@@ -431,21 +431,21 @@ export default function ContactSection() {
         <div className="relative max-w-5xl mx-auto">
 
           {/* Top Marquee */}
-          <div className="absolute top-0 left-0 w-full h-6 sm:h-8 overflow-hidden bg-accent text-white flex items-center z-20">
+          <div className="absolute top-0 left-0 w-full h-6 sm:h-8 overflow-hidden bg-red-600 text-white flex items-center z-20">
             <div className="contact-marquee-x whitespace-nowrap font-bold font-mono text-sm">
               {MARQUEE_TEXT}{MARQUEE_TEXT}
             </div>
           </div>
 
           {/* Bottom Marquee */}
-          <div className="absolute bottom-0 left-0 w-full h-6 sm:h-8 overflow-hidden bg-accent text-white flex items-center z-20">
+          <div className="absolute bottom-0 left-0 w-full h-6 sm:h-8 overflow-hidden bg-red-600 text-white flex items-center z-20">
             <div className="contact-marquee-x-rev whitespace-nowrap font-bold font-mono text-sm">
               {MARQUEE_TEXT}{MARQUEE_TEXT}
             </div>
           </div>
 
           {/* Left Marquee (Vertical) */}
-          <div className="absolute top-0 left-0 w-6 sm:w-8 h-full overflow-hidden bg-accent text-white flex items-center justify-center z-20">
+          <div className="absolute top-0 left-0 w-6 sm:w-8 h-full overflow-hidden bg-red-600 text-white flex items-center justify-center z-20">
             <div
               className="contact-marquee-y whitespace-nowrap font-bold font-mono text-sm"
               style={{ writingMode: "vertical-rl" }}
@@ -455,7 +455,7 @@ export default function ContactSection() {
           </div>
 
           {/* Right Marquee (Vertical) */}
-          <div className="absolute top-0 right-0 w-6 sm:w-8 h-full overflow-hidden bg-accent text-white flex items-center justify-center z-20">
+          <div className="absolute top-0 right-0 w-6 sm:w-8 h-full overflow-hidden bg-red-600 text-white flex items-center justify-center z-20">
             <div
               className="contact-marquee-y-rev whitespace-nowrap font-bold font-mono text-sm"
               style={{ writingMode: "vertical-rl" }}

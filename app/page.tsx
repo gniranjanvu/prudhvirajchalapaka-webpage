@@ -1,4 +1,5 @@
 import HeroSection from "@/components/sections/HeroSection";
+import AboutMeSection from "@/components/sections/AboutMeSection";
 import ExperienceSection from "@/components/sections/ExperienceSection";
 import EducationSection from "@/components/sections/EducationSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
@@ -14,6 +15,7 @@ export default function Home() {
   return (
     <main className="w-full overflow-x-hidden">
       <HeroSection />
+      <AboutMeSection />
       <ExperienceSection />
       <ProjectsSection />
       <SkillsSection />

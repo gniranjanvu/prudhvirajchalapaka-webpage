@@ -151,11 +151,11 @@
 }
 
 .animate-marquee-seamless {
-  animation: marquee-seamless 40s linear infinite;
+  animation: marquee-seamless var(--marquee-duration, 40s) linear infinite;
 }
 
 .animate-marquee-seamless-reverse {
-  animation: marquee-seamless-reverse 40s linear infinite;
+  animation: marquee-seamless-reverse var(--marquee-duration, 40s) linear infinite;
 }
 
 .pause-on-hover:hover .animate-marquee-seamless,

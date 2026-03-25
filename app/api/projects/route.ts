@@ -14,6 +14,7 @@ export interface ProjectPayload {
   documentation_url?: string;
   hero_image_url?: string;
   gallery_urls?: string[];
+  video_urls?: string[];
   enable_comments?: boolean;
   enable_likes?: boolean;
   status?: string;

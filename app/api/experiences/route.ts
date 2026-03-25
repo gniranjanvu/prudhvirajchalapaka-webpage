@@ -12,6 +12,7 @@ export interface ExperiencePayload {
   location?: string;
   employment_type?: string;
   description?: string;
+  short_description?: string;
   tech_stack?: string[];
   certificate_url?: string;
   gallery_urls?: string[];
@@ -25,7 +26,7 @@ export interface ExperiencePayload {
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     const { data, error } = await supabase
       .from('experiences')
       .select('*')

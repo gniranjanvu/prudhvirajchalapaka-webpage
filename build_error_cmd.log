@@ -1,0 +1,38 @@
+
+> prudhvirajchalapaka-portfolio@1.0.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 8.7s
+  Running TypeScript ...
+Failed to compile.
+
+./components/ui/TextReveal.tsx:46:33
+Type error: Type '{ hidden: { y: string; opacity: number; }; show: { y: number; opacity: number; transition: { duration: number; ease: number[]; }; }; }' is not assignable to type 'Variants'.
+  Property 'show' is incompatible with index signature.
+    Type '{ y: number; opacity: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Variant'.
+      Type '{ y: number; opacity: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ y: number; opacity: number; transition: { duration: number; ease: number[]; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+                      Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                        Type 'number[]' is not assignable to type 'Easing[]'.
+                          Type 'number' is not assignable to type 'Easing'.
+
+[0m [90m 44 |[39m             {words[33m.[39mmap((word[33m,[39m i) [33m=>[39m (
+ [90m 45 |[39m                 [33m<[39m[33mdiv[39m key[33m=[39m{i} className[33m=[39m[32m"overflow-hidden pb-4 mb-[-1rem]"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 46 |[39m                     [33m<[39m[33mmotion[39m[33m.[39mdiv variants[33m=[39m{item} className[33m=[39m[32m"inline-block"[39m[33m>[39m
+ [90m    |[39m                                 [31m[1m^[22m[39m
+ [90m 47 |[39m                         {word}
+ [90m 48 |[39m                     [33m<[39m[33m/[39m[33mmotion[39m[33m.[39mdiv[33m>[39m
+ [90m 49 |[39m                 [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null

@@ -17,12 +17,14 @@ import {
     Mail,
     Sun,
     Moon,
+    User,
 } from 'lucide-react';
 
 const ICON_SIZE = 20;
 
 const DOCK_SECTIONS: { label: string; href: string; icon: React.ReactNode }[] = [
     { label: 'Home', href: '#home', icon: <Home size={ICON_SIZE} /> },
+    { label: 'About', href: '#about', icon: <User size={ICON_SIZE} /> },
     { label: 'Experience', href: '#experience', icon: <Briefcase size={ICON_SIZE} /> },
     { label: 'Projects', href: '#projects', icon: <FolderKanban size={ICON_SIZE} /> },
     { label: 'Skills', href: '#skills', icon: <Wrench size={ICON_SIZE} /> },
@@ -152,9 +154,13 @@ export default function NavigationDock() {
         icon: section.icon,
         label: section.label,
         onClick: () => {
-            const el = document.querySelector(section.href);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (pathname === '/') {
+                const el = document.querySelector(section.href);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else {
+                window.location.href = `/${section.href}`;
             }
         },
     }));

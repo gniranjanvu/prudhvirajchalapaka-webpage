@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useScroll, useTransform, motion } from "framer-motion";
 import { MouseSpotlight } from "@/components/ui/MouseSpotlight";
 import { TextReveal } from "@/components/ui/TextReveal";
@@ -12,12 +12,7 @@ import { TypewriterEffect } from "@/components/ui/TypewriterEffect";
 
 const Lanyard = dynamic(() => import('@/components/ui/Lanyard'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center opacity-50">
-      <div className="w-10 h-10 border-4 border-black/10 dark:border-white/10 border-t-[#D71921] rounded-full animate-spin mb-4" />
-      <span className="text-sm font-mono text-gray-500">Initializing Physics...</span>
-    </div>
-  )
+  loading: () => null // Hide the loading state entirely so it feels invisible while loading
 });
 const stickers = [
   { text: "#ROS2 🤖", x: "10%", y: "20%", rotate: -10, delay: 0 },
@@ -31,6 +26,17 @@ const stickers = [
 
 export default function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showLanyard, setShowLanyard] = useState(false);
+
+  // Delay the heavy 3D rendering until after the page intro animations finish (1.5s)
+  // This prevents the CPU-intensive Rapier physics engine from stuttering the CSS/Framer intro animations
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLanyard(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
@@ -43,15 +49,21 @@ export default function HeroSection() {
     <section ref={containerRef} id="home" className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden bg-dot-pattern">
       <MouseSpotlight />
 
-      {/* Background Decorative Blobs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-red-500/10 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]" />
+      {/* Background Decorative Blobs - Optimized by removing expensive CSS blurs and using static radial gradients! */}
+      <div
+        className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0) 70%)' }}
+      />
+      <div
+        className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0) 70%)' }}
+      />
 
       {/* Stickers */}
       {stickers.map((sticker, i) => (
         <motion.div
           key={sticker.text}
-          className="absolute z-20 px-4 py-2 bg-white/10 dark:bg-black/20 backdrop-blur-md border border-black/10 dark:border-white/20 dark:border-white/10 rounded-xl text-sm font-mono font-bold text-foreground shadow-lg pointer-events-none select-none"
+          className="absolute z-20 px-4 py-2 bg-white/90 dark:bg-black/90 border border-black/10 dark:border-white/20 rounded-xl text-sm font-mono font-bold text-foreground shadow-lg pointer-events-none select-none"
           style={{
             left: sticker.x,
             top: sticker.y,
@@ -78,7 +90,7 @@ export default function HeroSection() {
 
           {/* Left: Lanyard */}
           <div className="h-[500px] lg:h-[600px] relative">
-            <Lanyard position={[0, 0, 20]} gravity={[0, -40, 0]} />
+            {showLanyard && <Lanyard position={[0, 0, 20]} gravity={[0, -40, 0]} />}
           </div>
 
           {/* Right: Text content */}
@@ -92,7 +104,7 @@ export default function HeroSection() {
             </div>
 
             {/* Typewriter Subtitle */}
-            <div className="h-12 overflow-hidden">
+            <div className="min-h-[48px] w-full">
               <TypewriterEffect
                 words={[
                   { text: "Robotics & Automation Engineer", className: "text-xl md:text-2xl text-muted-foreground font-mono text-[#D71921]" },
@@ -100,7 +112,7 @@ export default function HeroSection() {
                   { text: "Industrial Automation Specialist", className: "text-xl md:text-2xl text-muted-foreground font-mono text-green-500" },
                   { text: "Research Enthusiast", className: "text-xl md:text-2xl text-muted-foreground font-mono text-purple-500" },
                 ]}
-                className="text-xl md:text-2xl"
+                className="text-xl md:text-2xl text-left"
               />
             </div>
 

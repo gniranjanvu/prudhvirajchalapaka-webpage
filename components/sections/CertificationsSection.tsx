@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { CERTIFICATIONS } from "@/lib/constants";
 import { Award, ExternalLink } from "lucide-react";
 import Link from "next/link";
@@ -40,6 +40,38 @@ export default function CertificationsSection() {
         };
         fetchCertifications();
     }, []);
+
+    const [isHovered, setIsHovered] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const xTranslation = useMotionValue(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+    
+    // Constant velocity: roughly 50 pixels per second leftwards
+    const velocity = -50; 
+
+    useAnimationFrame((t, delta) => {
+        if (isHovered || isDragging) return;
+        
+        if (containerRef.current) {
+            const fullWidth = containerRef.current.scrollWidth;
+            const halfWidth = fullWidth / 2;
+            
+            let moveBy = velocity * (delta / 1000);
+            let newX = xTranslation.get() + moveBy;
+            
+            // If scrolled left past half, snap back to 0
+            if (newX <= -halfWidth) {
+                newX += halfWidth;
+            } 
+            // If dragged right past 0, snap back to half
+            else if (newX > 0) {
+                newX -= halfWidth;
+            }
+            
+            xTranslation.set(newX);
+        }
+    });
+
     return (
         <section id="certifications" className="py-10 overflow-hidden relative transition-colors duration-500 bg-gradient-to-br from-[#ede7e0] via-[#f0ebe5] to-[#e8e0d8] dark:from-[#0a0a0a] dark:via-[#0e0e0e] dark:to-[#0a0a0a]" style={{ zIndex: 2 }}>
             {/* Decorative Background Blobs */}
@@ -68,8 +100,17 @@ export default function CertificationsSection() {
                 </motion.h2>
             </div>
 
-            <div className="flex overflow-hidden relative pause-on-hover group/container">
-                <div className="flex animate-marquee-seamless hover:[animation-play-state:paused]">
+            <div className="flex overflow-hidden relative">
+                <motion.div 
+                    ref={containerRef}
+                    className="flex w-max cursor-grab active:cursor-grabbing"
+                    style={{ x: xTranslation }}
+                    drag="x"
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={() => setIsDragging(false)}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
                     {Array.from({ length: 4 }, () => certifications).flat().map((cert, i) => (
                         <div
                             key={`cert-a-${i}`}
@@ -124,7 +165,7 @@ export default function CertificationsSection() {
                             </div>
                         </div>
                     ))}
-                </div>
+                </motion.div>
             </div>
         </section>
     );

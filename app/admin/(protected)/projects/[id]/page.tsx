@@ -34,6 +34,7 @@ export default function EditProjectPage({ params }: EditProjectPageProps) {
                     content: p.full_description || '',
                     technologies: p.tech_stack || [],
                     images: p.gallery_urls || [],
+                    videos: p.video_urls || [],
                     heroImage: p.hero_image_url || '',
                     githubUrl: p.github_url || '',
                     demoUrl: p.demo_url || '',

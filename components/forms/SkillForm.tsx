@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useToast } from '@/components/ui/toast';
-import { Loader2, ArrowLeft, Star } from 'lucide-react';
+import { Loader2, ArrowLeft, Star, Image } from 'lucide-react';
 import Link from 'next/link';
+import ImageUpload from '@/components/ui/ImageUpload';
+import { Controller } from 'react-hook-form';
 
 interface SkillCategory {
     id: string;
@@ -28,13 +30,14 @@ export default function SkillForm({ initialData }: SkillFormProps) {
     const router = useRouter();
     const { toast } = useToast();
 
-    const { register, setValue, watch, handleSubmit, formState: { errors } } = useForm({
+    const { register, setValue, control, watch, handleSubmit, formState: { errors } } = useForm({
         defaultValues: initialData || {
             name: '',
             category: 'programming',
             proficiency: 3, // 1-5
             yearsExperience: 0,
             icon: '',
+            heroImageUrl: '',
             isVisible: true
         }
     });
@@ -104,6 +107,7 @@ export default function SkillForm({ initialData }: SkillFormProps) {
                     proficiency: data.proficiency,
                     years_experience: data.yearsExperience || null,
                     icon_url: data.icon || null,
+                    hero_image_url: data.heroImageUrl || null,
                     is_visible: data.isVisible,
                 }),
             });
@@ -255,6 +259,24 @@ export default function SkillForm({ initialData }: SkillFormProps) {
                         <label className="block text-sm font-medium mb-1">Icon Identifier (SimpleIcons/Lucide)</label>
                         <Input {...register('icon')} placeholder="e.g. python, react, cpu" />
                         <p className="text-xs text-gray-500 mt-1">Use icon names from SimpleIcons or Lucide</p>
+                    </div>
+
+                    <div>
+                        <h3 className="text-md font-semibold flex items-center gap-2 mb-2">
+                            <Image size={18} className="text-purple-500" />
+                            Hero Image URL (Optional)
+                        </h3>
+                        <Controller
+                            name="heroImageUrl"
+                            control={control}
+                            render={({ field }) => (
+                                <ImageUpload
+                                    value={field.value}
+                                    onChange={(value) => field.onChange(Array.isArray(value) ? value[0] : value)}
+                                />
+                            )}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Displayed as a rich background image on the frontend if provided.</p>
                     </div>
 
                     <div className="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-zinc-800">

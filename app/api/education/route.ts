@@ -14,6 +14,7 @@ export interface EducationPayload {
   grade?: string;
   location?: string;
   description?: string;
+  short_description?: string;
   key_courses?: string[];
   certificate_url?: string;
   gallery_urls?: string[];

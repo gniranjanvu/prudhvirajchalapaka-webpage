@@ -87,7 +87,8 @@ export default function RecommendationsAdminPage() {
 
             // Auto copy link to clipboard for convenience
             if (result.data?.token) {
-                const link = `${window.location.origin}/recommend/submit?token=${result.data.token}`;
+                const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+                const link = `${baseUrl}/recommend/submit?token=${result.data.token}`;
                 navigator.clipboard.writeText(link);
                 toast({
                     title: 'Copied to Clipboard',
@@ -148,7 +149,8 @@ export default function RecommendationsAdminPage() {
     };
 
     const copyLink = (token: string) => {
-        const link = `${window.location.origin}/recommend/submit?token=${token}`;
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+        const link = `${baseUrl}/recommend/submit?token=${token}`;
         navigator.clipboard.writeText(link);
         toast({ title: 'Copied!', description: 'Link copied to clipboard', type: 'success' });
     };
